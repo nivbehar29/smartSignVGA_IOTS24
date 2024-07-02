@@ -4,6 +4,11 @@
 #include "fabgl.h"
 
 class Bitmap_iot {
+private:
+    fabgl::Bitmap bm_buff;
+    int x;
+    int y;
+
 public:
     Bitmap_iot(fabgl::Bitmap *bitmap, int xpos, int ypos)
         : x(xpos), y(ypos) {
@@ -36,12 +41,6 @@ public:
         pos.y = y;
         return pos;
     }
-
-private:
-    fabgl::Bitmap bm_buff;
-    int x;
-    int y;
-
 };
 
 #endif // BITMAP_IOT_H
