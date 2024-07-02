@@ -21,7 +21,7 @@ public:
     void draw()
     {
         // Paint a yellow rectangle
-        canvas->setPenColor(Color::BrightWhite);
+        canvas->setPenColor(Color::BrightBlack);
         canvas->drawRectangle(x_pos, y_pos, x_pos + width, y_pos + height);
     }
 
