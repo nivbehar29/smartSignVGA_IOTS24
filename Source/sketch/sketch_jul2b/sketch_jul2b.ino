@@ -11,7 +11,7 @@
 
 // main VGA Controller
 fabgl::VGA16Controller DisplayController;
-
+fabgl::PS2Controller   PS2Controller;
 
 // bitmap for parking image
 // Bitmap park_bitmap = Bitmap(92, 146, NBitmapsWarehouse::park, PixelFormat::RGBA2222);
@@ -29,6 +29,9 @@ const char* password = "Dira1202";
 
 void setup(){
   Serial.begin(115200);  // Start the serial communication
+
+  // Setup Mouse \ Keyboard
+  PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
 
   // Setup display controller
   DisplayController.begin();
