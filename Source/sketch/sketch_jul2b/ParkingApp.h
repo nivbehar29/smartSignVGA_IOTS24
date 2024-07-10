@@ -4,13 +4,15 @@
 #include "fabgl.h"
 #include "fabui.h"
 
+#include "OptionsFrame.h"
+
 class ParkingApp : public uiApp {
 
     private:
 
     uiButton* StartButton;
 
-    uiFrame* OptionsFrame;
+    OptionsFrame* optionsFrame;
 
     uiLabel* WelcomeText;
 
@@ -34,45 +36,50 @@ class ParkingApp : public uiApp {
       // MainFrame->frameStyle().backgroundColor = RGB888(0, 0, 255);
       // MainFrame->windowStyle().borderSize     = 0;
 
+      // button to show TestControlsFrame
+      optionsFrame = new OptionsFrame(rootWindow(), ResX, ResY, app());
+
       // Start button
       int startTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Start");
       int buttonSizeX = startTextExt + 20;
       StartButton = new uiButton(rootWindow(), "Start", Point(ResX/2 - buttonSizeX/2, ResY/2), Size(buttonSizeX, 20));
-      StartButton->onClick = [&]() { onStartButtonClick(); };
+      StartButton->onClick = [&]() { showWindow(optionsFrame->frame, true); setActiveWindow(optionsFrame->frame); };
+
 
     }
 
 
-  void onStartButtonClick() {
+  // void onStartButtonClick() {
 
-    OptionsFrame = new uiFrame(rootWindow(), "Options Frame", Point(0, 0), Size(ResX, ResY), true);
+  //   OptionsFrame = new uiFrame(rootWindow(), "Options Frame", Point(0, 0), Size(ResX, ResY), true);
 
-    // Frame properties
-    fabgl::uiFrameProps& props = OptionsFrame->frameProps();
-    props.hasCloseButton = 0;
-    props.hasMinimizeButton = 0;
-    props.hasMaximizeButton = 0;
-    props.moveable = 0;
-    props.resizeable = 0;
+  //   // Frame properties
+  //   fabgl::uiFrameProps& props = OptionsFrame->frameProps();
+  //   props.hasCloseButton = 0;
+  //   props.hasMinimizeButton = 0;
+  //   props.hasMaximizeButton = 0;
+  //   props.moveable = 0;
+  //   props.resizeable = 0;
 
-    // Cancel Button
-    int CancelTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Cancel");
-    Size CancelButtonSize(CancelTextExt + 20, 20);
-    int y_top_offset = 10;
-    int x_left_offset = 10;
-    uiButton* CancelButton = new uiButton(OptionsFrame, "Cancel", Point(ResX - CancelButtonSize.width - x_left_offset, ResY - CancelButtonSize.height - y_top_offset), CancelButtonSize);
-    CancelButton->onClick = [&]() { app()->showWindow(OptionsFrame, 0);
-                                    OptionsFrame = nullptr;
-                                  };
+  //   // Cancel Button
+  //   int CancelTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Cancel");
+  //   Size CancelButtonSize(CancelTextExt + 20, 20);
+  //   int y_top_offset = 10;
+  //   int x_left_offset = 10;
+  //   uiButton* CancelButton = new uiButton(OptionsFrame, "Cancel", Point(ResX - CancelButtonSize.width - x_left_offset, ResY - CancelButtonSize.height - y_top_offset), CancelButtonSize);
+  //   CancelButton->onClick = [&]() { app()->showWindow(OptionsFrame, 0);
+  //                                   OptionsFrame = nullptr;
+  //                                 };
 
 
 
-  }
+  // }
 
   int calcWidthOfText(fabgl::FontInfo const * fontInfo, char const * text)
   {
     return app()->canvas()->textExtent(fontInfo, text);
   }
+
 };
 
 #endif // PARKINGAPP_H
