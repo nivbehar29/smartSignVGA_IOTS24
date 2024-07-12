@@ -10,12 +10,6 @@ class OptionsFrame : public GeneralFrame {
 
   public:
 
-  // uiFrame* frame;
-  // uiFrame* parent;
-  // int ResX;
-  // int ResY;
-  // uiApp* app;
-
   uiCheckBox* disabledCB;
   uiCheckBox* electricCarCB;
   uiCheckBox* motorcycleCB;
@@ -52,7 +46,7 @@ class OptionsFrame : public GeneralFrame {
                                   };
 
 
-    parkingLotFrame = new ParkingLotFrame(parent, ResX, ResY, app,5);
+    parkingLotFrame = new ParkingLotFrame(parent, ResX, ResY, app, 5);
 
     // Next Button
     int NextTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Next");
@@ -89,10 +83,7 @@ class OptionsFrame : public GeneralFrame {
     electricCarCB = new uiCheckBox(frame, Point(cbLeftOffset, 50 + cbSizeXY + cbSizeXY/2),  Size(cbSizeXY, cbSizeXY));
     motorcycleCB = new uiCheckBox(frame,  Point(cbLeftOffset, 50 + cbSizeXY*3),             Size(cbSizeXY, cbSizeXY));
 
-
-
-
-    //Time slider
+    // Time slider
     TimesliderLabel = new uiLabel(frame, "0", Point(ResX/2 + 100,50));
     Timeslider1 = new uiSlider(frame, Point(ResX/2 +30 ,50), Size(17, 400), uiOrientation::Vertical);
     Timeslider1->anchors().right = true;
@@ -105,17 +96,7 @@ class OptionsFrame : public GeneralFrame {
                                       TimesliderLabel->update();
                                   };
 
-
-
-
-
   }
-
-  // int calcWidthOfText(fabgl::FontInfo const * fontInfo, char const * text)
-  // {
-  //   return app->canvas()->textExtent(fontInfo, text);
-  // }
-
 };
 
 #endif // OPTIONSFRAME_H
