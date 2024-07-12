@@ -30,13 +30,12 @@ fabgl::PS2Controller   PS2Controller;
 
 // WIFI
 extern String openWeatherMapApiKey;
-const char* ssid = "Home12";
-const char* password = "Dira1202";
+const char* ssid = "ICST";
+const char* password = "arduino123";
 
 // Weather parameters
 String city = "Haifa";
 String countryCode = "IL";
- int x=10;
 // THE DEFAULT TIMER IS SET TO 10 SECONDS FOR TESTING PURPOSES
 // For a final application, check the API call limits per hour/minute to avoid getting blocked/banned
 unsigned long lastTime = 0;

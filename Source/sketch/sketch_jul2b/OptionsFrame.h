@@ -2,7 +2,9 @@
 #define OPTIONSFRAME_H
 
 #include "fabgl.h"
+#include "fabui.h"
 #include "GeneralFrame.h"
+#include "ParkingLotFrame.h"
 
 class OptionsFrame : public GeneralFrame {
 
@@ -21,7 +23,7 @@ class OptionsFrame : public GeneralFrame {
   uiLabel* TimesliderLabel;
   uiSlider* Timeslider1;
 
-
+  ParkingLotFrame* parkingLotFrame;
 
   OptionsFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t )
   {
@@ -49,6 +51,9 @@ class OptionsFrame : public GeneralFrame {
     CancelButton->onClick = [&]() { app->showWindow(frame, 0);
                                   };
 
+
+    parkingLotFrame = new ParkingLotFrame(parent, ResX, ResY, app,5);
+
     // Next Button
     int NextTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Next");
     Size NextButtonSize(NextTextExt + 20, 20);
@@ -56,6 +61,9 @@ class OptionsFrame : public GeneralFrame {
     int next_x_left_offset = 10;
     uiButton* NextButton = new uiButton(frame, "Next", Point(ResX - NextButtonSize.width - next_x_left_offset, ResY - NextButtonSize.height - next_y_top_offset), NextButtonSize);
     NextButton->onClick = [&]() { 
+                                    app->showWindow(frame, 0);
+                                    app->showWindow(parkingLotFrame->frame, 1);
+                                    app->setActiveWindow(parkingLotFrame->frame); 
                                 };
 
     // Setup Checkboxes
