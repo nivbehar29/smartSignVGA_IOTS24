@@ -13,6 +13,16 @@ class GeneralFrame {
   int ResY;
   uiApp* app;
 
+  void showFrame()
+  {
+    app->showWindow(frame, 1);
+  }
+
+  void hideFrame()
+  {
+    app->showWindow(frame, 0);
+  }
+
   int calcWidthOfText(fabgl::FontInfo const * fontInfo, char const * text)
   {
     return app->canvas()->textExtent(fontInfo, text);

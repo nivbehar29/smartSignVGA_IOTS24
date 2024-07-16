@@ -42,8 +42,7 @@ class OptionsFrame : public GeneralFrame {
     int cancel_y_top_offset = 10;
     int cancel_x_left_offset = 10;
     uiButton* CancelButton = new uiButton(frame, "Cancel", Point(cancel_x_left_offset, ResY - CancelButtonSize.height - cancel_y_top_offset), CancelButtonSize);
-    CancelButton->onClick = [&]() { app->showWindow(frame, 0);
-                                  };
+    CancelButton->onClick = [&]() { app->showWindow(frame, 0); };
 
 
     parkingLotFrame = new ParkingLotFrame(parent, ResX, ResY, app, 5);

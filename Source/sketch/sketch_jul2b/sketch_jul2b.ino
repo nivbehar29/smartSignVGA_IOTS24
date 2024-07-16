@@ -7,10 +7,6 @@
 #include <Arduino_JSON.h>
 #include "keys/openweathermap_key.h"
 
-// #include "Bitmap_iot.h"
-#include "ParkSlot.h"
-#include "ParkingLot.h"
-
 #include "ParkingApp.h"
 
 // main VGA Controller
@@ -32,6 +28,9 @@ fabgl::PS2Controller   PS2Controller;
 extern String openWeatherMapApiKey;
 const char* ssid = "ICST";
 const char* password = "arduino123";
+// const char* ssid = "Home12";
+// const char* password = "Dira1202";
+
 
 // Weather parameters
 String city = "Haifa";
@@ -59,7 +58,6 @@ void setup(){
   DisplayController.setResolution(VGA_640x480_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
 
   // Wifi
-  Serial.begin(115200);
   delay(1000);
 
   WiFi.mode(WIFI_STA); //Optional
