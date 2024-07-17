@@ -18,7 +18,7 @@ private:
 
     uint8_t floor_id = 0;
     char floor_text[20];
-    int x=10;
+    
 
     uiPaintBox * paintBox;
     Canvas* floor_canvas;
