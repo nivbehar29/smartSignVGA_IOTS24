@@ -12,6 +12,7 @@ class GeneralFrame {
   int ResX;
   int ResY;
   uiApp* app;
+  //parking_floor* FloorArr;
 
   void showFrame()
   {

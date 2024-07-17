@@ -1,9 +1,12 @@
-#ifndef PARKINGLOTFRAME_H
-#define PARKINGLOTFRAME_H
+//#ifndef PARKINGLOTFRAME_H
+//#define PARKINGLOTFRAME_H
 
+#pragma once
 #include "fabgl.h"
 #include "FloorFrame.h"
 #include "string.h"
+//#include "ParkSlot.h"
+
 
 struct parking_floor
 {
@@ -19,14 +22,14 @@ struct parking_floor
 
 class ParkingLotFrame : public GeneralFrame {
 
-  public:
-  
+  public:  
   int num_of_floors;
   parking_floor* FloorArr;
   int current_floor_id;
   
   ParkingLotFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t,int FloorsNum )
   {
+    
     num_of_floors = FloorsNum;
     parent = parent_t;
     ResX = ResX_t;
@@ -47,13 +50,21 @@ class ParkingLotFrame : public GeneralFrame {
     props.resizeable = 0;
 
     // Cancel Button
-    int CancelTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Cancel");
-    Size CancelButtonSize(CancelTextExt + 20, 20);
+    int EndTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Finish");
+    Size EndButtonSize(EndTextExt+ 20, 20);
     int cancel_y_top_offset = 10;
     int cancel_x_left_offset = 10;
-    uiButton* CancelButton = new uiButton(frame, "Cancel", Point(cancel_x_left_offset, ResY - CancelButtonSize.height - cancel_y_top_offset), CancelButtonSize);
-    CancelButton->onClick = [&]() { app->showWindow(frame, 0); };
-                                  
+    uiButton* EndButton = new uiButton(frame, "Finish", Point(cancel_x_left_offset, ResY - EndButtonSize.height - cancel_y_top_offset), EndButtonSize);
+    EndButton->onClick = [&]() { 
+                                  app->showWindow(frame, 0);
+                                  AssignParkingSlot();
+                               };
+
+
+
+
+   
+                             
     for(int i = 0; i < num_of_floors; i++)
     {
         FloorArr[i].num_of_regular_spaces=10;
@@ -74,13 +85,39 @@ class ParkingLotFrame : public GeneralFrame {
     // Activate first floor by default
     FloorArr[0].floor_box->onClick();
   }
+    void AssignParkingSlot()
+    {
+      for(int i = 0; i < num_of_floors; i++) 
+      {
+      
+        if((FloorArr[i].floor_frame)->IfChecked())
+        {
+            break;
+        }
+      
+      }
 
+    }
+
+   void uncheckParkingSlots() {
+    for(int i = 0; i < num_of_floors; i++) {
+      if(current_floor_id != i)
+      {
+        if((FloorArr[i].floor_frame)!=nullptr)
+        {
+             FloorArr[i].floor_frame->uncheckParkingSlots();
+        }
+        
+      }
+    }
+   }
   void onFloorCheckboxClick(int floor_id)
   {
     // if this is the first time we are showing this floor, initiate it.
     if(FloorArr[floor_id].floor_frame == nullptr)
     {
-      FloorArr[floor_id].floor_frame = new FloorFrame(frame, ResX, ResY, app, floor_id );
+      auto func=[&,this](){this->uncheckParkingSlots();}; 
+      FloorArr[floor_id].floor_frame = new FloorFrame(frame, ResX, ResY, app, floor_id,func);
     }
 
     // hide the current floor and show the new floor
@@ -90,8 +127,16 @@ class ParkingLotFrame : public GeneralFrame {
       FloorArr[floor_id].floor_frame->showFrame();
       current_floor_id = floor_id;
     }
+
+
   }
+
+
+  
+
+
+
 
 };
 
-#endif // PARKINGLOTFRAME_H
+//#endif // PARKINGLOTFRAME_H
