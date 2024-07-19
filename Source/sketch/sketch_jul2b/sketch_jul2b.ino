@@ -26,10 +26,8 @@ fabgl::PS2Controller   PS2Controller;
 
 // WIFI
 extern String openWeatherMapApiKey;
-const char* ssid = "ICST";
-const char* password = "arduino123";
-// const char* ssid = "Home12";
-// const char* password = "Dira1202";
+extern const char* ssid;
+extern const char* password;
 
 
 // Weather parameters
@@ -64,18 +62,30 @@ void setup(){
   WiFi.begin(ssid, password);
   Serial.println("\nConnecting");
 
-  while(WiFi.status() != WL_CONNECTED){
+
+  unsigned long startAttemptTime = millis();
+
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000)
+  {
       Serial.print(".");
       delay(100);
   }
 
-  Serial.println("\nConnected to the WiFi network");
-  Serial.print("Local ESP32 IP: ");
-  Serial.println(WiFi.localIP());
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nConnected to the WiFi network");
+    Serial.print("Local ESP32 IP: ");
+    Serial.println(WiFi.localIP());
+  }
+  else
+  {
+    Serial.println("\nFailed to connect to the WiFi network within 10 seconds");
+
+  }
 
 }
 
 bool done_with_weather = false;
+bool weather_succeeded = false;
 JSONVar myObject;
 
 void loop() {
@@ -85,7 +95,8 @@ void loop() {
     Serial.println("Starting Weather");
 
     // Check WiFi connection status
-    if(WiFi.status()== WL_CONNECTED){
+    if(WiFi.status()== WL_CONNECTED)
+    {
       Serial.println("Wifi status OK");
       
       String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&APPID=" + openWeatherMapApiKey;
@@ -95,28 +106,37 @@ void loop() {
       myObject = JSON.parse(jsonBuffer);
   
       // JSON.typeof(jsonVar) can be used to get the type of the var
-      if (JSON.typeof(myObject) == "undefined") {
+      // if 'cod' is not 200, according to weather api, we didnt get the right data (can be becuase of bad api key for example)
+      if (JSON.typeof(myObject) == "undefined" || (int) myObject["cod"] != 200)
+      {
         Serial.println("Parsing input failed!");
-        return;
+        done_with_weather = true;
+        weather_succeeded = false;
       }
+    
       else
       {
         done_with_weather = true;
+        weather_succeeded = true;
+
+        Serial.print("JSON object = ");
+        Serial.println(myObject);
+        Serial.print("Temperature: ");
+        Serial.println(myObject["main"]["temp"]);
+        Serial.print("Pressure: ");
+        Serial.println(myObject["main"]["pressure"]);
+        Serial.print("Humidity: ");
+        Serial.println(myObject["main"]["humidity"]);
+        Serial.print("Wind Speed: ");
+        Serial.println(myObject["wind"]["speed"]);
       }
-    
-      Serial.print("JSON object = ");
-      Serial.println(myObject);
-      Serial.print("Temperature: ");
-      Serial.println(myObject["main"]["temp"]);
-      Serial.print("Pressure: ");
-      Serial.println(myObject["main"]["pressure"]);
-      Serial.print("Humidity: ");
-      Serial.println(myObject["main"]["humidity"]);
-      Serial.print("Wind Speed: ");
-      Serial.println(myObject["wind"]["speed"]);
     }
-    else {
+    else
+    {
+      WiFi.disconnect(true, true);
       Serial.println("WiFi Disconnected");
+      done_with_weather = true;
+      weather_succeeded = false;
     }
     lastTime = millis();
   }
@@ -126,11 +146,17 @@ void loop() {
     Serial.println("Done with weather!");
 
     // Disconnect from WiFi
-    Serial.println("Disconnecting from WiFi...");
-    WiFi.disconnect(true, true);
+    if(WiFi.status()== WL_CONNECTED)
+    {
+      Serial.println("Disconnecting from WiFi...");
+      WiFi.disconnect(true, true);
+    }
 
     // ParkingApp().runAsync(&DisplayController, 3500).joinAsyncRun();
-    ParkingApp(myObject).runAsync(&DisplayController, 3500).joinAsyncRun();
+    if(weather_succeeded)
+      ParkingApp(&myObject).runAsync(&DisplayController, 3500).joinAsyncRun();
+    else
+      ParkingApp(nullptr).runAsync(&DisplayController, 3500).joinAsyncRun();
   }
 
 }

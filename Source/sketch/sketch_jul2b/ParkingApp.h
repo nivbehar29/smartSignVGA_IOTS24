@@ -14,11 +14,11 @@ class ParkingApp : public uiApp {
 
     public:
 
-    ParkingApp(JSONVar& weatherObj_t) : weatherObj(weatherObj_t) {}
+    ParkingApp(JSONVar* weatherObj_t) : weatherObj(weatherObj_t) {}
 
     private:
 
-    JSONVar& weatherObj;
+    JSONVar* weatherObj;
 
     uiButton* StartButton;
 
@@ -55,16 +55,19 @@ class ParkingApp : public uiApp {
       StartButton = new uiButton(rootWindow(), "Start", Point(ResX/2 - buttonSizeX/2, ResY/2), Size(buttonSizeX, 20));
       StartButton->onClick = [&]() { showWindow(optionsFrame->frame, true); setActiveWindow(optionsFrame->frame); };
 
-      uiLabel* weather_city_label = new uiLabel(rootWindow(), "City:", Point(ResX / 2 + 200, 10));
-      uiLabel* weather_city_info = new uiLabel(rootWindow(), "Haifa", Point(ResX / 2 + 200 , 40));
-      uiLabel* weather_temperature_label = new uiLabel(rootWindow(), "Temperature:", Point(ResX / 2 + 200 , 70));
+      if(weatherObj != nullptr)
+      {
+        uiLabel* weather_city_label = new uiLabel(rootWindow(), "City:", Point(ResX / 2 + 200, 10));
+        uiLabel* weather_city_info = new uiLabel(rootWindow(), "Haifa", Point(ResX / 2 + 200 , 40));
+        uiLabel* weather_temperature_label = new uiLabel(rootWindow(), "Temperature:", Point(ResX / 2 + 200 , 70));
 
-      char buffer[20];  // Make sure this buffer is large enough to hold the converted value
+        char buffer[20];  // Make sure this buffer is large enough to hold the converted value
 
-      // dtostrf(float value, minimum width, precision, buffer)
-      dtostrf(fahrenheitToCelcius(weatherObj["main"]["temp"]), 6, 2, buffer);  // Convert float to string with 2 decimal places
+        // dtostrf(float value, minimum width, precision, buffer)
+        dtostrf(fahrenheitToCelcius((*weatherObj)["main"]["temp"]), 6, 2, buffer);  // Convert float to string with 2 decimal places
 
-      uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200 , 100));
+        uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200 , 100));
+      }
 
     }
 
