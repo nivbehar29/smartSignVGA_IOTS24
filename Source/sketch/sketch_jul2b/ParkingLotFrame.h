@@ -49,74 +49,76 @@ class ParkingLotFrame : public GeneralFrame {
     props.moveable = 0;
     props.resizeable = 0;
 
-    // Cancel Button
-    int EndTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Finish");
-    Size EndButtonSize(EndTextExt+ 20, 20);
+    // Finish Button
+    int FinishTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Finish");
+    Size FinishButtonSize(FinishTextExt+ 20, 20);
     int cancel_y_top_offset = 10;
     int cancel_x_left_offset = 10;
-    uiButton* EndButton = new uiButton(frame, "Finish", Point(cancel_x_left_offset, ResY - EndButtonSize.height - cancel_y_top_offset), EndButtonSize);
-    EndButton->onClick = [&]() { 
-                                  app->showWindow(frame, 0);
-                                  AssignParkingSlot();
-                               };
-
-
-
-
-   
-                             
+    uiButton* FinishButton = new uiButton(frame, "Finish", Point(cancel_x_left_offset, ResY - FinishButtonSize.height - cancel_y_top_offset), FinishButtonSize);
+    FinishButton->onClick = [&]() { onFinishButtonClicked(); };
+    
+    // 
     for(int i = 0; i < num_of_floors; i++)
     {
-        FloorArr[i].num_of_regular_spaces=10;
-        FloorArr[i].num_of_electric_spaces=5;
-        FloorArr[i].num_of_disabled_spaces=2;
-        FloorArr[i].num_of_motor_spaces=2;
-        sprintf(FloorArr[i].floor_text, "Floor %d", i);
+      FloorArr[i].num_of_regular_spaces=10;
+      FloorArr[i].num_of_electric_spaces=5;
+      FloorArr[i].num_of_disabled_spaces=2;
+      FloorArr[i].num_of_motor_spaces=2;
+      sprintf(FloorArr[i].floor_text, "Floor %d", i);
 
-        int offset_y = 30;
-        FloorArr[i].floor_label= new uiStaticLabel(frame, FloorArr[i].floor_text, Point(10, i*40 + offset_y));
-        FloorArr[i].floor_box= new uiCheckBox(frame, Point(45, i*40 + offset_y), Size(16, 16), uiCheckBoxKind::RadioButton);
-        FloorArr[i].floor_box->setGroupIndex(1);
-        FloorArr[i].floor_frame = nullptr;
+      int offset_y = 30;
+      FloorArr[i].floor_label= new uiStaticLabel(frame, FloorArr[i].floor_text, Point(10, i*40 + offset_y));
+      FloorArr[i].floor_box= new uiCheckBox(frame, Point(45, i*40 + offset_y), Size(16, 16), uiCheckBoxKind::RadioButton);
+      FloorArr[i].floor_box->setGroupIndex(1);
+      FloorArr[i].floor_frame = nullptr;
 
-        FloorArr[i].floor_box->onClick = [&, i]() { onFloorCheckboxClick(i); };
+      FloorArr[i].floor_box->onClick = [&, i]() { onFloorCheckboxClick(i); };
     }
 
     // Activate first floor by default
     FloorArr[0].floor_box->onClick();
   }
-    void AssignParkingSlot()
+
+  void onFinishButtonClicked()
+  {
+    app->showWindow(frame, 0);
+    AssignParkingSlot();
+  }
+
+  void AssignParkingSlot()
+  {
+    for(int i = 0; i < num_of_floors; i++) 
     {
-      for(int i = 0; i < num_of_floors; i++) 
+      if(FloorArr[i].floor_frame != nullptr && (FloorArr[i].floor_frame)->IfCheckedSetInTakenGroup())
       {
-      
-        if((FloorArr[i].floor_frame)->IfChecked())
-        {
-            break;
-        }
-      
+          break;
       }
-
     }
+  }
 
-   void uncheckParkingSlots() {
-    for(int i = 0; i < num_of_floors; i++) {
+  void uncheckParkingSlots()
+  {
+    for(int i = 0; i < num_of_floors; i++)
+    {
       if(current_floor_id != i)
       {
-        if((FloorArr[i].floor_frame)!=nullptr)
+        if((FloorArr[i].floor_frame) != nullptr)
         {
-             FloorArr[i].floor_frame->uncheckParkingSlots();
+          FloorArr[i].floor_frame->uncheckParkingSlots();
         }
-        
       }
     }
-   }
+  }
+
   void onFloorCheckboxClick(int floor_id)
   {
     // if this is the first time we are showing this floor, initiate it.
     if(FloorArr[floor_id].floor_frame == nullptr)
     {
-      auto func=[&,this](){this->uncheckParkingSlots();}; 
+      // set callback function to be called when a park slot has been clicked
+      auto func = [&,this]() { this->uncheckParkingSlots(); }; 
+
+      // create a new floor fram and send the CB function to it
       FloorArr[floor_id].floor_frame = new FloorFrame(frame, ResX, ResY, app, floor_id,func);
     }
 
@@ -127,14 +129,7 @@ class ParkingLotFrame : public GeneralFrame {
       FloorArr[floor_id].floor_frame->showFrame();
       current_floor_id = floor_id;
     }
-
-
   }
-
-
-  
-
-
 
 
 };

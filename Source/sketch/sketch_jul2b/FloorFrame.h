@@ -1,4 +1,3 @@
-
 //#ifndef FLOORFRAME_H
 //#define FLOORFRAME_H
 
@@ -8,7 +7,6 @@
 #include "GeneralFrame.h"
 #include "ParkSlot.h"
 #include "canvas.h"
-//#include "ParkingLotFrame.h"
 
 #include "string.h"
 
@@ -24,35 +22,22 @@ private:
     Canvas* floor_canvas;
 
     bool isInitiated;
-    //parking_floor* FloorArr;
     ParkSlot** park_slots;
     int park_slots_num;
     int current_floor_id;
     int num_of_floors;
-    //ParkingLotFrame* curr_frame;
-    std::function<void()> func;
+    std::function<void()> onParkSlotChooseButtonClickCB;
 
 public:
 
-    // enum ParkStates {
-    //     FREE,
-    //     WAITING_FOR_VEHICLE,
-    //     TAKEN
-    // };
-
-    FloorFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t, uint8_t floor_id_t,std::function<void()> funcToSet)
+    FloorFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t, uint8_t floor_id_t,std::function<void()> onParkSlotChooseButtonClickCB_t)
     {
       parent = parent_t;
       ResX = ResX_t;
       ResY = ResY_t;
       app = app_t;
       floor_id = floor_id_t;
-      func=funcToSet;
-       //FloorArr=FloorArrToSet;
-      //current_floor_id= curr_id;
-     // num_of_floors=num_of_floorsToset;
-      //curr_frame=curr_framee;
-
+      onParkSlotChooseButtonClickCB = onParkSlotChooseButtonClickCB_t;
 
       isInitiated = false;
 
@@ -77,10 +62,7 @@ public:
       paintBox = new uiPaintBox(frame, frame->clientPos(), frame->clientSize());
       paintBox->paintBoxStyle().backgroundColor = Color::Black;
       paintBox->onPaint = [&](Rect const & r) { FloorPaint(); };
-      //FloorPaint();
-
     }
-    
 
     void showFrame()
     {
@@ -102,57 +84,39 @@ public:
         for(int i = 0; i < park_slots_num; i++)
         {
           int width = 50;
-          park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 100,func);
+          park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 100, onParkSlotChooseButtonClickCB);
           offset_x += width + 5;
         }
 
         isInitiated = true;
       }
-
-      for(int i = 0; i < park_slots_num; i++)
-      {
-        park_slots[i]->draw();
-      }
-      
     }
 
     void uncheckParkingSlots() {
       for(int i = 0; i < park_slots_num; i++)
       {
-        if(park_slots!=nullptr )
+        if(park_slots != nullptr )
         {
            park_slots[i]->uncheckNotTaken();
-
         }
-        
       }
     }
 
-     bool IfChecked()
+     bool IfCheckedSetInTakenGroup()
      {
-         for(int i = 0; i < park_slots_num; i++)
-      {
-        if(park_slots !=nullptr && park_slots[i]!=nullptr )
-          {
-
-               if(park_slots[i]->ChooseButton->checked() && (park_slots[i]->ChooseButton->groupIndex()==1)) 
-              {
-                
-                {
-                  park_slots[i]->SetGroup();
-                  return true;
-                }
-              }
-
-             
-          }    
-        }
+        for(int i = 0; i < park_slots_num; i++)
+        {
+          if(park_slots != nullptr && park_slots[i] != nullptr &&
+             park_slots[i]->ChooseButton->checked() && park_slots[i]->ChooseButton->groupIndex() == 1)
+            {
+              // set in taken park slots group
+              park_slots[i]->SetGroupTaken();
+              return true;
+            }    
+          }
 
         return false;
      }
-     
-
-
 };
 
 

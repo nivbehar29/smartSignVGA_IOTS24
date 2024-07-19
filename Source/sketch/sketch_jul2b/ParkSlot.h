@@ -21,8 +21,6 @@ public:
         TAKEN
     };
 
-    std::function<void()> func;
-
     ParkStates state;
     fabgl::Canvas* canvas;
     fabgl::uiFrame* frame;
@@ -37,67 +35,44 @@ public:
     int x_pos;
     int y_pos;
 
-    ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width, int height,std::function<void()> funcToSet)
-        : state(FREE), frame(frameToSet), canvas(cvToSet), x_pos(x), y_pos(y), width(width), height(height) {
+    // callback function to be called when park slot choose button has been clicked
+    std::function<void()> onChooseButtonClickCB;
 
+    ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width, int height, std::function<void()> onChooseButtonClickCB_t)
+        : state(FREE), frame(frameToSet), canvas(cvToSet), x_pos(x), y_pos(y), width(width), height(height)
+    {
 
-       func=funcToSet;
-       //curr_frame=curr_frameToSet;
-     /*
-      // Choose Button
+      // set callback function for Choose button clicked
+      onChooseButtonClickCB = onChooseButtonClickCB_t;
+
+      int offset_y = 30;
       int ChooseButtonExt = calcWidthOfText(&fabgl::FONT_std_14, "Choose");
       Size ChooseButtonSize(ChooseButtonExt + 10, 20);
-      ChooseButton = new uiButton(frame, "Choose", Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), ChooseButtonSize);
-      //ChooseButton = new uiButton(frame, "Choose", Point(30, 30), ChooseButtonSize);
-      ChooseButton->onClick = [&]() { onChooseButtonClick(); }; */
-        // num_of_floors=num_of_floorsToSet;
-        // Floorarr=Floorarray;
-        // current_floor_id=curr_id;
-        int offset_y = 30;
-       int ChooseButtonExt = calcWidthOfText(&fabgl::FONT_std_14, "Choose");
-       Size ChooseButtonSize(ChooseButtonExt + 10, 20);
-       // uistaticLabel* ChooseLabel= new uiStaticLabel(frame, "choose", Point(10, 40 ));
-        ChooseButton= new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
-        
-        ChooseButton->setGroupIndex(1);
-        ChooseButton->checkBoxStyle().mouseOverBackgroundColor=RGB888(0,0,0);
-        ChooseButton->checkBoxStyle().checkedBackgroundColor=RGB888(0,128,0);
-        ChooseButton->checkBoxStyle().foregroundColor=RGB888(0,128,0);
-        ChooseButton->repaint();
-        ChooseButton->onClick = [&]() {onChooseButtonClick();};
+      ChooseButton= new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
+      
+      ChooseButton->setGroupIndex(1);
+      ChooseButton->checkBoxStyle().mouseOverBackgroundColor=RGB888(0,0,0);
+      ChooseButton->checkBoxStyle().checkedBackgroundColor=RGB888(0,128,0);
+      ChooseButton->checkBoxStyle().foregroundColor=RGB888(0,128,0);
+      ChooseButton->repaint();
+      ChooseButton->onClick = [&]() {onChooseButtonClick();};
+    }
 
-        }
-
-        void SetGroup()
-        {
-           ChooseButton->setGroupIndex(-1);
-        }
-        
-        void uncheckNotTaken() 
-        {
-          if(ChooseButton->groupIndex()!=-1)
-          {
-              ChooseButton->setChecked(false);
-          }
-          
-        }
-        
-
-    void draw()
+    void SetGroupTaken()
     {
-       /* // Paint a yellow rectangle
-        int pen_width = 1;
-        canvas->setPenWidth(pen_width);
-        canvas->setPenColor(Color::White);
-        canvas->drawRectangle(x_pos, y_pos, x_pos + width, y_pos + height);
-        
-        if(state == TAKEN)
-        {
-          canvas->setBrushColor(Color::Red);
-          canvas->fillRectangle(x_pos + pen_width, y_pos + pen_width, x_pos + width - pen_width, y_pos + height - pen_width);
-        }*/
-        return;
+      // set in 'taken' park slots group
+      ChooseButton->setGroupIndex(-1);
 
+      // change the desired park slot color to 'taken' color 
+      ChooseButton->checkBoxStyle().checkedBackgroundColor = RGB888(128,0,0);
+    }
+    
+    void uncheckNotTaken() 
+    {
+      if(ChooseButton->groupIndex() != -1)
+      {
+          ChooseButton->setChecked(false);
+      }
     }
 
     void setPos(int x, int y)
@@ -113,20 +88,11 @@ public:
 
     void onChooseButtonClick()
     {
-      // for(int i = 0; i < num_of_floors; i++)
-      //   {
-      //   if (i != current_floor_id) 
-      //   {
-      //     int num_of_park_slots = Floorarr[i].floorframe->park_slots_num;
-      //     for(int j = 0; j < num_of_park_slots; j++) 
-      //     {
-      //       Floorarr[i].floorFrame->parkslots[i].uncheck();
-      //     }
-      //   }
-      //   }
-            func();
-
-         
+      if(this->ChooseButton->groupIndex() != -1)
+      {
+        // call callback function
+        onChooseButtonClickCB();
+      }
     }
 
 };
