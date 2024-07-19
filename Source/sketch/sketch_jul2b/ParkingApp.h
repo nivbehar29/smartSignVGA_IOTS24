@@ -2,6 +2,7 @@
 #define PARKINGAPP_H
 
 #include <Arduino_JSON.h>
+#include <time.h>
 
 #include "fabgl.h"
 #include "fabui.h"
@@ -25,6 +26,8 @@ class ParkingApp : public uiApp {
     OptionsFrame* optionsFrame;
 
     uiLabel* WelcomeText;
+    uiLabel* AdvText;
+    uiTimerHandle timer;
 
     int ResX = 640;
     int ResY = 480;
@@ -33,6 +36,8 @@ class ParkingApp : public uiApp {
 
       // set root window background color to dark green
       rootWindow()->frameStyle().backgroundColor = RGB888(0, 64, 0);
+
+      timer = nullptr;
 
       // Welcome Text
       int textExt = calcWidthOfText(&fabgl::FONT_std_24, "Welcome To The Parking Lot!");
@@ -68,6 +73,30 @@ class ParkingApp : public uiApp {
 
         uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200 , 100));
       }
+
+      // Advertisement Text
+      int AdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Advertisement !!!");
+      AdvText = new uiLabel(rootWindow(), "Some Advertisement !!!", Point(ResX / 2 - AdvtextExt / 2, 400));
+      AdvText->labelStyle().backgroundColor = rootWindow()->frameStyle().backgroundColor;
+      AdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
+      AdvText->update();
+      
+
+      timer = app()->setTimer(this, 1000);
+      this->onTimer = [&](uiTimerHandle tHandle) {  Serial.println("onTimer");
+
+                                                    if(AdvText->labelStyle().backgroundColor == RGB888(0, 64, 0))
+                                                      AdvText->labelStyle().backgroundColor = RGB888(64, 64, 64);
+                                                    else
+                                                      AdvText->labelStyle().backgroundColor = RGB888(0, 64, 0);
+                                                    AdvText->update();
+
+                                                    // set new timer
+                                                    app()->killTimer(timer);
+                                                    timer = nullptr;
+                                                    timer = app()->setTimer(this, 1000);
+                                                    /*app()->canvas->repaint();*/ };
+
 
     }
 
