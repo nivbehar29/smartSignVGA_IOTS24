@@ -39,8 +39,6 @@ class ParkingLotFrame : public GeneralFrame {
 
     FloorArr = (parking_floor*)malloc(num_of_floors * sizeof(parking_floor));
 
-    current_floor_id = 0;
-
     // Frame properties
     fabgl::uiFrameProps& props = frame->frameProps();
     props.hasCloseButton = 0;
@@ -75,8 +73,13 @@ class ParkingLotFrame : public GeneralFrame {
       FloorArr[i].floor_box->onClick = [&, i]() { onFloorCheckboxClick(i); };
     }
 
+    current_floor_id = -1;
+
     // Activate first floor by default
-    FloorArr[0].floor_box->onClick();
+    // FloorArr[0].floor_box->onClick();
+    // FloorArr[0].floor_box->setChecked(true);
+    // onFloorCheckboxClick(0);
+    // current_floor_id = 0;
   }
 
   void onFinishButtonClicked()
@@ -125,7 +128,11 @@ class ParkingLotFrame : public GeneralFrame {
     // hide the current floor and show the new floor
     if(current_floor_id != floor_id)
     {
-      FloorArr[current_floor_id].floor_frame->hideFrame();
+      if(current_floor_id >= 0 && FloorArr[current_floor_id].floor_frame != nullptr)
+      {
+        FloorArr[current_floor_id].floor_frame->hideFrame();
+      }
+      
       FloorArr[floor_id].floor_frame->showFrame();
       current_floor_id = floor_id;
     }

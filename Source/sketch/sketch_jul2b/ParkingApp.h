@@ -26,8 +26,15 @@ class ParkingApp : public uiApp {
     OptionsFrame* optionsFrame;
 
     uiLabel* WelcomeText;
-    uiLabel* AdvText;
-    uiTimerHandle timer;
+    
+    uiLabel* FlashingAdvText;
+    uiTimerHandle FlashingAdvTimer;
+
+    int MvoingAdvtextExt;
+    uiLabel* MovingAdvText;
+    uiTimerHandle MovingAdvTimer;
+
+    uiTimerHandle FreeMemoryTimer;
 
     int ResX = 640;
     int ResY = 480;
@@ -36,8 +43,6 @@ class ParkingApp : public uiApp {
 
       // set root window background color to dark green
       rootWindow()->frameStyle().backgroundColor = RGB888(0, 64, 0);
-
-      timer = nullptr;
 
       // Welcome Text
       int textExt = calcWidthOfText(&fabgl::FONT_std_24, "Welcome To The Parking Lot!");
@@ -58,7 +63,9 @@ class ParkingApp : public uiApp {
       int startTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Start");
       int buttonSizeX = startTextExt + 20;
       StartButton = new uiButton(rootWindow(), "Start", Point(ResX/2 - buttonSizeX/2, ResY/2), Size(buttonSizeX, 20));
-      StartButton->onClick = [&]() { showWindow(optionsFrame->frame, true); setActiveWindow(optionsFrame->frame); };
+      StartButton->onClick = [&]() {  showWindow(optionsFrame->frame, true);
+                                      setActiveWindow(optionsFrame->frame);
+                                    };
 
       if(weatherObj != nullptr)
       {
@@ -75,18 +82,61 @@ class ParkingApp : public uiApp {
       }
 
       // Flashing Advertisement Text
-      int AdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Advertisement !!!");
-      AdvText = new uiLabel(rootWindow(), "Some Advertisement !!!", Point(ResX / 2 - AdvtextExt / 2, 400));
-      AdvText->labelStyle().backgroundColor = RGB888(0,0,0);
-      AdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
-      AdvText->update();
-      timer = app()->setTimer(this, 150);
-      this->onTimer = [&](uiTimerHandle tHandle) { onFlashingAdvTimer(); };
+      int FlashingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Advertisement !!!");
+      FlashingAdvText = new uiLabel(rootWindow(), "Some Advertisement !!!", Point(ResX / 2 - FlashingAdvtextExt / 2, 400));
+      FlashingAdvText->labelStyle().backgroundColor = RGB888(0,0,64);
+      FlashingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
+      FlashingAdvText->update();
+      
+      
+
+      // Moving Advertisement Text
+      MvoingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Moving Advertisement !!!");
+      MovingAdvText = new uiLabel(rootWindow(), "Some Moving Advertisement !!!", Point(ResX / 2 - MvoingAdvtextExt / 2, 300));
+      MovingAdvText->labelStyle().backgroundColor = RGB888(255,255,255);
+      MovingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
+      MovingAdvText->update();
+      
+
+      
+      
+      this->onTimer = [&](uiTimerHandle tHandle) {  if (tHandle == FlashingAdvTimer) 
+                                                      onFlashingAdvTimer(); 
+                                                    
+                                                    if(tHandle == MovingAdvTimer) 
+                                                      onMovingAdvTimer();
+
+                                                    if(tHandle == FreeMemoryTimer)
+                                                    {
+                                                      Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+                                                      Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+                                                    }
+                                                      
+                                                  };
+
+      setTimers();
+
+    }
+
+    void setTimers()
+    {
+      FlashingAdvTimer = app()->setTimer(this, 500);
+      MovingAdvTimer = app()->setTimer(this, 50);
+      FreeMemoryTimer = app()->setTimer(this, 2000);
+    }
+
+    void stopTimers()
+    {
+      app()->killTimer(FlashingAdvTimer);
+      app()->killTimer(MovingAdvTimer);
+      app()->killTimer(FreeMemoryTimer);
     }
 
   void onFlashingAdvTimer()
   {
-    RGB888 curr_col = AdvText->labelStyle().backgroundColor;
+    // Serial.printf("Flash timer!\n");
+
+    RGB888 curr_col = FlashingAdvText->labelStyle().backgroundColor;
     RGB888 next_col = curr_col;
 
     // some color manipulation for flashing
@@ -100,13 +150,32 @@ class ParkingApp : public uiApp {
       }
     }
 
-    AdvText->labelStyle().backgroundColor = next_col;
-    AdvText->update();
+    FlashingAdvText->labelStyle().backgroundColor = next_col;
+    FlashingAdvText->update();
 
     // set new timer
-    app()->killTimer(timer);
-    timer = app()->setTimer(this, 150);
+    //app()->killTimer(FlashingAdvTimer);
+    //FlashingAdvTimer = app()->setTimer(this, 500);
   } 
+
+  void onMovingAdvTimer()
+  {
+    // Serial.printf("Moving timer!\n");
+
+    if(MovingAdvText->pos().X + MvoingAdvtextExt < 0)
+    {
+      app()->moveWindow(MovingAdvText, ResX, MovingAdvText->pos().Y);
+    }
+    else
+    {
+      app()->moveWindow(MovingAdvText, MovingAdvText->pos().X - 1, MovingAdvText->pos().Y);
+    }
+    //MovingAdvText->update();
+
+    // set new timer
+    //app()->killTimer(MovingAdvTimer);
+    //MovingAdvTimer = app()->setTimer(this, 50);
+  }
 
   // void onStartButtonClick() {
 
