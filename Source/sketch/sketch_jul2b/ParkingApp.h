@@ -74,32 +74,39 @@ class ParkingApp : public uiApp {
         uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200 , 100));
       }
 
-      // Advertisement Text
+      // Flashing Advertisement Text
       int AdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Advertisement !!!");
       AdvText = new uiLabel(rootWindow(), "Some Advertisement !!!", Point(ResX / 2 - AdvtextExt / 2, 400));
-      AdvText->labelStyle().backgroundColor = rootWindow()->frameStyle().backgroundColor;
+      AdvText->labelStyle().backgroundColor = RGB888(0,0,0);
       AdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
       AdvText->update();
-      
-
-      timer = app()->setTimer(this, 1000);
-      this->onTimer = [&](uiTimerHandle tHandle) {  Serial.println("onTimer");
-
-                                                    if(AdvText->labelStyle().backgroundColor == RGB888(0, 64, 0))
-                                                      AdvText->labelStyle().backgroundColor = RGB888(64, 64, 64);
-                                                    else
-                                                      AdvText->labelStyle().backgroundColor = RGB888(0, 64, 0);
-                                                    AdvText->update();
-
-                                                    // set new timer
-                                                    app()->killTimer(timer);
-                                                    timer = nullptr;
-                                                    timer = app()->setTimer(this, 1000);
-                                                    /*app()->canvas->repaint();*/ };
-
-
+      timer = app()->setTimer(this, 150);
+      this->onTimer = [&](uiTimerHandle tHandle) { onFlashingAdvTimer(); };
     }
 
+  void onFlashingAdvTimer()
+  {
+    RGB888 curr_col = AdvText->labelStyle().backgroundColor;
+    RGB888 next_col = curr_col;
+
+    // some color manipulation for flashing
+    next_col.B = next_col.B + 64;
+    if (curr_col.B == 192)
+    {
+      next_col.G = next_col.G + 64;
+      if (curr_col.G == 192) 
+      {
+        next_col.R = next_col.R + 64;
+      }
+    }
+
+    AdvText->labelStyle().backgroundColor = next_col;
+    AdvText->update();
+
+    // set new timer
+    app()->killTimer(timer);
+    timer = app()->setTimer(this, 150);
+  } 
 
   // void onStartButtonClick() {
 
