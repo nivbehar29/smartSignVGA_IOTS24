@@ -98,7 +98,6 @@ void setup(){
     
     // Firebase.begin(&config, &auth);
     // Firebase.reconnectWiFi(true);
-
   }
   else
   {
@@ -176,7 +175,7 @@ void loop() {
     {
       Serial.println("call setIntFlotTest()");
       fbMngr->setIntFlotTest();
-      
+      fbMngr->EndFB();
 
       disconnectWifi();
     }

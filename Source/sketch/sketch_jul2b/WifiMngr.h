@@ -3,11 +3,6 @@
 #include <WiFi.h>
 #include "keys/openweathermap_key.h"
 
-extern String openWeatherMapApiKey;
-extern const char* ssid;
-extern const char* password;
-
-
 bool setupWifi()
 {
   WiFi.mode(WIFI_STA); //Optional

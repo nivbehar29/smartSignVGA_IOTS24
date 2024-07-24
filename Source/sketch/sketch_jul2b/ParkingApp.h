@@ -16,149 +16,186 @@
 
 class ParkingApp : public uiApp {
 
-    public:
+public:
 
-    ParkingApp(JSONVar* weatherObj_t) : weatherObj(weatherObj_t) {}
+  ParkingApp(JSONVar* weatherObj_t)
+    : weatherObj(weatherObj_t) {}
 
-    private:
+private:
 
-    JSONVar* weatherObj;
+  JSONVar* weatherObj;
 
-    uiButton* StartButton;
+  uiButton* StartButton;
 
-    OptionsFrame* optionsFrame;
+  OptionsFrame* optionsFrame;
 
-    uiLabel* WelcomeText;
+  uiLabel* WelcomeText;
 
-    uiFrame* holdFrame;
-    uiTimerHandle HoldFrameTimer;
-    
-    uiLabel* FlashingAdvText;
-    uiTimerHandle FlashingAdvTimer;
+  uiFrame* holdFrame;
+  uiTimerHandle HoldFrameTimer1;
+  uiTimerHandle HoldFrameTimer2;
 
-    int MvoingAdvtextExt;
-    uiLabel* MovingAdvText;
-    uiTimerHandle MovingAdvTimer;
+  uiLabel* FlashingAdvText;
+  uiTimerHandle FlashingAdvTimer;
 
-    uiTimerHandle FreeMemoryTimer;
+  int MvoingAdvtextExt;
+  uiLabel* MovingAdvText;
+  uiTimerHandle MovingAdvTimer;
 
-    int ResX = 640;
-    int ResY = 480;
+  uiTimerHandle FreeMemoryTimer;
 
-    void init() {
+  int ResX = 640;
+  int ResY = 480;
 
-      // set root window background color to dark green
-      rootWindow()->frameStyle().backgroundColor = RGB888(0, 64, 0);
+  void init() {
 
-      // Welcome Text
-      int textExt = calcWidthOfText(&fabgl::FONT_std_24, "Welcome To The Parking Lot!");
-      WelcomeText = new uiLabel(rootWindow(), "Welcome To The Parking Lot!", Point(ResX / 2 - textExt / 2, 150));
-      WelcomeText->labelStyle().backgroundColor = rootWindow()->frameStyle().backgroundColor;
-      WelcomeText->labelStyle().textFont        = &fabgl::FONT_std_24;
-      WelcomeText->update();
+    // set root window background color to dark green
+    rootWindow()->frameStyle().backgroundColor = RGB888(0, 64, 0);
 
-      // frame where to put buttons
-      // MainFrame = new uiFrame(rootWindow(), "", Point(10, 10), Size(115, 120));
-      // MainFrame->frameStyle().backgroundColor = RGB888(0, 0, 255);
-      // MainFrame->windowStyle().borderSize     = 0;
+    // Welcome Text
+    int textExt = calcWidthOfText(&fabgl::FONT_std_24, "Welcome To The Parking Lot!");
+    WelcomeText = new uiLabel(rootWindow(), "Welcome To The Parking Lot!", Point(ResX / 2 - textExt / 2, 150));
+    WelcomeText->labelStyle().backgroundColor = rootWindow()->frameStyle().backgroundColor;
+    WelcomeText->labelStyle().textFont = &fabgl::FONT_std_24;
+    WelcomeText->update();
 
-      // set callback function to be called when a finish button has been clicked
-      auto func = [&,this]() { this->onFinishButton(); }; 
+    // frame where to put buttons
+    // MainFrame = new uiFrame(rootWindow(), "", Point(10, 10), Size(115, 120));
+    // MainFrame->frameStyle().backgroundColor = RGB888(0, 0, 255);
+    // MainFrame->windowStyle().borderSize     = 0;
 
-      // button to show TestControlsFrame
-      optionsFrame = new OptionsFrame(rootWindow(), ResX, ResY, app(), func);
+    // set callback function to be called when a finish button has been clicked
+    auto func = [&, this]() {
+      this->onFinishButton();
+    };
 
-      // Start button
-      int startTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Start");
-      int buttonSizeX = startTextExt + 20;
-      StartButton = new uiButton(rootWindow(), "Start", Point(ResX/2 - buttonSizeX/2, ResY/2), Size(buttonSizeX, 20));
-      StartButton->onClick = [&]() {  showWindow(optionsFrame->frame, true);
-                                      setActiveWindow(optionsFrame->frame);
-                                    };
+    // button to show TestControlsFrame
+    optionsFrame = new OptionsFrame(rootWindow(), ResX, ResY, app(), func);
 
-      if(weatherObj != nullptr)
-      {
-        uiLabel* weather_city_label = new uiLabel(rootWindow(), "City:", Point(ResX / 2 + 200, 10));
-        uiLabel* weather_city_info = new uiLabel(rootWindow(), "Haifa", Point(ResX / 2 + 200 , 40));
-        uiLabel* weather_temperature_label = new uiLabel(rootWindow(), "Temperature:", Point(ResX / 2 + 200 , 70));
+    // Start button
+    int startTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Start");
+    int buttonSizeX = startTextExt + 20;
+    StartButton = new uiButton(rootWindow(), "Start", Point(ResX / 2 - buttonSizeX / 2, ResY / 2), Size(buttonSizeX, 20));
+    StartButton->onClick = [&]() {
+      showWindow(optionsFrame->frame, true);
+      setActiveWindow(optionsFrame->frame);
+    };
 
-        char buffer[20];  // Make sure this buffer is large enough to hold the converted value
+    if (weatherObj != nullptr) {
+      uiLabel* weather_city_label = new uiLabel(rootWindow(), "City:", Point(ResX / 2 + 200, 10));
+      uiLabel* weather_city_info = new uiLabel(rootWindow(), "Haifa", Point(ResX / 2 + 200, 40));
+      uiLabel* weather_temperature_label = new uiLabel(rootWindow(), "Temperature:", Point(ResX / 2 + 200, 70));
 
-        // dtostrf(float value, minimum width, precision, buffer)
-        dtostrf(fahrenheitToCelcius((*weatherObj)["main"]["temp"]), 6, 2, buffer);  // Convert float to string with 2 decimal places
+      char buffer[20];  // Make sure this buffer is large enough to hold the converted value
 
-        uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200 , 100));
-      }
+      // dtostrf(float value, minimum width, precision, buffer)
+      dtostrf(fahrenheitToCelcius((*weatherObj)["main"]["temp"]), 6, 2, buffer);  // Convert float to string with 2 decimal places
 
-      // Flashing Advertisement Text
-      int FlashingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Advertisement !!!");
-      FlashingAdvText = new uiLabel(rootWindow(), "Some Advertisement !!!", Point(ResX / 2 - FlashingAdvtextExt / 2, 400));
-      FlashingAdvText->labelStyle().backgroundColor = RGB888(0,0,64);
-      FlashingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
-      FlashingAdvText->update();
-      
-      
-
-      // Moving Advertisement Text
-      MvoingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Moving Advertisement !!!");
-      MovingAdvText = new uiLabel(rootWindow(), "Some Moving Advertisement !!!", Point(ResX / 2 - MvoingAdvtextExt / 2, 300));
-      MovingAdvText->labelStyle().backgroundColor = RGB888(255,255,255);
-      MovingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
-      MovingAdvText->update();
-      
-
-      
-      this->onTimer = [&](uiTimerHandle tHandle) { onTimers(tHandle); };
-
-      // Hold frame
-      holdFrame = new uiFrame(rootWindow(), "Hold Frame", Point(0, 0), Size(256, 192), false);
-      HoldFrameTimer = null;
-
-      setTimers();
-
+      uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200, 100));
     }
 
-    void onTimers(uiTimerHandle tHandle)
-    {
-      if(tHandle == FlashingAdvTimer )
-        onFlashingAdvTimer(); 
+    // Flashing Advertisement Text
+    int FlashingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Advertisement !!!");
+    FlashingAdvText = new uiLabel(rootWindow(), "Some Advertisement !!!", Point(ResX / 2 - FlashingAdvtextExt / 2, 400));
+    FlashingAdvText->labelStyle().backgroundColor = RGB888(0, 0, 64);
+    FlashingAdvText->labelStyle().textFont = &fabgl::FONT_std_24;
+    FlashingAdvText->update();
 
-      else if(tHandle == MovingAdvTimer)
-        onMovingAdvTimer();
 
-      else if(tHandle == FreeMemoryTimer)
-      {
+
+    // Moving Advertisement Text
+    MvoingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Moving Advertisement !!!");
+    MovingAdvText = new uiLabel(rootWindow(), "Some Moving Advertisement !!!", Point(ResX / 2 - MvoingAdvtextExt / 2, 300));
+    MovingAdvText->labelStyle().backgroundColor = RGB888(255, 255, 255);
+    MovingAdvText->labelStyle().textFont = &fabgl::FONT_std_24;
+    MovingAdvText->update();
+
+
+
+    this->onTimer = [&](uiTimerHandle tHandle) {
+      onTimers(tHandle);
+    };
+
+    // Hold frame
+    holdFrame = new uiFrame(rootWindow(), "Hold Frame", Point(0, 0), Size(256, 192), false);
+    HoldFrameTimer1 = nullptr;
+    HoldFrameTimer2 = nullptr;
+
+    setTimers();
+  }
+
+  void onTimers(uiTimerHandle tHandle) {
+    if (tHandle == FlashingAdvTimer)
+      onFlashingAdvTimer();
+
+    else if (tHandle == MovingAdvTimer)
+      onMovingAdvTimer();
+
+    else if (tHandle == FreeMemoryTimer) {
+      Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+      Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+    }
+
+    else if (tHandle == HoldFrameTimer1) {
+
+      FBMngr* fbMngr = nullptr;
+
+      Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+      Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+
+      setupWifi();
+
+      if (WiFi.status() == WL_CONNECTED) {
+
         Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
         Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+
+        Serial.println("1");
+
+        // Setup Firebase
+        fbMngr = new FBMngr();
+        fbMngr->setup();
+
+        Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+        Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+
+        Serial.println("call setIntFlotTest()");
+        fbMngr->setIntFlotTest();
+        Serial.println("call EndFB()");
+        fbMngr->EndFB();
+
+        disconnectWifi();
+
+        app()->killTimer(HoldFrameTimer1);
+        HoldFrameTimer1 = nullptr;
+
+        HoldFrameTimer2 = app()->setTimer(this, 5000);
       }
-
-      else if(tHandle == HoldFrameTimer)
-      {
-        Serial.printf("turn off holdFrame");
-        app()->showWindow(holdFrame, false);
-        app()->killTimer(HoldFrameTimer);
-        HoldFrameTimer = nullptr;
-        app()->displayController()->setResolution(VGA_640x480_60Hz);
-        rootWindow()->repaint();
-      }
     }
-
-    void setTimers()
+    else if (HoldFrameTimer2)
     {
-      FlashingAdvTimer = app()->setTimer(this, 500);
-      MovingAdvTimer = app()->setTimer(this, 50);
-      FreeMemoryTimer = app()->setTimer(this, 2000);
+      Serial.printf("turn off holdFrame");
+      app()->showWindow(holdFrame, false);
+      app()->killTimer(HoldFrameTimer2);
+      HoldFrameTimer2 = nullptr;
+      app()->displayController()->setResolution(VGA_640x480_60Hz);
+      rootWindow()->repaint();
     }
+  }
 
-    void stopTimers()
-    {
-      app()->killTimer(FlashingAdvTimer);
-      app()->killTimer(MovingAdvTimer);
-      app()->killTimer(FreeMemoryTimer);
-    }
+  void setTimers() {
+    FlashingAdvTimer = app()->setTimer(this, 500);
+    MovingAdvTimer = app()->setTimer(this, 50);
+    FreeMemoryTimer = app()->setTimer(this, 2000);
+  }
 
-  void onFlashingAdvTimer()
-  {
+  void stopTimers() {
+    app()->killTimer(FlashingAdvTimer);
+    app()->killTimer(MovingAdvTimer);
+    app()->killTimer(FreeMemoryTimer);
+  }
+
+  void onFlashingAdvTimer() {
     // Serial.printf("Flash timer!\n");
 
     RGB888 curr_col = FlashingAdvText->labelStyle().backgroundColor;
@@ -166,11 +203,9 @@ class ParkingApp : public uiApp {
 
     // some color manipulation for flashing
     next_col.B = next_col.B + 64;
-    if (curr_col.B == 192)
-    {
+    if (curr_col.B == 192) {
       next_col.G = next_col.G + 64;
-      if (curr_col.G == 192) 
-      {
+      if (curr_col.G == 192) {
         next_col.R = next_col.R + 64;
       }
     }
@@ -181,18 +216,14 @@ class ParkingApp : public uiApp {
     // set new timer
     //app()->killTimer(FlashingAdvTimer);
     //FlashingAdvTimer = app()->setTimer(this, 500);
-  } 
+  }
 
-  void onMovingAdvTimer()
-  {
+  void onMovingAdvTimer() {
     // Serial.printf("Moving timer!\n");
 
-    if(MovingAdvText->pos().X + MvoingAdvtextExt < 0)
-    {
+    if (MovingAdvText->pos().X + MvoingAdvtextExt < 0) {
       app()->moveWindow(MovingAdvText, ResX, MovingAdvText->pos().Y);
-    }
-    else
-    {
+    } else {
       app()->moveWindow(MovingAdvText, MovingAdvText->pos().X - 1, MovingAdvText->pos().Y);
     }
     //MovingAdvText->update();
@@ -228,8 +259,7 @@ class ParkingApp : public uiApp {
 
   // }
 
-  void onFinishButton()
-  {
+  void onFinishButton() {
     Serial.println("onFinishButton(): finish button clicked!");
 
     Serial.printf("Memory after click finish button:\n");
@@ -238,39 +268,34 @@ class ParkingApp : public uiApp {
 
     app()->displayController()->setResolution(VGA_256x192_50Hz);
 
-    
-
-    HoldFrameTimer = app()->setTimer(this, 5000);
+    HoldFrameTimer1 = app()->setTimer(this, 5000);
 
     Serial.printf("Memory after changing resolution to VGA_256x192_50Hz:\n");
     Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
     Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
-    
+
     rootWindow()->repaint();
     app()->showWindow(holdFrame, true);
-    
+
 
     // delay(5000);
 
     // //app()->showWindow(holdFrame, false);
 
     // app()->displayController()->setResolution(VGA_640x480_60Hz);
-    
+
     // Serial.printf("Memory after changing resolution back to VGA_640x480_60Hz:\n");
     // Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
     // Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
   }
 
-  int calcWidthOfText(fabgl::FontInfo const * fontInfo, char const * text)
-  {
+  int calcWidthOfText(fabgl::FontInfo const* fontInfo, char const* text) {
     return app()->canvas()->textExtent(fontInfo, text);
   }
 
-  double fahrenheitToCelcius(double c)
-  {
+  double fahrenheitToCelcius(double c) {
     return c - 273.15;
   }
-
 };
 
-#endif // PARKINGAPP_H
+#endif  // PARKINGAPP_H

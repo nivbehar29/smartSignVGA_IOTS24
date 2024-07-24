@@ -51,6 +51,8 @@ public:
       
       Firebase.begin(&config, &auth);
       Firebase.reconnectWiFi(false);
+      
+      Serial.println("setup End");
     }
 
     void setIntFlotTest()
