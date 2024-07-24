@@ -53,7 +53,7 @@ unsigned long timerDelay = 10000;
 String jsonBuffer;
 
 // Firebase stuff
-FBMngr fbMngr;
+FBMngr* fbMngr = nullptr;
 
 void printMem()
 {
@@ -78,8 +78,8 @@ void setup(){
     printMem();
 
     // Setup Firebase
-    //fbMngr = FBMngr();
-    //fbMngr.setup();
+    fbMngr = new FBMngr();
+    fbMngr->setup();
 
     // if (Firebase.signUp(&config, &auth, "", ""))
     // {
@@ -174,7 +174,9 @@ void loop() {
     // Disconnect from WiFi
     if(WiFi.status()== WL_CONNECTED)
     {
-      //fbMngr.setIntFlotTest();
+      Serial.println("call setIntFlotTest()");
+      fbMngr->setIntFlotTest();
+      
 
       disconnectWifi();
     }

@@ -9,6 +9,9 @@
 
 #include "OptionsFrame.h"
 
+#include "WifiMngr.h"
+#include "FirebaseMngr.h"
+
 // extern JSONVar myObject;
 
 class ParkingApp : public uiApp {
@@ -234,6 +237,9 @@ class ParkingApp : public uiApp {
     Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
 
     app()->displayController()->setResolution(VGA_256x192_50Hz);
+
+    
+
     HoldFrameTimer = app()->setTimer(this, 5000);
 
     Serial.printf("Memory after changing resolution to VGA_256x192_50Hz:\n");
