@@ -86,6 +86,16 @@ class ParkingLotFrame : public GeneralFrame {
   {
     app->showWindow(frame, 0);
     AssignParkingSlot();
+
+    Serial.printf("Memory after click finish button:\n");
+    Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+    Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+
+    app->displayController()->setResolution(VGA_256x192_50Hz);
+
+    Serial.printf("Memory after changing resolution to VGA_256x192_50Hz:\n");
+    Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+    Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
   }
 
   void AssignParkingSlot()

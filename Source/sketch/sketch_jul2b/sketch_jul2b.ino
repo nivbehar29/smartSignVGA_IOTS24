@@ -5,6 +5,13 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
+
+#include <Firebase_ESP_Client.h>
+//Provide the token generation process info.
+#include "addons/TokenHelper.h"
+//Provide the RTDB payload printing info and other helper functions.
+#include "addons/RTDBHelper.h"
+
 #include "keys/openweathermap_key.h"
 
 #include "ParkingApp.h"
@@ -43,17 +50,61 @@ unsigned long timerDelay = 10000;
 
 String jsonBuffer;
 
+// Firebase stuff
+FirebaseData fbdo;
+FirebaseAuth auth;
+FirebaseConfig config;
+unsigned long sendDataPrevMillis = 0;
+int count = 0;
+bool signupOK = false;
 
+void printMem()
+{
+  Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+  Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+}
 
 void setup(){
   Serial.begin(115200);  // Start the serial communication
 
+  delay(1000);
+
+  Serial.printf("Memory at init:\n");
+  printMem();
+
   // Setup Mouse / Keyboard
   PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
+
+  Serial.printf("Memory after init PS2Controller:\n");
+  printMem();
 
   // Setup display controller
   DisplayController.begin();
   DisplayController.setResolution(VGA_640x480_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
+
+  // Serial.printf("Memory after init fabgl with VGA_640x480_60Hz:\n");
+  // printMem();
+
+  // DisplayController.setResolution(VGA_256x192_50Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
+
+  // Serial.printf("Memory after changing resolution to VGA_256x192_50Hz:\n");
+  // printMem();
+
+  // DisplayController.end();
+
+  // Serial.printf("Memory after ending fabgl:\n");
+  // printMem();
+
+  // PS2Controller.end();
+
+  // Serial.printf("Memory after ending PS2Controller:\n");
+  // printMem();
+
+  // DisplayController.begin();
+  // DisplayController.setResolution(VGA_256x192_50Hz ); // VGA_640x350_70Hz , VGA_640x480_60Hz
+
+  // Serial.printf("Memory after init fabgl with  VGA_256x192_50Hz:\n");
+  // printMem();
 
   // Wifi
   delay(1000);
@@ -62,6 +113,8 @@ void setup(){
   WiFi.begin(ssid, password);
   Serial.println("\nConnecting");
 
+  Serial.printf("Memory after init Wifi:\n");
+  printMem();
 
   unsigned long startAttemptTime = millis();
 
@@ -75,6 +128,38 @@ void setup(){
     Serial.println("\nConnected to the WiFi network");
     Serial.print("Local ESP32 IP: ");
     Serial.println(WiFi.localIP());
+
+
+    Serial.printf("Memory after connecting Wifi:\n");
+    printMem();
+
+    // Setup Firebase
+    // Assign the api key (required)
+    config.api_key = API_KEY;
+
+    // Assign the RTDB URL (required)
+    config.database_url = DATABASE_URL;
+    Serial.println(API_KEY);
+    Serial.println(DATABASE_URL);
+
+    // if (Firebase.signUp(&config, &auth, "", ""))
+    // {
+    //   Serial.println("ok");
+    //   signupOK = true;
+    // }
+    // else{
+    //   Serial.println("not ok");
+    //   Serial.printf("%s\n", config.signer.signupError.message.c_str());
+    // }
+
+    // Serial.println("next step");
+
+    // /* Assign the callback function for the long running token generation task */
+    // // config.token_status_callback = tokenStatusCallback; //see addons/TokenHelper.h
+    
+    // Firebase.begin(&config, &auth);
+    // Firebase.reconnectWiFi(true);
+
   }
   else
   {
@@ -91,7 +176,8 @@ JSONVar myObject;
 void loop() {
 
   // Send an HTTP GET request
-  if ((millis() - lastTime) > timerDelay && !done_with_weather) {
+  if ((millis() - lastTime) > timerDelay && !done_with_weather)
+  {
     Serial.println("Starting Weather");
 
     // Check WiFi connection status
@@ -130,6 +216,7 @@ void loop() {
         Serial.print("Wind Speed: ");
         Serial.println(myObject["wind"]["speed"]);
       }
+
     }
     else
     {
@@ -138,6 +225,7 @@ void loop() {
       done_with_weather = true;
       weather_succeeded = false;
     }
+    
     lastTime = millis();
   }
 
@@ -158,6 +246,32 @@ void loop() {
     else
       ParkingApp(nullptr).runAsync(&DisplayController, 3500).joinAsyncRun();
   }
+
+  // if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)){
+  //   sendDataPrevMillis = millis();
+  //   // Write an Int number on the database path test/int
+  //   if (Firebase.RTDB.setInt(&fbdo, "test/int", count)){
+  //     Serial.println("PASSED");
+  //     Serial.println("PATH: " + fbdo.dataPath());
+  //     Serial.println("TYPE: " + fbdo.dataType());
+  //   }
+  //   else {
+  //     Serial.println("FAILED");
+  //     Serial.println("REASON: " + fbdo.errorReason());
+  //   }
+  //   count++;
+    
+  //   // Write an Float number on the database path test/float
+  //   if (Firebase.RTDB.setFloat(&fbdo, "test/float", 0.01 + random(0,100))){
+  //     Serial.println("PASSED");
+  //     Serial.println("PATH: " + fbdo.dataPath());
+  //     Serial.println("TYPE: " + fbdo.dataType());
+  //   }
+  //   else {
+  //     Serial.println("FAILED");
+  //     Serial.println("REASON: " + fbdo.errorReason());
+  //   }
+  // }
 
 }
 
