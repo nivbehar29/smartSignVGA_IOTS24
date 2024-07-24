@@ -2,7 +2,9 @@
 #include "bitmapsWarehouse.h"
 #include "fabui.h"
 
-#include <WiFi.h>
+// #include <WiFi.h>
+#include "WifiMngr.h"
+#include "FirebaseMngr.h"
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 
@@ -17,7 +19,7 @@
 #include "ParkingApp.h"
 
 // main VGA Controller
-fabgl::VGA16Controller DisplayController;
+fabgl::VGA8Controller DisplayController;
 fabgl::PS2Controller   PS2Controller;
 
 // bitmap for parking image
@@ -51,12 +53,7 @@ unsigned long timerDelay = 10000;
 String jsonBuffer;
 
 // Firebase stuff
-FirebaseData fbdo;
-FirebaseAuth auth;
-FirebaseConfig config;
-unsigned long sendDataPrevMillis = 0;
-int count = 0;
-bool signupOK = false;
+FBMngr fbMngr;
 
 void printMem()
 {
@@ -72,75 +69,17 @@ void setup(){
   Serial.printf("Memory at init:\n");
   printMem();
 
-  // Setup Mouse / Keyboard
-  PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
-
-  Serial.printf("Memory after init PS2Controller:\n");
-  printMem();
-
-  // Setup display controller
-  DisplayController.begin();
-  DisplayController.setResolution(VGA_640x480_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
-
-  // Serial.printf("Memory after init fabgl with VGA_640x480_60Hz:\n");
-  // printMem();
-
-  // DisplayController.setResolution(VGA_256x192_50Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
-
-  // Serial.printf("Memory after changing resolution to VGA_256x192_50Hz:\n");
-  // printMem();
-
-  // DisplayController.end();
-
-  // Serial.printf("Memory after ending fabgl:\n");
-  // printMem();
-
-  // PS2Controller.end();
-
-  // Serial.printf("Memory after ending PS2Controller:\n");
-  // printMem();
-
-  // DisplayController.begin();
-  // DisplayController.setResolution(VGA_256x192_50Hz ); // VGA_640x350_70Hz , VGA_640x480_60Hz
-
-  // Serial.printf("Memory after init fabgl with  VGA_256x192_50Hz:\n");
-  // printMem();
-
   // Wifi
-  delay(1000);
-
-  WiFi.mode(WIFI_STA); //Optional
-  WiFi.begin(ssid, password);
-  Serial.println("\nConnecting");
-
-  Serial.printf("Memory after init Wifi:\n");
-  printMem();
-
-  unsigned long startAttemptTime = millis();
-
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000)
-  {
-      Serial.print(".");
-      delay(100);
-  }
+  setupWifi();
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\nConnected to the WiFi network");
-    Serial.print("Local ESP32 IP: ");
-    Serial.println(WiFi.localIP());
-
 
     Serial.printf("Memory after connecting Wifi:\n");
     printMem();
 
     // Setup Firebase
-    // Assign the api key (required)
-    config.api_key = API_KEY;
-
-    // Assign the RTDB URL (required)
-    config.database_url = DATABASE_URL;
-    Serial.println(API_KEY);
-    Serial.println(DATABASE_URL);
+    //fbMngr = FBMngr();
+    //fbMngr.setup();
 
     // if (Firebase.signUp(&config, &auth, "", ""))
     // {
@@ -166,7 +105,6 @@ void setup(){
     Serial.println("\nFailed to connect to the WiFi network within 10 seconds");
 
   }
-
 }
 
 bool done_with_weather = false;
@@ -236,9 +174,19 @@ void loop() {
     // Disconnect from WiFi
     if(WiFi.status()== WL_CONNECTED)
     {
-      Serial.println("Disconnecting from WiFi...");
-      WiFi.disconnect(true, true);
+      //fbMngr.setIntFlotTest();
+
+      disconnectWifi();
     }
+
+    // Setup Mouse / Keyboard
+    PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
+
+    // Setup display controller
+    DisplayController.begin();
+    DisplayController.setResolution(VGA_640x480_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
+
+    delay(1000);
 
     // ParkingApp().runAsync(&DisplayController, 3500).joinAsyncRun();
     if(weather_succeeded)

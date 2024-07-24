@@ -51,9 +51,9 @@ public:
       ChooseButton= new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
       
       ChooseButton->setGroupIndex(1);
-      ChooseButton->checkBoxStyle().mouseOverBackgroundColor=RGB888(0,0,0);
-      ChooseButton->checkBoxStyle().checkedBackgroundColor=RGB888(0,128,0);
-      ChooseButton->checkBoxStyle().foregroundColor=RGB888(0,128,0);
+      ChooseButton->checkBoxStyle().backgroundColor = RGB888(200, 200, 200);
+      ChooseButton->checkBoxStyle().mouseOverBackgroundColor = RGB888(0,0,255);
+      ChooseButton->checkBoxStyle().checkedBackgroundColor = RGB888(0,128,0);
       ChooseButton->repaint();
       ChooseButton->onClick = [&]() {onChooseButtonClick();};
     }
@@ -64,7 +64,9 @@ public:
       ChooseButton->setGroupIndex(-1);
 
       // change the desired park slot color to 'taken' color 
-      ChooseButton->checkBoxStyle().checkedBackgroundColor = RGB888(128,0,0);
+      ChooseButton->checkBoxStyle().backgroundColor = RGB888(255,0,0);
+      ChooseButton->checkBoxStyle().mouseOverBackgroundColor = RGB888(255,0,0);
+      ChooseButton->checkBoxStyle().checkedBackgroundColor = RGB888(255,0,0);
     }
     
     void uncheckNotTaken() 

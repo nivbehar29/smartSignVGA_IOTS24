@@ -19,12 +19,15 @@ class OptionsFrame : public GeneralFrame {
 
   ParkingLotFrame* parkingLotFrame;
 
-  OptionsFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t )
+  std::function<void()> onFinishButtonClickCB;
+
+  OptionsFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t, std::function<void()> onFinishButtonClickCB_t)
   {
     parent = parent_t;
     ResX = ResX_t;
     ResY = ResY_t;
     app = app_t;
+    onFinishButtonClickCB = onFinishButtonClickCB_t;
 
     frame = new uiFrame(parent, "Options Frame", Point(0, 0), Size(ResX, ResY), false);
 
@@ -45,7 +48,7 @@ class OptionsFrame : public GeneralFrame {
     CancelButton->onClick = [&]() { app->showWindow(frame, 0); };
 
 
-    parkingLotFrame = new ParkingLotFrame(parent, ResX, ResY, app, 5);
+    parkingLotFrame = new ParkingLotFrame(parent, ResX, ResY, app, 5, onFinishButtonClickCB);
 
     // Next Button
     int NextTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Next");

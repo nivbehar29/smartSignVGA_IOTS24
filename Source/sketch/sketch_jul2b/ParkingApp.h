@@ -26,6 +26,9 @@ class ParkingApp : public uiApp {
     OptionsFrame* optionsFrame;
 
     uiLabel* WelcomeText;
+
+    uiFrame* holdFrame;
+    uiTimerHandle HoldFrameTimer;
     
     uiLabel* FlashingAdvText;
     uiTimerHandle FlashingAdvTimer;
@@ -56,8 +59,11 @@ class ParkingApp : public uiApp {
       // MainFrame->frameStyle().backgroundColor = RGB888(0, 0, 255);
       // MainFrame->windowStyle().borderSize     = 0;
 
+      // set callback function to be called when a finish button has been clicked
+      auto func = [&,this]() { this->onFinishButton(); }; 
+
       // button to show TestControlsFrame
-      optionsFrame = new OptionsFrame(rootWindow(), ResX, ResY, app());
+      optionsFrame = new OptionsFrame(rootWindow(), ResX, ResY, app(), func);
 
       // Start button
       int startTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Start");
@@ -99,23 +105,39 @@ class ParkingApp : public uiApp {
       
 
       
-      
-      this->onTimer = [&](uiTimerHandle tHandle) {  if (tHandle == FlashingAdvTimer) 
-                                                      onFlashingAdvTimer(); 
-                                                    
-                                                    if(tHandle == MovingAdvTimer) 
-                                                      onMovingAdvTimer();
+      this->onTimer = [&](uiTimerHandle tHandle) { onTimers(tHandle); };
 
-                                                    if(tHandle == FreeMemoryTimer)
-                                                    {
-                                                      Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
-                                                      Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
-                                                    }
-                                                      
-                                                  };
+      // Hold frame
+      holdFrame = new uiFrame(rootWindow(), "Hold Frame", Point(0, 0), Size(256, 192), false);
+      HoldFrameTimer = null;
 
       setTimers();
 
+    }
+
+    void onTimers(uiTimerHandle tHandle)
+    {
+      if(tHandle == FlashingAdvTimer )
+        onFlashingAdvTimer(); 
+
+      else if(tHandle == MovingAdvTimer)
+        onMovingAdvTimer();
+
+      else if(tHandle == FreeMemoryTimer)
+      {
+        Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+        Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+      }
+
+      else if(tHandle == HoldFrameTimer)
+      {
+        Serial.printf("turn off holdFrame");
+        app()->showWindow(holdFrame, false);
+        app()->killTimer(HoldFrameTimer);
+        HoldFrameTimer = nullptr;
+        app()->displayController()->setResolution(VGA_640x480_60Hz);
+        rootWindow()->repaint();
+      }
     }
 
     void setTimers()
@@ -202,6 +224,36 @@ class ParkingApp : public uiApp {
 
 
   // }
+
+  void onFinishButton()
+  {
+    Serial.println("onFinishButton(): finish button clicked!");
+
+    Serial.printf("Memory after click finish button:\n");
+    Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+    Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+
+    app()->displayController()->setResolution(VGA_256x192_50Hz);
+    HoldFrameTimer = app()->setTimer(this, 5000);
+
+    Serial.printf("Memory after changing resolution to VGA_256x192_50Hz:\n");
+    Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+    Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+    
+    rootWindow()->repaint();
+    app()->showWindow(holdFrame, true);
+    
+
+    // delay(5000);
+
+    // //app()->showWindow(holdFrame, false);
+
+    // app()->displayController()->setResolution(VGA_640x480_60Hz);
+    
+    // Serial.printf("Memory after changing resolution back to VGA_640x480_60Hz:\n");
+    // Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+    // Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+  }
 
   int calcWidthOfText(fabgl::FontInfo const * fontInfo, char const * text)
   {

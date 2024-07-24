@@ -26,8 +26,9 @@ class ParkingLotFrame : public GeneralFrame {
   int num_of_floors;
   parking_floor* FloorArr;
   int current_floor_id;
+  std::function<void()> onFinishButtonClickCB;
   
-  ParkingLotFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t,int FloorsNum )
+  ParkingLotFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t,int FloorsNum, std::function<void()> onFinishButtonClickCB_t)
   {
     
     num_of_floors = FloorsNum;
@@ -35,6 +36,8 @@ class ParkingLotFrame : public GeneralFrame {
     ResX = ResX_t;
     ResY = ResY_t;
     app = app_t;
+    onFinishButtonClickCB = onFinishButtonClickCB_t;
+
     frame = new uiFrame(parent, "Parking Lot Frame", Point(0, 0), Size(ResX, ResY), false);
 
     FloorArr = (parking_floor*)malloc(num_of_floors * sizeof(parking_floor));
@@ -86,16 +89,7 @@ class ParkingLotFrame : public GeneralFrame {
   {
     app->showWindow(frame, 0);
     AssignParkingSlot();
-
-    Serial.printf("Memory after click finish button:\n");
-    Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
-    Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
-
-    app->displayController()->setResolution(VGA_256x192_50Hz);
-
-    Serial.printf("Memory after changing resolution to VGA_256x192_50Hz:\n");
-    Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
-    Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+    onFinishButtonClickCB();
   }
 
   void AssignParkingSlot()
