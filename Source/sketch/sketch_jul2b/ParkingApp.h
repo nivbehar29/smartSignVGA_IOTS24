@@ -10,7 +10,10 @@
 #include "OptionsFrame.h"
 
 #include "WifiMngr.h"
-#include "FirebaseMngr.h"
+// #include "FirebaseMngr.h"
+#include <ESP_Google_Sheet_Client.h>
+extern void tokenStatusCallback(TokenInfo info);
+extern void gsSendTest(bool toReset);
 
 #include <HTTPClient.h>
 extern String openWeatherMapApiKey;
@@ -51,7 +54,7 @@ private:
 
   uiTimerHandle FreeMemoryTimer;
 
-  FBMngr* fbMngr = nullptr;
+  // FBMngr* fbMngr = nullptr;
 
   int ResX = 640;
   int ResY = 480;
@@ -162,8 +165,35 @@ private:
 
         Serial.println("1");
 
+        String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=Haifa,IL&APPID=94e384a4dcddf1ca44c40fd5b7568f26";
+        
+        String jsonBuffer = httpGETRequest2(serverPath.c_str());
+        Serial.println(jsonBuffer);
+        JSONVar myObject = JSON.parse(jsonBuffer);
+    
+        // JSON.typeof(jsonVar) can be used to get the type of the var
+        // if 'cod' is not 200, according to weather api, we didnt get the right data (can be becuase of bad api key for example)
+        if (JSON.typeof(myObject) == "undefined" || (int) myObject["cod"] != 200)
+        {
+          Serial.println("Parsing input failed!");
+        }
+        else
+        {
+          Serial.print("JSON object = ");
+          Serial.println(myObject);
+          Serial.print("Temperature: ");
+          Serial.println(myObject["main"]["temp"]);
+          Serial.print("Pressure: ");
+          Serial.println(myObject["main"]["pressure"]);
+          Serial.print("Humidity: ");
+          Serial.println(myObject["main"]["humidity"]);
+          Serial.print("Wind Speed: ");
+          Serial.println(myObject["wind"]["speed"]);
+        }
+
+
         // Setup Firebase
-/*        fbMngr = new FBMngr();
+        /*fbMngr = new FBMngr();
 
         Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
         Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
@@ -180,38 +210,14 @@ private:
         delete fbMngr;
         fbMngr = nullptr;*/
 
-      String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=Haifa,IL&APPID=94e384a4dcddf1ca44c40fd5b7568f26";
-      
-      String jsonBuffer = httpGETRequest2(serverPath.c_str());
-      Serial.println(jsonBuffer);
-      JSONVar myObject = JSON.parse(jsonBuffer);
-  
-      // JSON.typeof(jsonVar) can be used to get the type of the var
-      // if 'cod' is not 200, according to weather api, we didnt get the right data (can be becuase of bad api key for example)
-      if (JSON.typeof(myObject) == "undefined" || (int) myObject["cod"] != 200)
-      {
-        Serial.println("Parsing input failed!");
-      }
-      else
-      {
-        Serial.print("JSON object = ");
-        Serial.println(myObject);
-        Serial.print("Temperature: ");
-        Serial.println(myObject["main"]["temp"]);
-        Serial.print("Pressure: ");
-        Serial.println(myObject["main"]["pressure"]);
-        Serial.print("Humidity: ");
-        Serial.println(myObject["main"]["humidity"]);
-        Serial.print("Wind Speed: ");
-        Serial.println(myObject["wind"]["speed"]);
-      }
+        gsSendTest(true);
 
         disconnectWifi();
 
         app()->killTimer(HoldFrameTimer1);
         HoldFrameTimer1 = nullptr;
 
-        HoldFrameTimer2 = app()->setTimer(this, 5000);
+        HoldFrameTimer2 = app()->setTimer(this, 500);
       }
     }
     else if (HoldFrameTimer2)
@@ -222,7 +228,6 @@ private:
       HoldFrameTimer2 = nullptr;
 
       app()->displayController()->setResolution(VGA_640x480_60Hz);
-      // PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
       PS2Controller.mouse()->reset();
       rootWindow()->repaint();
     }
@@ -311,8 +316,6 @@ private:
     Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
     Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
 
-    // PS2Controller.end();
-
     app()->displayController()->setResolution(VGA_256x192_50Hz);
 
     HoldFrameTimer1 = app()->setTimer(this, 5000);
@@ -321,7 +324,7 @@ private:
     Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
     Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
 
-    rootWindow()->repaint();
+    // rootWindow()->repaint();
     app()->showWindow(holdFrame, true);
 
 

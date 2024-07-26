@@ -4,7 +4,8 @@
 
 // #include <WiFi.h>
 #include "WifiMngr.h"
-#include "FirebaseMngr.h"
+// #include "FirebaseMngr.h"
+#include <ESP_Google_Sheet_Client.h>
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 
@@ -13,7 +14,7 @@
 #include "ParkingApp.h"
 
 // main VGA Controller
-fabgl::VGA8Controller DisplayController;
+fabgl::VGA8Controller *DisplayController;
 fabgl::PS2Controller   PS2Controller;
 
 // bitmap for parking image
@@ -47,12 +48,60 @@ unsigned long timerDelay = 10000;
 String jsonBuffer;
 
 // Firebase stuff
-FBMngr* fbMngr = nullptr;
+//FBMngr* fbMngr = nullptr;
 
 void printMem()
 {
   Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
   Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+}
+
+void gsSendTest(bool toReset)
+{
+  if(toReset)
+    GSheet.reset();
+
+  Serial.println("GS: call setTokenCallback()");
+  GSheet.setTokenCallback(tokenStatusCallback);
+  // Set the seconds to refresh the auth token before expire (60 to 3540, default is 300 seconds)
+  Serial.println("GS: call setPrerefreshSeconds()");
+  GSheet.setPrerefreshSeconds(10 * 60);
+  // Begin the access token generation for Google API authentication
+  Serial.println("GS: call begin()");
+  GSheet.begin(GS_CLIENT_EMAIL, GS_PROJECT_ID, GS_PRIVATE_KEY);
+  bool ready = GSheet.ready();
+
+  if(ready)
+  {
+    FirebaseJson response;
+    FirebaseJson valueRange;
+    valueRange.add("majorDimension", "COLUMNS");
+    valueRange.set("values/[0]/[0]", 5);
+    Serial.println("GS: call values.append()");
+    bool success = GSheet.values.append(&response /* returned response */, spreadsheetId /* spreadsheet Id to append */, "Sheet1!A1" /* range to append */, &valueRange /* data range to append */);
+    if (success){
+        response.toString(Serial, true);
+        valueRange.clear();
+    }
+    else{
+        Serial.println(GSheet.errorReason());
+    }
+  }
+  else
+  {
+    Serial.println("Not Ready!!!!!!!!");
+  }
+}
+
+void tokenStatusCallback(TokenInfo info)
+{
+  if (info.status == token_status_error){
+      GSheet.printf("Token info: type = %s, status = %s\n", GSheet.getTokenType(info).c_str(), GSheet.getTokenStatus(info).c_str());
+      GSheet.printf("Token error: %s\n", GSheet.getTokenError(info).c_str());
+  }
+  else{
+      GSheet.printf("Token info: type = %s, status = %s\n", GSheet.getTokenType(info).c_str(), GSheet.getTokenStatus(info).c_str());
+  }
 }
 
 void setup(){
@@ -141,17 +190,20 @@ void loop() {
     if(WiFi.status()== WL_CONNECTED)
     {
       // Setup Firebase
-      printMem();
-      fbMngr = new FBMngr();
-      fbMngr->setup();
-      printMem();
+      // printMem();
+      // fbMngr = new FBMngr();
+      // fbMngr->setup();
+      // printMem();
 
-      Serial.println("call setIntFlotTest()");
-      printMem();
-      fbMngr->setIntFlotTest(1);
-      printMem();
-      fbMngr->EndFB();
-      delete fbMngr;
+      // Serial.println("call setIntFlotTest()");
+      // printMem();
+      // fbMngr->setIntFlotTest(1);
+      // printMem();
+      // fbMngr->EndFB();
+      // delete fbMngr;
+
+      // Setup Google Sheets
+      gsSendTest(false);
 
       printMem();
 
@@ -159,15 +211,18 @@ void loop() {
 
       disconnectWifi();
 
-      Serial.println("trying firebase again");
+      // Serial.println("trying firebase again");
+      Serial.println("trying google sheets again");
       setupWifi();
       if(WiFi.status()== WL_CONNECTED)
       {
-        fbMngr = new FBMngr();
+        /*fbMngr = new FBMngr();
         fbMngr->setup();
         fbMngr->setIntFlotTest(2);
         fbMngr->EndFB();
-        delete fbMngr;
+        delete fbMngr;*/
+
+        gsSendTest(true);
         
         disconnectWifi();
       }
@@ -177,16 +232,17 @@ void loop() {
     PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
 
     // Setup display controller
-    DisplayController.begin();
-    DisplayController.setResolution(VGA_640x480_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
+    DisplayController = new fabgl::VGA8Controller();
+    DisplayController->begin();
+    DisplayController->setResolution(VGA_640x480_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
 
     delay(1000);
 
     // ParkingApp().runAsync(&DisplayController, 3500).joinAsyncRun();
     if(weather_succeeded)
-      ParkingApp(&myObject).runAsync(&DisplayController, 3500).joinAsyncRun();
+      ParkingApp(&myObject).runAsync(DisplayController, 6000).joinAsyncRun();
     else
-      ParkingApp(nullptr).runAsync(&DisplayController, 3500).joinAsyncRun();
+      ParkingApp(nullptr).runAsync(DisplayController, 6000).joinAsyncRun();
   }
 
   // if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)){
