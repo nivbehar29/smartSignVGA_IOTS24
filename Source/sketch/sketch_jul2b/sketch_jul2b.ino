@@ -8,12 +8,6 @@
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 
-#include <Firebase_ESP_Client.h>
-//Provide the token generation process info.
-#include "addons/TokenHelper.h"
-//Provide the RTDB payload printing info and other helper functions.
-#include "addons/RTDBHelper.h"
-
 #include "keys/openweathermap_key.h"
 
 #include "ParkingApp.h"
@@ -72,34 +66,7 @@ void setup(){
   // Wifi
   setupWifi();
 
-  if (WiFi.status() == WL_CONNECTED) {
-
-    Serial.printf("Memory after connecting Wifi:\n");
-    printMem();
-
-    // Setup Firebase
-    fbMngr = new FBMngr();
-    fbMngr->setup();
-
-    // if (Firebase.signUp(&config, &auth, "", ""))
-    // {
-    //   Serial.println("ok");
-    //   signupOK = true;
-    // }
-    // else{
-    //   Serial.println("not ok");
-    //   Serial.printf("%s\n", config.signer.signupError.message.c_str());
-    // }
-
-    // Serial.println("next step");
-
-    // /* Assign the callback function for the long running token generation task */
-    // // config.token_status_callback = tokenStatusCallback; //see addons/TokenHelper.h
-    
-    // Firebase.begin(&config, &auth);
-    // Firebase.reconnectWiFi(true);
-  }
-  else
+  if (WiFi.status() != WL_CONNECTED)
   {
     Serial.println("\nFailed to connect to the WiFi network within 10 seconds");
 
@@ -173,11 +140,37 @@ void loop() {
     // Disconnect from WiFi
     if(WiFi.status()== WL_CONNECTED)
     {
+      // Setup Firebase
+      printMem();
+      fbMngr = new FBMngr();
+      fbMngr->setup();
+      printMem();
+
       Serial.println("call setIntFlotTest()");
-      fbMngr->setIntFlotTest();
+      printMem();
+      fbMngr->setIntFlotTest(1);
+      printMem();
       fbMngr->EndFB();
+      delete fbMngr;
+
+      printMem();
+
+
 
       disconnectWifi();
+
+      Serial.println("trying firebase again");
+      setupWifi();
+      if(WiFi.status()== WL_CONNECTED)
+      {
+        fbMngr = new FBMngr();
+        fbMngr->setup();
+        fbMngr->setIntFlotTest(2);
+        fbMngr->EndFB();
+        delete fbMngr;
+        
+        disconnectWifi();
+      }
     }
 
     // Setup Mouse / Keyboard

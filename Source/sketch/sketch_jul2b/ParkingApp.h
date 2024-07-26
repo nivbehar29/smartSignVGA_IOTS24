@@ -12,6 +12,11 @@
 #include "WifiMngr.h"
 #include "FirebaseMngr.h"
 
+#include <HTTPClient.h>
+extern String openWeatherMapApiKey;
+
+extern fabgl::PS2Controller PS2Controller;
+
 // extern JSONVar myObject;
 
 class ParkingApp : public uiApp {
@@ -19,7 +24,9 @@ class ParkingApp : public uiApp {
 public:
 
   ParkingApp(JSONVar* weatherObj_t)
-    : weatherObj(weatherObj_t) {}
+    : weatherObj(weatherObj_t) {
+
+    }
 
 private:
 
@@ -43,6 +50,8 @@ private:
   uiTimerHandle MovingAdvTimer;
 
   uiTimerHandle FreeMemoryTimer;
+
+  FBMngr* fbMngr = nullptr;
 
   int ResX = 640;
   int ResY = 480;
@@ -138,12 +147,13 @@ private:
 
     else if (tHandle == HoldFrameTimer1) {
 
-      FBMngr* fbMngr = nullptr;
+      // FBMngr* fbMngr = nullptr;
 
       Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
       Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
 
       setupWifi();
+
 
       if (WiFi.status() == WL_CONNECTED) {
 
@@ -153,16 +163,48 @@ private:
         Serial.println("1");
 
         // Setup Firebase
-        fbMngr = new FBMngr();
+/*        fbMngr = new FBMngr();
+
+        Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+        Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+
         fbMngr->setup();
 
         Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
         Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
 
         Serial.println("call setIntFlotTest()");
-        fbMngr->setIntFlotTest();
+        fbMngr->setIntFlotTest(15);
         Serial.println("call EndFB()");
         fbMngr->EndFB();
+        delete fbMngr;
+        fbMngr = nullptr;*/
+
+      String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=Haifa,IL&APPID=94e384a4dcddf1ca44c40fd5b7568f26";
+      
+      String jsonBuffer = httpGETRequest2(serverPath.c_str());
+      Serial.println(jsonBuffer);
+      JSONVar myObject = JSON.parse(jsonBuffer);
+  
+      // JSON.typeof(jsonVar) can be used to get the type of the var
+      // if 'cod' is not 200, according to weather api, we didnt get the right data (can be becuase of bad api key for example)
+      if (JSON.typeof(myObject) == "undefined" || (int) myObject["cod"] != 200)
+      {
+        Serial.println("Parsing input failed!");
+      }
+      else
+      {
+        Serial.print("JSON object = ");
+        Serial.println(myObject);
+        Serial.print("Temperature: ");
+        Serial.println(myObject["main"]["temp"]);
+        Serial.print("Pressure: ");
+        Serial.println(myObject["main"]["pressure"]);
+        Serial.print("Humidity: ");
+        Serial.println(myObject["main"]["humidity"]);
+        Serial.print("Wind Speed: ");
+        Serial.println(myObject["wind"]["speed"]);
+      }
 
         disconnectWifi();
 
@@ -178,7 +220,10 @@ private:
       app()->showWindow(holdFrame, false);
       app()->killTimer(HoldFrameTimer2);
       HoldFrameTimer2 = nullptr;
+
       app()->displayController()->setResolution(VGA_640x480_60Hz);
+      // PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
+      PS2Controller.mouse()->reset();
       rootWindow()->repaint();
     }
   }
@@ -266,6 +311,8 @@ private:
     Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
     Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
 
+    // PS2Controller.end();
+
     app()->displayController()->setResolution(VGA_256x192_50Hz);
 
     HoldFrameTimer1 = app()->setTimer(this, 5000);
@@ -296,6 +343,33 @@ private:
   double fahrenheitToCelcius(double c) {
     return c - 273.15;
   }
+
+  String httpGETRequest2(const char* serverName) {
+  WiFiClient client;
+  HTTPClient http;
+    
+  // Your Domain name with URL path or IP address with path
+  http.begin(client, serverName);
+  
+  // Send HTTP POST request
+  int httpResponseCode = http.GET();
+  
+  String payload = "{}"; 
+  
+  if (httpResponseCode>0) {
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    payload = http.getString();
+  }
+  else {
+    Serial.print("Error code: ");
+    Serial.println(httpResponseCode);
+  }
+  // Free resources
+  http.end();
+
+  return payload;
+}
 };
 
 #endif  // PARKINGAPP_H

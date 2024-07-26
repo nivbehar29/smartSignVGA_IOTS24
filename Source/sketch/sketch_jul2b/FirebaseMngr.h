@@ -36,15 +36,18 @@ public:
       Serial.println(API_KEY);
       Serial.println(DATABASE_URL);
 
-      if (Firebase.signUp(&config, &auth, "", ""))
-      {
-        Serial.println("Firebase signUp success");
-        signupOK = true;
-      }
-      else{
-        Serial.println("Firebase signUp failed");
-        Serial.printf("%s\n", config.signer.signupError.message.c_str());
-      }
+      // if(!signupOK)
+      // {
+        if (Firebase.signUp(&config, &auth, "", ""))
+        {
+          Serial.println("Firebase signUp success");
+          signupOK = true;
+        }
+        else{
+          Serial.println("Firebase signUp failed");
+          Serial.printf("%s\n", config.signer.signupError.message.c_str());
+        }
+      // }
 
       /* Assign the callback function for the long running token generation task */
       // config.token_status_callback = tokenStatusCallback; //see addons/TokenHelper.h
@@ -55,7 +58,7 @@ public:
       Serial.println("setup End");
     }
 
-    void setIntFlotTest()
+    void setIntFlotTest(int num)
     {
        Serial.println("setIntFlotTest()");
       if (Firebase.ready() && signupOK /*&& (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)*/)
@@ -64,7 +67,7 @@ public:
         //sendDataPrevMillis = millis();
 
         // Write an Int number on the database path test/int
-        if (Firebase.RTDB.setInt(&fbdo, "test/int", count)){
+        if (Firebase.RTDB.setInt(&fbdo, "test/int", num)){
           Serial.println("setIntFlotTest(): 2");
           Serial.println("PASSED");
           Serial.println("PATH: " + fbdo.dataPath());
@@ -95,11 +98,13 @@ public:
 
     void EndFB()
     {
+      Serial.println("EndFB() Start");
       // Ensure to remove listeners or streaming if used
       Firebase.RTDB.endStream(&fbdo);
 
       // Clear the FirebaseData object
       fbdo.clear();
+      Serial.println("EndFB() End");
 
       // Optionally, you can also end Firebase altogether
       // Firebase.end(&fbdo);
