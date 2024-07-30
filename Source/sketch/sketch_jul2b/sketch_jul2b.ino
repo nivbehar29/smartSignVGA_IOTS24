@@ -212,20 +212,20 @@ void loop() {
       disconnectWifi();
 
       // Serial.println("trying firebase again");
-      Serial.println("trying google sheets again");
-      setupWifi();
-      if(WiFi.status()== WL_CONNECTED)
-      {
-        /*fbMngr = new FBMngr();
-        fbMngr->setup();
-        fbMngr->setIntFlotTest(2);
-        fbMngr->EndFB();
-        delete fbMngr;*/
+      // Serial.println("trying google sheets again");
+      // setupWifi();
+      // if(WiFi.status()== WL_CONNECTED)
+      // {
+      //   /*fbMngr = new FBMngr();
+      //   fbMngr->setup();
+      //   fbMngr->setIntFlotTest(2);
+      //   fbMngr->EndFB();
+      //   delete fbMngr;*/
 
-        gsSendTest(true);
+      //   gsSendTest(true);
         
-        disconnectWifi();
-      }
+      //   disconnectWifi();
+      // }
     }
 
     // Setup Mouse / Keyboard
@@ -234,15 +234,15 @@ void loop() {
     // Setup display controller
     DisplayController = new fabgl::VGA8Controller();
     DisplayController->begin();
-    DisplayController->setResolution(VGA_640x480_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
+    DisplayController->setResolution(VGA_640x400_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
 
     delay(1000);
 
     // ParkingApp().runAsync(&DisplayController, 3500).joinAsyncRun();
     if(weather_succeeded)
-      ParkingApp(&myObject).runAsync(DisplayController, 6000).joinAsyncRun();
+      ParkingApp(&myObject).runAsync(DisplayController, SACK_SIZE_NIV).joinAsyncRun();
     else
-      ParkingApp(nullptr).runAsync(DisplayController, 6000).joinAsyncRun();
+      ParkingApp(nullptr).runAsync(DisplayController, SACK_SIZE_NIV).joinAsyncRun();
   }
 
   // if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)){

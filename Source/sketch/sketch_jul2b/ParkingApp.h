@@ -57,7 +57,7 @@ private:
   // FBMngr* fbMngr = nullptr;
 
   int ResX = 640;
-  int ResY = 480;
+  int ResY = 400;
 
   void init() {
 
@@ -133,7 +133,7 @@ private:
     HoldFrameTimer1 = nullptr;
     HoldFrameTimer2 = nullptr;
 
-    setTimers();
+    // setTimers();
   }
 
   void onTimers(uiTimerHandle tHandle) {
@@ -151,6 +151,9 @@ private:
     else if (tHandle == HoldFrameTimer1) {
 
       // FBMngr* fbMngr = nullptr;
+
+      rootWindow()->repaint();
+      app()->showWindow(holdFrame, true);
 
       Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
       Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
@@ -217,7 +220,8 @@ private:
         app()->killTimer(HoldFrameTimer1);
         HoldFrameTimer1 = nullptr;
 
-        HoldFrameTimer2 = app()->setTimer(this, 500);
+        app()->displayController()->setResolution(VGA_640x400_60Hz);
+        HoldFrameTimer2 = app()->setTimer(this, 5000);
       }
     }
     else if (HoldFrameTimer2)
@@ -227,7 +231,7 @@ private:
       app()->killTimer(HoldFrameTimer2);
       HoldFrameTimer2 = nullptr;
 
-      app()->displayController()->setResolution(VGA_640x480_60Hz);
+      
       PS2Controller.mouse()->reset();
       rootWindow()->repaint();
     }
@@ -318,14 +322,11 @@ private:
 
     app()->displayController()->setResolution(VGA_256x192_50Hz);
 
-    HoldFrameTimer1 = app()->setTimer(this, 5000);
-
     Serial.printf("Memory after changing resolution to VGA_256x192_50Hz:\n");
     Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
     Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
 
-    // rootWindow()->repaint();
-    app()->showWindow(holdFrame, true);
+    HoldFrameTimer1 = app()->setTimer(this, 5000);
 
 
     // delay(5000);
