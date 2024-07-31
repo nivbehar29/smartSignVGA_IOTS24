@@ -11,10 +11,6 @@ void setup() {
   // Initialize serial communication at 115200 baud rate
   Serial.begin(115200);
   mySerial.begin(115200, SERIAL_8N1, 34, 2);
-
-
-
-
   // Print a message on the Serial Monitor
   Serial.println("Serial Communication Initialized");
 }

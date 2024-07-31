@@ -5,6 +5,8 @@
 #include "fabgl.h"
 #include "FloorFrame.h"
 #include "string.h"
+#include <HardwareSerial.h>
+HardwareSerial mySerial(1);
 //#include "ParkSlot.h"
 
 
@@ -26,6 +28,7 @@ class ParkingLotFrame : public GeneralFrame {
   int num_of_floors;
   parking_floor* FloorArr;
   int current_floor_id;
+  
   
   ParkingLotFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t,int FloorsNum )
   {
@@ -85,18 +88,38 @@ class ParkingLotFrame : public GeneralFrame {
   void onFinishButtonClicked()
   {
     app->showWindow(frame, 0);
-    AssignParkingSlot();
+    int choosen_slot= AssignParkingSlot();
+   // Serial.begin(115200);
+   // string FormatLine = formatString(FloorArr[choosen_slot].floor_id,choosen_slot);
+    //mySerial.printf("data from vga to esp * %s *", FormatLine);
+     mySerial.printf("data from vga to esp * %s *", choosen_slot);
   }
 
-  void AssignParkingSlot()
+
+  /*String formatString(int floor_id, int i) 
+   {
+  // Create a string in the desired format
+    String formattedString = "F" + String(floor_id) + "P" + String(i);
+    return formattedString;
+    }*/
+
+    int AssignParkingSlot()
   {
+    int curr_parking=-1;
     for(int i = 0; i < num_of_floors; i++) 
     {
-      if(FloorArr[i].floor_frame != nullptr && (FloorArr[i].floor_frame)->IfCheckedSetInTakenGroup())
+       if(FloorArr[i].floor_frame != nullptr)
+       {
+          curr_parking = (FloorArr[i].floor_frame)->IfCheckedSetInTakenGroup();
+       }
+      if(FloorArr[i].floor_frame != nullptr && curr_parking>=0)
       {
+         
           break;
+
       }
     }
+      return curr_parking;
   }
 
   void uncheckParkingSlots()

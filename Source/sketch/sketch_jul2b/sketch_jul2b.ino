@@ -8,6 +8,8 @@
 #include "keys/openweathermap_key.h"
 
 #include "ParkingApp.h"
+//#include <HardwareSerial.h>
+//HardwareSerial mySerial(1);
 
 // main VGA Controller
 fabgl::VGA16Controller DisplayController;
@@ -26,8 +28,8 @@ fabgl::PS2Controller   PS2Controller;
 
 // WIFI
 extern String openWeatherMapApiKey;
-extern const char* ssid;
-extern const char* password;
+extern const char* ssid = "ICST";
+extern const char* password ="arduino123" ;
 
 
 // Weather parameters
@@ -75,6 +77,7 @@ void setup(){
     Serial.println("\nConnected to the WiFi network");
     Serial.print("Local ESP32 IP: ");
     Serial.println(WiFi.localIP());
+    mySerial.begin(115200, SERIAL_8N1, 34, 2);
   }
   else
   {
@@ -187,4 +190,7 @@ String httpGETRequest(const char* serverName) {
 
   return payload;
 }
+
+
+
 

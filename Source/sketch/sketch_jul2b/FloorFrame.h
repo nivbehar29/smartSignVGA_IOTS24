@@ -102,7 +102,7 @@ public:
       }
     }
 
-     bool IfCheckedSetInTakenGroup()
+     int IfCheckedSetInTakenGroup()
      {
         for(int i = 0; i < park_slots_num; i++)
         {
@@ -111,11 +111,11 @@ public:
             {
               // set in taken park slots group
               park_slots[i]->SetGroupTaken();
-              return true;
+              return i;
             }    
           }
 
-        return false;
+        return -1;
      }
 };
 
