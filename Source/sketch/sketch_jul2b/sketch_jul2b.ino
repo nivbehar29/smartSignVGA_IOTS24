@@ -2,7 +2,8 @@
 #include "bitmapsWarehouse.h"
 #include "fabui.h"
 
-#include <WiFi.h>
+#include "WifiMngr.h"
+#include "FirebaseMngr.h"
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 #include "keys/openweathermap_key.h"
@@ -28,8 +29,8 @@ fabgl::PS2Controller   PS2Controller;
 
 // WIFI
 extern String openWeatherMapApiKey;
-extern const char* ssid = "ICST";
-extern const char* password ="arduino123" ;
+// extern const char* ssid = "ICST";
+// extern const char* password ="arduino123" ;
 
 
 // Weather parameters
@@ -45,9 +46,16 @@ unsigned long timerDelay = 10000;
 
 String jsonBuffer;
 
-
+void printMem()
+{
+  Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+  Serial.printf("Free 32bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024);
+}
 
 void setup(){
+  Serial.println("Memory at setup():");
+  printMem();
+
   Serial.begin(115200);  // Start the serial communication
 
   // Setup Mouse / Keyboard
@@ -55,35 +63,12 @@ void setup(){
 
   // Setup display controller
   DisplayController.begin();
-  DisplayController.setResolution(VGA_640x480_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
+  DisplayController.setResolution(VGA_512x448_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
 
+  Serial.println("Memory before wifi:");
+  printMem();
   // Wifi
-  delay(1000);
-
-  WiFi.mode(WIFI_STA); //Optional
-  WiFi.begin(ssid, password);
-  Serial.println("\nConnecting");
-
-
-  unsigned long startAttemptTime = millis();
-
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000)
-  {
-      Serial.print(".");
-      delay(100);
-  }
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\nConnected to the WiFi network");
-    Serial.print("Local ESP32 IP: ");
-    Serial.println(WiFi.localIP());
-    mySerial.begin(115200, SERIAL_8N1, 34, 2);
-  }
-  else
-  {
-    Serial.println("\nFailed to connect to the WiFi network within 10 seconds");
-
-  }
+  setupWifi();
 
 }
 
@@ -136,8 +121,7 @@ void loop() {
     }
     else
     {
-      WiFi.disconnect(true, true);
-      Serial.println("WiFi Disconnected");
+      disconnectWifi();
       done_with_weather = true;
       weather_succeeded = false;
     }
@@ -151,9 +135,60 @@ void loop() {
     // Disconnect from WiFi
     if(WiFi.status()== WL_CONNECTED)
     {
-      Serial.println("Disconnecting from WiFi...");
-      WiFi.disconnect(true, true);
+      // Setup Firebase
+      FBMngr* fbMngr = new FBMngr();
+      fbMngr->setup();
+
+      // Get data from firebase
+      int numFloors;
+      if(fbMngr->getInt("numFloors", &numFloors))
+      {
+        for(int i = 0; i < numFloors; i++)
+        {
+          int numSlots;
+          if(fbMngr->getInt("floor" + String(i) + "/numSlots", &numSlots))
+          {
+            for(int j = 0; j < numSlots; j++)
+            {
+              bool isTaken;
+              if(fbMngr->getBool("floor" + String(i) + "/ParkSlot_" + String(j) + "/taken", &isTaken))
+              {
+                String output = "floor" + String(i) + ", Parkslot_" + String(j) + ", taken = " + String(isTaken);
+                Serial.println(output);
+                // Serial.println("floor" + i + ", parkslot_" + j + ", taken = " + isTaken);
+              }
+            }
+          }
+        }
+      }
+
+      // End firebase
+      fbMngr->EndFB();
+      delete fbMngr;
+
+      printMem();
+      
+      disconnectWifi();
+
+      // Serial.println("trying firebase again");
+      // Serial.println("trying google sheets again");
+      // setupWifi();
+      // if(WiFi.status()== WL_CONNECTED)
+      // {
+      //   /*fbMngr = new FBMngr();
+      //   fbMngr->setup();
+      //   fbMngr->setIntFlotTest(2);
+      //   fbMngr->EndFB();
+      //   delete fbMngr;*/
+
+      //   gsSendTest(true);
+        
+      //   disconnectWifi();
+      // }
     }
+
+    Serial.println("Memory before init app:");
+    printMem();
 
     // ParkingApp().runAsync(&DisplayController, 3500).joinAsyncRun();
     if(weather_succeeded)

@@ -36,8 +36,8 @@ class ParkingApp : public uiApp {
 
     uiTimerHandle FreeMemoryTimer;
 
-    int ResX = 640;
-    int ResY = 480;
+    int ResX = 512;
+    int ResY = 448;
 
     void init() {
 

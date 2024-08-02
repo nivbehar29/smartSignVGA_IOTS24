@@ -92,7 +92,7 @@ class ParkingLotFrame : public GeneralFrame {
    // Serial.begin(115200);
    // string FormatLine = formatString(FloorArr[choosen_slot].floor_id,choosen_slot);
     //mySerial.printf("data from vga to esp * %s *", FormatLine);
-     mySerial.printf("data from vga to esp * %s *", choosen_slot);
+    //  mySerial.printf("data from vga to esp * %s *", choosen_slot);
   }
 
 

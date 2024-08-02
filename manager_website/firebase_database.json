@@ -1,0 +1,81 @@
+{
+  "advs": "",
+  "floor0": {
+    "ParkSlot_0": {
+      "taken": false
+    },
+    "ParkSlot_1": {
+      "taken": false
+    },
+    "ParkSlot_2": {
+      "taken": true
+    },
+    "ParkSlot_3": {
+      "taken": true
+    },
+    "ParkSlot_4": {
+      "taken": false
+    },
+    "numSlots": 5
+  },
+  "floor1": {
+    "ParkSlot_0": {
+      "taken": false
+    },
+    "ParkSlot_1": {
+      "taken": false
+    },
+    "ParkSlot_2": {
+      "taken": false
+    },
+    "ParkSlot_3": {
+      "taken": false
+    },
+    "ParkSlot_4": {
+      "taken": false
+    },
+    "numSlots": 5
+  },
+  "floor2": {
+    "ParkSlot_0": {
+      "taken": false
+    },
+    "ParkSlot_1": {
+      "taken": false
+    },
+    "ParkSlot_2": {
+      "taken": false
+    },
+    "ParkSlot_3": {
+      "taken": false
+    },
+    "ParkSlot_4": {
+      "taken": false
+    },
+    "numSlots": 5
+  },
+  "floor3": {
+    "ParkSlot_0": {
+      "taken": false
+    },
+    "ParkSlot_1": {
+      "taken": false
+    },
+    "ParkSlot_2": {
+      "taken": false
+    },
+    "ParkSlot_3": {
+      "taken": false
+    },
+    "ParkSlot_4": {
+      "taken": false
+    },
+    "numSlots": 5
+  },
+  "numFloors": 4,
+  "test": {
+    "data": "Hello from ESP32",
+    "float": 38.01,
+    "int": 1
+  }
+}
