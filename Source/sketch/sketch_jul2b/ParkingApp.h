@@ -15,7 +15,7 @@ class ParkingApp : public uiApp {
 
     public:
 
-    ParkingApp(JSONVar* weatherObj_t) : weatherObj(weatherObj_t) {}
+    ParkingApp(JSONVar* weatherObj_t) : weatherObj(weatherObj_t){}
 
     private:
 

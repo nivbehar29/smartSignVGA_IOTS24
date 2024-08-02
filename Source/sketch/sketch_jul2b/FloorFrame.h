@@ -10,11 +10,14 @@
 
 #include "string.h"
 
+#include "DBAux.h"
+extern DB_parkingLot* db_parkingLot;
+
 class FloorFrame : public GeneralFrame {
 
 private:
 
-    uint8_t floor_id = 0;
+    int floor_id = 0;
     char floor_text[20];
     
 
@@ -30,7 +33,7 @@ private:
 
 public:
 
-    FloorFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t, uint8_t floor_id_t,std::function<void()> onParkSlotChooseButtonClickCB_t)
+    FloorFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t, int floor_id_t,std::function<void()> onParkSlotChooseButtonClickCB_t)
     {
       parent = parent_t;
       ResX = ResX_t;
@@ -42,7 +45,14 @@ public:
       isInitiated = false;
 
       park_slots = nullptr;
-      park_slots_num = 5;
+      if(db_parkingLot != nullptr)
+      {
+        park_slots_num = db_parkingLot->floors[floor_id].num_slots;
+      }
+      else
+      {
+        park_slots_num = 5;
+      }
 
       sprintf(floor_text, "floor %d", floor_id);
 
@@ -84,7 +94,7 @@ public:
         for(int i = 0; i < park_slots_num; i++)
         {
           int width = 50;
-          park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 100, onParkSlotChooseButtonClickCB);
+          park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 100, floor_id, i, onParkSlotChooseButtonClickCB);
           offset_x += width + 5;
         }
 

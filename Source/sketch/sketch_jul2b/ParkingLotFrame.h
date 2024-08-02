@@ -8,6 +8,8 @@
 #include <HardwareSerial.h>
 HardwareSerial mySerial(1);
 //#include "ParkSlot.h"
+#include "DBAux.h"
+extern DB_parkingLot* db_parkingLot;
 
 
 struct parking_floor
@@ -33,7 +35,15 @@ class ParkingLotFrame : public GeneralFrame {
   ParkingLotFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t,int FloorsNum )
   {
     
-    num_of_floors = FloorsNum;
+    if(db_parkingLot != nullptr)
+    {
+      num_of_floors = db_parkingLot->num_floors;
+    }
+    else
+    {
+      num_of_floors = FloorsNum;
+    }
+    
     parent = parent_t;
     ResX = ResX_t;
     ResY = ResY_t;
@@ -103,7 +113,7 @@ class ParkingLotFrame : public GeneralFrame {
     return formattedString;
     }*/
 
-    int AssignParkingSlot()
+  int AssignParkingSlot()
   {
     int curr_parking=-1;
     for(int i = 0; i < num_of_floors; i++) 
@@ -145,7 +155,7 @@ class ParkingLotFrame : public GeneralFrame {
       auto func = [&,this]() { this->uncheckParkingSlots(); }; 
 
       // create a new floor fram and send the CB function to it
-      FloorArr[floor_id].floor_frame = new FloorFrame(frame, ResX, ResY, app, floor_id,func);
+      FloorArr[floor_id].floor_frame = new FloorFrame(frame, ResX, ResY, app, floor_id, func);
     }
 
     // hide the current floor and show the new floor

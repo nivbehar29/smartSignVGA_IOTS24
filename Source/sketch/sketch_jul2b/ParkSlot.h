@@ -8,7 +8,8 @@
 #include "ParkingLotFrame.h"
 #include "FloorFrame.h"
 
-
+#include "DBAux.h"
+extern DB_parkingLot* db_parkingLot;
 
 class ParkSlot {
 
@@ -35,11 +36,14 @@ public:
     int x_pos;
     int y_pos;
 
+    int floorId;
+    int slotId;
+
     // callback function to be called when park slot choose button has been clicked
     std::function<void()> onChooseButtonClickCB;
 
-    ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width, int height, std::function<void()> onChooseButtonClickCB_t)
-        : state(FREE), frame(frameToSet), canvas(cvToSet), x_pos(x), y_pos(y), width(width), height(height)
+    ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width, int height, int floorId, int slotId, std::function<void()> onChooseButtonClickCB_t)
+        : state(FREE), frame(frameToSet), canvas(cvToSet), x_pos(x), y_pos(y), width(width), height(height), floorId(floorId), slotId(slotId)
     {
 
       // set callback function for Choose button clicked
@@ -48,11 +52,20 @@ public:
       int offset_y = 30;
       int ChooseButtonExt = calcWidthOfText(&fabgl::FONT_std_14, "Choose");
       Size ChooseButtonSize(ChooseButtonExt + 10, 20);
-      ChooseButton= new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
+      ChooseButton = new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
       
-      ChooseButton->setGroupIndex(1);
+      if(db_parkingLot != nullptr && db_parkingLot->floors[floorId].slots[slotId].is_taken)
+      {
+        SetGroupTaken();
+        ChooseButton->setChecked(true);
+      }
+      else
+      {
+        ChooseButton->setGroupIndex(1);
+        ChooseButton->checkBoxStyle().checkedBackgroundColor=RGB888(0,128,0);
+      }
+      
       ChooseButton->checkBoxStyle().mouseOverBackgroundColor=RGB888(0,0,0);
-      ChooseButton->checkBoxStyle().checkedBackgroundColor=RGB888(0,128,0);
       ChooseButton->checkBoxStyle().foregroundColor=RGB888(0,128,0);
       ChooseButton->repaint();
       ChooseButton->onClick = [&]() {onChooseButtonClick();};

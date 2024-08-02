@@ -72,7 +72,25 @@
     },
     "numSlots": 5
   },
-  "numFloors": 4,
+  "floor4": {
+    "ParkSlot_0": {
+      "taken": false
+    },
+    "ParkSlot_1": {
+      "taken": false
+    },
+    "ParkSlot_2": {
+      "taken": false
+    },
+    "ParkSlot_3": {
+      "taken": false
+    },
+    "ParkSlot_4": {
+      "taken": false
+    },
+    "numSlots": 5
+  },
+  "numFloors": 5,
   "test": {
     "data": "Hello from ESP32",
     "float": 38.01,
