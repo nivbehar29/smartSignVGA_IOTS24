@@ -155,7 +155,7 @@ public:
       return false;
     }
 
-    // get full DB. return false if succeeded, true otherwise
+    // get full DB. return true if succeeded, false otherwise
     bool getDB()
     {
       int numFloors;
@@ -232,6 +232,7 @@ public:
               bool val_to_set = db_parkingLot->floors[i].slots[j].is_taken;
               if(Firebase.RTDB.setBool(&fbdo, "floor" + String(i) + "/ParkSlot_" + String(j) + "/taken", val_to_set))
               {
+                db_parkingLot->floors[i].slots[j].is_changed = false;
                 Serial.println("set floor: " + String(i) + ", slot: " + String(j));
                 Serial.println("Succeed while setting park slot to DB!");
               }

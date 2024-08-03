@@ -67,6 +67,14 @@ class ParkingApp : public uiApp {
                                       setActiveWindow(optionsFrame->frame);
                                     };
 
+      // Restart button
+      int restartTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Restart");
+      int restartButtonSizeX = restartTextExt + 20;
+      uiButton* RestartButton = new uiButton(rootWindow(), "Restart", Point(10, 10), Size(restartButtonSizeX, 20));
+      RestartButton->onClick = [&]() {
+                                       ESP.restart();
+                                     };
+
       if(weatherObj != nullptr)
       {
         uiLabel* weather_city_label = new uiLabel(rootWindow(), "City:", Point(ResX / 2 + 200, 10));
