@@ -102,10 +102,13 @@ public:
 
     if (choosen_slot != -1)
     {
-      db_parkingLot->floors[floor_id].slots[choosen_slot].is_taken = true;
-      db_parkingLot->floors[floor_id].slots[choosen_slot].is_changed = true;
+      if(db_parkingLot != nullptr)
+      {
+        db_parkingLot->floors[floor_id].slots[choosen_slot].is_taken = true;
+        db_parkingLot->floors[floor_id].slots[choosen_slot].is_changed = true;
 
-      app->quit(app->exitCode);
+        app->quit(app->exitCode);
+      }
     }
 
     // Serial.begin(115200);
