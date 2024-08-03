@@ -76,7 +76,7 @@ void setup(){
 bool done_with_weather = false;
 bool weather_succeeded = false;
 JSONVar myObject;
-DB_parkingLot* db_parkingLot = nullptr;
+extern DB_parkingLot* db_parkingLot;
 
 void loop() {
 
@@ -142,57 +142,9 @@ void loop() {
       fbMngr->setup();
 
       // Get data from firebase
-      int numFloors;
-      bool is_error = false;
-
-      if(fbMngr->getInt("numFloors", &numFloors))
+      bool DB_status = fbMngr->getDB(db_parkingLot);
+      if(!DB_status)
       {
-        db_parkingLot = (DB_parkingLot*)malloc(sizeof(DB_parkingLot));
-        db_parkingLot->num_floors = numFloors;
-        db_parkingLot->floors = (DB_floor*)malloc(sizeof(DB_floor) * numFloors);
-
-        for(int i = 0; i < numFloors && !is_error; i++)
-        {
-          int numSlots;
-          if(fbMngr->getInt("floor" + String(i) + "/numSlots", &numSlots))
-          {
-            db_parkingLot->floors[i].num_slots = numSlots;
-            db_parkingLot->floors[i].slots = (DB_parkSlot*)malloc(sizeof(DB_parkSlot) * numSlots);
-
-            for(int j = 0; j < numSlots && !is_error; j++)
-            {
-              bool isTaken;
-              if(fbMngr->getBool("floor" + String(i) + "/ParkSlot_" + String(j) + "/taken", &isTaken))
-              {
-                db_parkingLot->floors[i].slots[j].is_taken = isTaken;
-                String output = "floor" + String(i) + ", Parkslot_" + String(j) + ", taken = " + String(isTaken);
-                Serial.println(output);
-                // Serial.println("floor" + i + ", parkslot_" + j + ", taken = " + isTaken);
-              }
-              else
-              {
-                Serial.println("Error pulling isTaken");
-                is_error = true;
-              }
-            }
-          }
-          else
-          {
-            Serial.println("Error pulling numSlots");
-            is_error = true;
-          }
-        }
-      }
-      else
-      {
-        Serial.println("Error pulling numFloors");
-        is_error = true;
-      }
-
-      if(is_error)
-      {
-        // TODO: suppose to free malloced floors/parkSlots
-        db_parkingLot = nullptr;
         Serial.println("Error occured during pulling database");
       }
 

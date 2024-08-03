@@ -16,3 +16,6 @@ struct DB_parkingLot
   int num_floors;
   DB_floor* floors;
 };
+
+// holds database after calling to getDB() function
+DB_parkingLot* db_parkingLot = nullptr;
