@@ -39,7 +39,7 @@ class OptionsFrame : public GeneralFrame {
     // Cancel Button
     int CancelTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Cancel");
     Size CancelButtonSize(CancelTextExt + 20, 20);
-    int cancel_y_top_offset = 10;
+    int cancel_y_top_offset = 40;
     int cancel_x_left_offset = 10;
     uiButton* CancelButton = new uiButton(frame, "Cancel", Point(cancel_x_left_offset, ResY - CancelButtonSize.height - cancel_y_top_offset), CancelButtonSize);
     CancelButton->onClick = [&]() { app->showWindow(frame, 0); };
@@ -50,7 +50,7 @@ class OptionsFrame : public GeneralFrame {
     // Next Button
     int NextTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Next");
     Size NextButtonSize(NextTextExt + 20, 20);
-    int next_y_top_offset = 10;
+    int next_y_top_offset = 40;
     int next_x_left_offset = 10;
     uiButton* NextButton = new uiButton(frame, "Next", Point(ResX - NextButtonSize.width - next_x_left_offset, ResY - NextButtonSize.height - next_y_top_offset), NextButtonSize);
     NextButton->onClick = [&]() { 

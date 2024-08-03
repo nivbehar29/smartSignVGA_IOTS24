@@ -36,13 +36,15 @@ class ParkingApp : public uiApp {
 
     uiTimerHandle FreeMemoryTimer;
 
-    int ResX = 512;
-    int ResY = 448;
+    int ResX = 640;
+    int ResY = 480;
 
     void init() {
 
       // set root window background color to dark green
-      rootWindow()->frameStyle().backgroundColor = RGB888(0, 64, 0);
+      // 1000 1100 1100 0001 1111 1111
+      // color picker: https://codepen.io/kevinli/pen/GRpXOvo
+      rootWindow()->frameStyle().backgroundColor = RGB888(140, 193, 255);
 
       // Welcome Text
       int textExt = calcWidthOfText(&fabgl::FONT_std_24, "Welcome To The Parking Lot!");
@@ -134,7 +136,7 @@ class ParkingApp : public uiApp {
     void setTimers()
     {
       FlashingAdvTimer = app()->setTimer(this, 500);
-      MovingAdvTimer = app()->setTimer(this, 50);
+      MovingAdvTimer = app()->setTimer(this, 35);
       FreeMemoryTimer = app()->setTimer(this, 2000);
     }
 
@@ -181,7 +183,7 @@ class ParkingApp : public uiApp {
     }
     else
     {
-      app()->moveWindow(MovingAdvText, MovingAdvText->pos().X - 1, MovingAdvText->pos().Y);
+      app()->moveWindow(MovingAdvText, MovingAdvText->pos().X - 2, MovingAdvText->pos().Y);
     }
     //MovingAdvText->update();
 

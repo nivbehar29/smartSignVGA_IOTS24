@@ -183,9 +183,8 @@ public:
               if(getBool("floor" + String(i) + "/ParkSlot_" + String(j) + "/taken", &isTaken))
               {
                 db_parkingLot->floors[i].slots[j].is_taken = isTaken;
-                String output = "floor" + String(i) + ", Parkslot_" + String(j) + ", taken = " + String(isTaken);
-                Serial.println(output);
-                // Serial.println("floor" + i + ", parkslot_" + j + ", taken = " + isTaken);
+                // String output = "floor" + String(i) + ", Parkslot_" + String(j) + ", taken = " + String(isTaken);
+                // Serial.println(output);
               }
               else
               {

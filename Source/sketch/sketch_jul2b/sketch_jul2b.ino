@@ -14,7 +14,7 @@
 //HardwareSerial mySerial(1);
 
 // main VGA Controller
-fabgl::VGA16Controller DisplayController;
+fabgl::VGA16Controller* DisplayController;
 fabgl::PS2Controller   PS2Controller;
 
 // bitmap for parking image
@@ -60,8 +60,9 @@ void setup(){
   Serial.begin(115200);  // Start the serial communication
 
   // Setup display controller
-  DisplayController.begin();
-  DisplayController.setResolution(VGA_512x448_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
+  // DisplayController = new fabgl::VGA16Controller();
+  // DisplayController->begin();
+  // DisplayController->setResolution(VGA_640x480_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
 
   Serial.println("Memory before wifi:");
   printMem();
@@ -159,10 +160,19 @@ void loop() {
     if(first_app_run)
     {
       PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
+
+      DisplayController = new fabgl::VGA16Controller();
+      DisplayController->begin();
+      DisplayController->setResolution(VGA_640x480_60Hz);
+      // delay(5000);
     }
     else
     {
-      DisplayController.setResolution(VGA_512x448_60Hz);
+      DisplayController = new fabgl::VGA16Controller();
+      DisplayController->begin();
+      DisplayController->setResolution(VGA_640x480_60Hz);
+      // delay(5000);
+      // DisplayController->setResolution(VGA_256x384_60Hz);
       PS2Controller.mouse()->reset();
     }
     
@@ -172,19 +182,35 @@ void loop() {
 
     // Kick off application and wait for it to quit
     if(weather_succeeded)
-      ParkingApp(&myObject).runAsync(&DisplayController, 3500).joinAsyncRun();
+      ParkingApp(&myObject).runAsync(DisplayController, 3500).joinAsyncRun();
     else
-      ParkingApp(nullptr).runAsync(&DisplayController, 3500).joinAsyncRun();
+      ParkingApp(nullptr).runAsync(DisplayController, 3500).joinAsyncRun();
 
     Serial.println("Memory after quit app:");
     printMem();
 
 
     // Set display to low resolution, to get some memory for wifi + firebase
-    DisplayController.setResolution(VGA_256x384_60Hz);
+    DisplayController->setResolution(VGA_256x384_60Hz);
+    // delete DisplayController;
 
     Serial.println("Memory after set resolution to VGA_256x384_60Hz:");
     printMem();
+
+    // Serial.println("wait 10 sec");
+    // delay(10000);
+
+    Serial.println("Set canvas...");
+    Canvas cv(DisplayController);
+    cv.setBrushColor(RGB888(255, 255, 255));
+    cv.clear();
+    cv.setPenColor(Color::Black);
+
+    int ThankYouTextLength = cv.textExtent(&fabgl::FONT_10x20, "Thank You! :)");
+    cv.drawText(&fabgl::FONT_10x20, 256/2 - ThankYouTextLength/2, 384/2, "Thank You! :)");
+
+    Serial.println("wait 3 sec");
+    delay(3000);
 
     Serial.println("trying firebase again");
     setupWifi();
@@ -201,6 +227,9 @@ void loop() {
       
       disconnectWifi();
     }
+
+    DisplayController->end();
+    delete DisplayController;
 
     first_app_run = false;
 

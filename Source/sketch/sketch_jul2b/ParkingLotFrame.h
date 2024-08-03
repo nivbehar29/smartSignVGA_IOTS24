@@ -59,7 +59,7 @@ public:
     // Finish Button
     int FinishTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Finish");
     Size FinishButtonSize(FinishTextExt + 20, 20);
-    int cancel_y_top_offset = 10;
+    int cancel_y_top_offset = 40;
     int cancel_x_left_offset = 10;
     uiButton* FinishButton = new uiButton(frame, "Finish", Point(cancel_x_left_offset, ResY - FinishButtonSize.height - cancel_y_top_offset), FinishButtonSize);
     FinishButton->onClick = [&]() {
