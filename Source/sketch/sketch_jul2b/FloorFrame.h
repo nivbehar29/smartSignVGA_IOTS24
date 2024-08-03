@@ -51,6 +51,7 @@ public:
       }
       else
       {
+        Serial.println("db_parkingLot is null!");
         park_slots_num = 5;
       }
 
@@ -118,12 +119,12 @@ public:
         {
           if(park_slots != nullptr && park_slots[i] != nullptr &&
              park_slots[i]->ChooseButton->checked() && park_slots[i]->ChooseButton->groupIndex() == 1)
-            {
-              // set in taken park slots group
-              park_slots[i]->SetGroupTaken();
-              return i;
-            }    
-          }
+          {
+            // set in taken park slots group
+            park_slots[i]->SetGroupTaken();
+            return i;
+          }    
+        }
 
         return -1;
      }

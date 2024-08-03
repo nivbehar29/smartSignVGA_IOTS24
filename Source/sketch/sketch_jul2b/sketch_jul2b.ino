@@ -59,9 +59,6 @@ void setup(){
 
   Serial.begin(115200);  // Start the serial communication
 
-  // Setup Mouse / Keyboard
-  PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
-
   // Setup display controller
   DisplayController.begin();
   DisplayController.setResolution(VGA_512x448_60Hz); // VGA_640x350_70Hz , VGA_640x480_60Hz
@@ -142,7 +139,7 @@ void loop() {
       fbMngr->setup();
 
       // Get data from firebase
-      bool DB_status = fbMngr->getDB(db_parkingLot);
+      bool DB_status = fbMngr->getDB();
       if(!DB_status)
       {
         Serial.println("Error occured during pulling database");
@@ -155,34 +152,57 @@ void loop() {
       printMem();
       
       disconnectWifi();
-
-      // Serial.println("trying firebase again");
-      // Serial.println("trying google sheets again");
-      // setupWifi();
-      // if(WiFi.status()== WL_CONNECTED)
-      // {
-      //   /*fbMngr = new FBMngr();
-      //   fbMngr->setup();
-      //   fbMngr->setIntFlotTest(2);
-      //   fbMngr->EndFB();
-      //   delete fbMngr;*/
-
-      //   gsSendTest(true);
-        
-      //   disconnectWifi();
-      // }
     }
+
+    // Setup Mouse / Keyboard
+    PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
 
     Serial.println("Memory before init app:");
     printMem();
 
-    // ParkingApp().runAsync(&DisplayController, 3500).joinAsyncRun();
+    // Kick off application and wait for it to quit
     if(weather_succeeded)
       ParkingApp(&myObject).runAsync(&DisplayController, 3500).joinAsyncRun();
     else
       ParkingApp(nullptr).runAsync(&DisplayController, 3500).joinAsyncRun();
-  }
 
+    Serial.println("Memory after quit app:");
+    printMem();
+
+
+    // Set display to low resolution, to get some memory for wifi + firebase
+    DisplayController.setResolution(VGA_256x384_60Hz);
+
+    Serial.println("Memory after set resolution to VGA_256x384_60Hz:");
+    printMem();
+
+    Serial.println("trying firebase again");
+    setupWifi();
+    if(WiFi.status()== WL_CONNECTED)
+    {
+      FBMngr* fbMngr = new FBMngr();
+      fbMngr->setup();
+
+      // send new database to firebase
+      fbMngr->setDB();
+
+      fbMngr->EndFB();
+      delete fbMngr;
+      
+      disconnectWifi();
+    }
+
+    Serial.println("RESTART !!");
+    ESP.restart();
+
+    // DisplayController.setResolution(VGA_512x448_60Hz);
+    // PS2Controller.mouse()->reset();
+    // // Kick off application and wait for it to quit
+    // if(weather_succeeded)
+    //   ParkingApp(&myObject).runAsync(&DisplayController, 3500).joinAsyncRun();
+    // else
+    //   ParkingApp(nullptr).runAsync(&DisplayController, 3500).joinAsyncRun();
+  }
 }
 
 String httpGETRequest(const char* serverName) {

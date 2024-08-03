@@ -9,6 +9,7 @@
 
 #include "keys/openweathermap_key.h"
 #include "DBAux.h"
+extern DB_parkingLot* db_parkingLot;
 
 class FBMngr {
 
@@ -119,6 +120,23 @@ public:
       return false;
     }
 
+    bool setBool(String path, bool val)
+    {
+      if (Firebase.ready() && signupOK)
+      {
+        if (Firebase.RTDB.setBool(&fbdo, path, val))
+        {
+          return true;
+        }
+        else
+        {
+          Serial.println("Error setting data: " + fbdo.errorReason());
+          return false;
+        }
+      }
+      return false;
+    }
+
     bool getInt(String path, int* target)
     {
       if (Firebase.ready() && signupOK)
@@ -138,7 +156,7 @@ public:
     }
 
     // get full DB. return false if succeeded, true otherwise
-    bool getDB(DB_parkingLot* db_parkingLot)
+    bool getDB()
     {
       int numFloors;
       bool is_error = false;
@@ -159,6 +177,8 @@ public:
 
             for(int j = 0; j < numSlots && !is_error; j++)
             {
+              db_parkingLot->floors[i].slots[j].is_changed = false;
+
               bool isTaken;
               if(getBool("floor" + String(i) + "/ParkSlot_" + String(j) + "/taken", &isTaken))
               {
@@ -190,9 +210,47 @@ public:
       if(is_error)
       {
         // TODO: suppose to free alloced floors/parkSlots
+        Serial.println("Error occured while pulling database, set db_parkingLot to null");
         db_parkingLot = nullptr;
-        return !is_error;
       }
+
+      return !is_error;
+    }
+
+    bool setDB()
+    {
+      if(db_parkingLot != nullptr)
+      {
+        int numFloors = db_parkingLot->num_floors;
+        for(int i = 0; i < numFloors; i++)
+        {
+          int numSlots = db_parkingLot->floors[i].num_slots;
+          for(int j = 0; j < numSlots; j++)
+          {
+            if(db_parkingLot->floors[i].slots[j].is_changed)
+            {
+              bool val_to_set = db_parkingLot->floors[i].slots[j].is_taken;
+              if(Firebase.RTDB.setBool(&fbdo, "floor" + String(i) + "/ParkSlot_" + String(j) + "/taken", val_to_set))
+              {
+                Serial.println("set floor: " + String(i) + ", slot: " + String(j));
+                Serial.println("Succeed while setting park slot to DB!");
+              }
+              else
+              {
+                Serial.println("Failed while setting park slot to DB!");
+                return false;
+              }
+            }
+          }
+        }
+      }
+      else
+      {
+        Serial.println("Failed while setting park slot to DB! db_parkingLot is null");
+        return false;
+      }
+
+      return true;
     }
 
     void EndFB()

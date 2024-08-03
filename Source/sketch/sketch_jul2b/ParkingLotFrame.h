@@ -41,6 +41,7 @@ class ParkingLotFrame : public GeneralFrame {
     }
     else
     {
+      Serial.println("db_parkingLot is null!");
       num_of_floors = FloorsNum;
     }
     
@@ -98,7 +99,17 @@ class ParkingLotFrame : public GeneralFrame {
   void onFinishButtonClicked()
   {
     app->showWindow(frame, 0);
-    int choosen_slot= AssignParkingSlot();
+    int floor_id;
+    int choosen_slot= AssignParkingSlot(floor_id); // if the function succeed, it will assign a value to the floor_id as well
+
+    if(choosen_slot != -1)
+    {
+      db_parkingLot->floors[floor_id].slots[choosen_slot].is_taken = true;
+      db_parkingLot->floors[floor_id].slots[choosen_slot].is_changed = true;
+
+      app->quit(app->exitCode);
+    }
+
    // Serial.begin(115200);
    // string FormatLine = formatString(FloorArr[choosen_slot].floor_id,choosen_slot);
     //mySerial.printf("data from vga to esp * %s *", FormatLine);
@@ -113,23 +124,25 @@ class ParkingLotFrame : public GeneralFrame {
     return formattedString;
     }*/
 
-  int AssignParkingSlot()
+  int AssignParkingSlot(int& floor_id)
   {
-    int curr_parking=-1;
+    int curr_parking = -1;
+
     for(int i = 0; i < num_of_floors; i++) 
     {
-       if(FloorArr[i].floor_frame != nullptr)
-       {
-          curr_parking = (FloorArr[i].floor_frame)->IfCheckedSetInTakenGroup();
-       }
-      if(FloorArr[i].floor_frame != nullptr && curr_parking>=0)
+      if(FloorArr[i].floor_frame != nullptr)
       {
-         
-          break;
+        curr_parking = (FloorArr[i].floor_frame)->IfCheckedSetInTakenGroup();
+      }
 
+      if(FloorArr[i].floor_frame != nullptr && curr_parking >= 0)
+      {
+        floor_id = i;
+        break;
       }
     }
-      return curr_parking;
+
+    return curr_parking;
   }
 
   void uncheckParkingSlots()
