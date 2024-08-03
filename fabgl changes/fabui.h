@@ -26,6 +26,7 @@
 
 #pragma once
 
+
 /**
  * @file
  *
@@ -3108,6 +3109,9 @@ public:
 
   // Niv - moved this from protected
   int exitCode;
+
+  // Niv - function to be called when quit app
+  Delegate<> onQuit;
 
   uiApp();
 

@@ -98,7 +98,12 @@ class ParkingApp : public uiApp {
       MovingAdvText->update();
       
 
-      
+      this->onQuit =  [&]() { 
+                              Serial.printf("onQuit() has been called !!!!!!!!");
+
+                              optionsFrame->freeResources();
+                              delete optionsFrame;
+                            };
       
       this->onTimer = [&](uiTimerHandle tHandle) {  if (tHandle == FlashingAdvTimer) 
                                                       onFlashingAdvTimer(); 

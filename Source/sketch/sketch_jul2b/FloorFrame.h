@@ -15,7 +15,7 @@ extern DB_parkingLot* db_parkingLot;
 
 class FloorFrame : public GeneralFrame {
 
-private:
+public:
 
     int floor_id = 0;
     char floor_text[20];
@@ -30,8 +30,6 @@ private:
     int current_floor_id;
     int num_of_floors;
     std::function<void()> onParkSlotChooseButtonClickCB;
-
-public:
 
     FloorFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t, int floor_id_t,std::function<void()> onParkSlotChooseButtonClickCB_t)
     {

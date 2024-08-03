@@ -74,6 +74,7 @@ bool done_with_weather = false;
 bool weather_succeeded = false;
 JSONVar myObject;
 extern DB_parkingLot* db_parkingLot;
+bool first_app_run = true;
 
 void loop() {
 
@@ -132,7 +133,7 @@ void loop() {
     Serial.println("Done with weather!");
 
     // Disconnect from WiFi
-    if(WiFi.status()== WL_CONNECTED)
+    if(first_app_run && WiFi.status()== WL_CONNECTED)
     {
       // Setup Firebase
       FBMngr* fbMngr = new FBMngr();
@@ -155,7 +156,16 @@ void loop() {
     }
 
     // Setup Mouse / Keyboard
-    PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
+    if(first_app_run)
+    {
+      PS2Controller.begin(PS2Preset::KeyboardPort0_MousePort1, KbdMode::GenerateVirtualKeys);
+    }
+    else
+    {
+      DisplayController.setResolution(VGA_512x448_60Hz);
+      PS2Controller.mouse()->reset();
+    }
+    
 
     Serial.println("Memory before init app:");
     printMem();
@@ -192,11 +202,11 @@ void loop() {
       disconnectWifi();
     }
 
-    Serial.println("RESTART !!");
-    ESP.restart();
+    first_app_run = false;
 
-    // DisplayController.setResolution(VGA_512x448_60Hz);
-    // PS2Controller.mouse()->reset();
+    // Serial.println("RESTART !!");
+    // ESP.restart();
+
     // // Kick off application and wait for it to quit
     // if(weather_succeeded)
     //   ParkingApp(&myObject).runAsync(&DisplayController, 3500).joinAsyncRun();

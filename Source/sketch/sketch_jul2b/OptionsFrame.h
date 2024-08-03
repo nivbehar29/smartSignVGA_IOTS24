@@ -96,6 +96,12 @@ class OptionsFrame : public GeneralFrame {
                                   };
 
   }
+
+  void freeResources()
+  {
+    parkingLotFrame->freeResources();
+    delete parkingLotFrame;
+  }
 };
 
 #endif // OPTIONSFRAME_H

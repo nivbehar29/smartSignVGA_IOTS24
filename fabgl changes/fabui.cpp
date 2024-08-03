@@ -399,6 +399,9 @@ void uiApp::processEvents()
 
 void uiApp::quit(int exitCode)
 {
+  // Niv - call onQuit delegate
+  onQuit();
+
   for (auto child = m_rootWindow->lastChild(); child; child = child->prev())
     destroyWindow(child);
   uiEvent evt = uiEvent(nullptr, UIEVT_QUIT);

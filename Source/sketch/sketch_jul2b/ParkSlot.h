@@ -107,7 +107,6 @@ public:
         onChooseButtonClickCB();
       }
     }
-
 };
 
 //#endif // PARKSLOT_H
