@@ -62,10 +62,12 @@
         <!-- Ads content will be dynamically generated here -->
     </div>
 
+    <button id="clearSlotsButton">Clear All Slots</button>
+
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+        import { getDatabase, ref, onValue, set, update, get} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
         import { firebaseConfig } from "./keys/firebaseConfig.js";  // Import the config
 
@@ -167,6 +169,44 @@
                 console.error("Error updating ad:", error);
             });
         };
+
+        function clearAllSlots() {
+            const floors = [0, 1, 2, 3, 4];  // Adjust as needed
+
+            floors.forEach(floor => {
+                const floorRef = ref(database, `floor${floor}`);
+
+                // Fetch the data once
+                get(floorRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        console.log(`Current data for floor ${floor}:`, data);
+
+                        const updates = {};
+                        for (let spot in data) {
+                            if (spot.startsWith('ParkSlot_')) {
+                                updates[`${spot}/taken`] = false;  // Set the slot to free
+                            }
+                        }
+                        console.log(`Updating floor ${floor} with:`, updates);
+
+                        // Apply the updates to the Firebase database
+                        update(floorRef, updates).then(() => {
+                            console.log(`All slots on floor ${floor} cleared.`);
+                        }).catch((error) => {
+                            console.error("Error clearing slots:", error);
+                        });
+                    } else {
+                        console.log(`No data available for floor ${floor}`);
+                    }
+                }).catch((error) => {
+                    console.error("Error fetching data:", error);
+                });
+            });
+        }
+
+        // Set up the button click event handler
+        document.getElementById('clearSlotsButton').addEventListener('click', clearAllSlots);
 
         // Initialize the tabs
         const floors = [0, 1, 2, 3, 4]; // Adjust this array to match the number of floors in your Firebase
