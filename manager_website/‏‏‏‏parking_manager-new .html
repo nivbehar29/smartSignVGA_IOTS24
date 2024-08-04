@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parking Lot Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .tab {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 10px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .tab.active {
+            background-color: #5b63fa;
+        }
+        .parking-lot {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .parking-spot {
+            width: 80px;
+            height: 180px;
+            margin: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #000;
+            border-radius: 5px;
+        }
+        .free {
+            background-color: rgb(0, 124, 10);
+            color: white;
+        }
+        .occupied {
+            background-color: rgb(255, 0, 0);
+            color: white;
+        }
+        .ads-section {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .ads-section input {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Parking Lot Manager</h1>
+    <div id="tabs">
+        <!-- Tabs will be dynamically generated here -->
+    </div>
+    <div id="parkingLot" class="parking-lot">
+        <!-- Parking spots will be dynamically generated here -->
+    </div>
+    <div id="adsSection" class="ads-section">
+        <!-- Ads content will be dynamically generated here -->
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+        import { firebaseConfig } from "./keys/firebaseConfig.js";  // Import the config
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        // Sign in anonymously
+        signInAnonymously(auth)
+            .then(() => {
+                console.log('Signed in anonymously');
+                // Load initial data after signing in
+                loadParkingLot(1); // Load the first floor by default
+            })
+            .catch((error) => {
+                console.error('Error signing in anonymously:', error);
+            });
+
+        // Function to generate tabs based on floors
+        function generateTabs(floors) {
+            const tabsContainer = document.getElementById('tabs');
+            tabsContainer.innerHTML = '';
+            floors.forEach(floor => {
+                const tab = document.createElement('div');
+                tab.className = 'tab';
+                tab.innerText = `Floor ${floor}`;
+                tab.onclick = () => loadParkingLot(floor);
+                tabsContainer.appendChild(tab);
+            });
+            const adsTab = document.createElement('div');
+            adsTab.className = 'tab';
+            adsTab.innerText = 'Ads';
+            adsTab.onclick = loadAds;
+            tabsContainer.appendChild(adsTab);
+        }
+
+        // Function to generate parking spots
+        function generateParkingSpots(floor, data) {
+            const parkingLot = document.getElementById('parkingLot');
+            parkingLot.innerHTML = '';
+            for (let spot in data) {
+                if (spot.startsWith('ParkSlot_')) {  // Ensure we only handle parking slots
+                    const isTaken = data[spot].taken;
+                    const parkingSpot = document.createElement('div');
+                    parkingSpot.className = 'parking-spot ' + (isTaken ? 'occupied' : 'free');
+                    parkingSpot.innerText = '';
+                    parkingLot.appendChild(parkingSpot);
+                }
+            }
+        }
+
+        // Function to generate ad section
+        function generateAds(adText) {
+            const adsSection = document.getElementById('adsSection');
+            adsSection.innerHTML = `
+                <label for="adInput">Edit Ad:</label>
+                <input type="text" id="adInput" value="${adText}" />
+                <button onclick="updateAd()">Update Ad</button>
+            `;
+        }
+
+        // Function to load the parking lot data for a specific floor
+        function loadParkingLot(floor) {
+            const floorRef = ref(database, `floor${floor}`);
+            onValue(floorRef, (snapshot) => {
+                const data = snapshot.val();
+                generateParkingSpots(floor, data);
+            });
+            // Highlight the active tab
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabs[floor].classList.add('active');
+            document.getElementById('adsSection').style.display = 'none'; // Hide Ads section
+            document.getElementById('parkingLot').style.display = 'flex'; // Show Parking section
+        }
+
+        // Function to load the ad text
+        function loadAds() {
+            const adRef = ref(database, 'ad');
+            onValue(adRef, (snapshot) => {
+                generateAds(snapshot.val() || '');
+            });
+            // Highlight the active tab
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabs[tabs.length - 1].classList.add('active');
+            document.getElementById('parkingLot').style.display = 'none'; // Hide Parking section
+            document.getElementById('adsSection').style.display = 'flex'; // Show Ads section
+        }
+
+        // Function to update the ad text
+        window.updateAd = function() {
+            const adInput = document.getElementById('adInput').value;
+            const adRef = ref(database, 'ad');
+            set(adRef, adInput).then(() => {
+                alert('Ad updated successfully!');
+            }).catch((error) => {
+                console.error("Error updating ad:", error);
+            });
+        };
+
+        // Initialize the tabs
+        const floors = [0, 1, 2, 3, 4]; // Adjust this array to match the number of floors in your Firebase
+        generateTabs(floors);
+    </script>
+</body>
+</html>
