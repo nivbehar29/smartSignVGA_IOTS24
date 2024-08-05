@@ -58,13 +58,15 @@ public:
         taken = db_parkingLot->floors[floorId].slots[slotId].is_taken;
         pos_x = db_parkingLot->floors[floorId].slots[slotId].pos_x;
         pos_y = db_parkingLot->floors[floorId].slots[slotId].pos_y;
+        width = db_parkingLot->floors[floorId].slots[slotId].width;
+        height = db_parkingLot->floors[floorId].slots[slotId].height;
       }
 
       // int offset_y = 30;
       // int ChooseButtonExt = calcWidthOfText(&fabgl::FONT_std_14, "Choose");
       // Size ChooseButtonSize(ChooseButtonExt + 10, 20);
       // ChooseButton = new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
-      ChooseButton = new uiCheckBox(frame, Point(pos_x, pos_y), Size(50, 120), uiCheckBoxKind::RadioButton);
+      ChooseButton = new uiCheckBox(frame, Point(pos_x, pos_y), Size(width, height), uiCheckBoxKind::RadioButton);
       
       if(taken)
       {

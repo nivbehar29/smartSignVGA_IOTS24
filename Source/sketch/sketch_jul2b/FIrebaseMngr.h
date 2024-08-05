@@ -7,6 +7,8 @@
 //Provide the RTDB payload printing info and other helper functions.
 #include "addons/RTDBHelper.h"
 
+#include <Arduino_JSON.h>
+
 #include "keys/openweathermap_key.h"
 #include "DBAux.h"
 extern DB_parkingLot* db_parkingLot;
@@ -188,6 +190,7 @@ public:
                 is_error = true;
               }
 
+              // Position
               int pos_x;
               if(getInt("floor" + String(i) + "/ParkSlot_" + String(j) + "/position/x", &pos_x))
               {
@@ -211,6 +214,31 @@ public:
                 Serial.println("Error pulling pos_y");
                 is_error = true;
               }
+
+              // Dimensions
+              int width;
+              if(getInt("floor" + String(i) + "/ParkSlot_" + String(j) + "/Dimensions/width", &width))
+              {
+                Serial.println("loaded floor: " + String(i) + ", slot: " + String(j) + ", width = " + String(width));
+                db_parkingLot->floors[i].slots[j].width = width;
+              }
+              else
+              {
+                Serial.println("Error pulling width");
+                is_error = true;
+              }
+
+              int height;
+              if(getInt("floor" + String(i) + "/ParkSlot_" + String(j) + "/Dimensions/height", &height))
+              {
+                Serial.println("loaded floor: " + String(i) + ", slot: " + String(j) + ", height = " + String(height));
+                db_parkingLot->floors[i].slots[j].height = height;
+              }
+              else
+              {
+                Serial.println("Error pulling height");
+                is_error = true;
+              }
             }
           }
           else
@@ -230,6 +258,85 @@ public:
       {
         // TODO: suppose to free alloced floors/parkSlots
         Serial.println("Error occured while pulling database, set db_parkingLot to null");
+        db_parkingLot = nullptr;
+      }
+
+      return !is_error;
+    }
+
+    bool getDB2()
+    {
+      bool is_error = false;
+      
+
+      if (Firebase.ready() && signupOK)
+      {
+        int numFloors;
+
+        if(getInt("numFloors", &numFloors))
+        {
+          db_parkingLot = (DB_parkingLot*)malloc(sizeof(DB_parkingLot));
+          db_parkingLot->num_floors = numFloors;
+          db_parkingLot->floors = (DB_floor*)malloc(sizeof(DB_floor) * numFloors);
+
+          for(int i = 0; i < numFloors && !is_error; i++)
+          {
+            fbdo.setBSSLBufferSize(2048 /* Rx buffer size in bytes from 512 - 16384 */, 1024 /* Tx buffer size in bytes from 512 - 16384 */);
+            String floor_path = "/floor" + String(i);
+
+            bool is_data = Firebase.RTDB.getJSON(&fbdo, floor_path);
+            Serial.printf("Get json... %s\n", is_data ? fbdo.to<FirebaseJson>().raw() : fbdo.errorReason().c_str());
+
+            if(is_data)
+            {
+              FirebaseJson json = fbdo.to<FirebaseJson>();
+              String jsonString;
+              json.toString(jsonString);
+
+              JSONVar myObject =  JSON.parse(jsonString);
+              Serial.println(myObject);
+
+              int numSlots = myObject["numSlots"];
+
+              db_parkingLot->floors[i].num_slots = numSlots;
+              db_parkingLot->floors[i].slots = (DB_parkSlot*)malloc(sizeof(DB_parkSlot) * numSlots);
+
+              for(int j = 0; j < numSlots; j++)
+              {
+                db_parkingLot->floors[i].slots[j].is_changed = false;
+
+                String parkSlot_s = "ParkSlot_" + String(j);
+                db_parkingLot->floors[i].slots[j].is_taken = myObject[parkSlot_s]["taken"];
+                db_parkingLot->floors[i].slots[j].pos_x = myObject[parkSlot_s]["position"]["x"];
+                db_parkingLot->floors[i].slots[j].pos_y = myObject[parkSlot_s]["position"]["y"];
+                db_parkingLot->floors[i].slots[j].width = myObject[parkSlot_s]["Dimensions"]["width"];
+                db_parkingLot->floors[i].slots[j].height = myObject[parkSlot_s]["Dimensions"]["height"];
+              }
+
+            }
+            else
+            {
+              Serial.println("Error occurred while pulling floor " + String(i));
+              is_error = true;
+            }
+          }
+        }
+        else
+        {
+          Serial.println("Error occurred while pulling numFlors");
+          is_error = true;
+        }
+      }
+      else
+      {
+        Serial.printf("Firebase not ready!!!!!!!!!!!!!!!!!!!!!!!");
+        is_error = true;
+      }
+
+      if (is_error)
+      {
+        // TODO: Free allocated memory
+        Serial.println("Error occurred while pulling database, set db_parkingLot to null");
         db_parkingLot = nullptr;
       }
 

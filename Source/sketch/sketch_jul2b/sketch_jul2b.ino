@@ -71,7 +71,7 @@ void setup(){
 
 }
 
-bool done_with_weather = false;
+bool done_with_weather = true;
 bool weather_succeeded = false;
 JSONVar myObject;
 extern DB_parkingLot* db_parkingLot;
@@ -141,7 +141,7 @@ void loop() {
       fbMngr->setup();
 
       // Get data from firebase
-      bool DB_status = fbMngr->getDB();
+      bool DB_status = fbMngr->getDB2();
       if(!DB_status)
       {
         Serial.println("Error occured during pulling database");

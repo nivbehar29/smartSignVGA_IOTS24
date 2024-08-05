@@ -93,7 +93,7 @@ public:
         for(int i = 0; i < park_slots_num; i++)
         {
           int width = 50;
-          park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 100, floor_id, i, onParkSlotChooseButtonClickCB);
+          park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 120, floor_id, i, onParkSlotChooseButtonClickCB);
           offset_x += width + 5;
         }
 

@@ -2,37 +2,57 @@
   "advs": "",
   "floor0": {
     "ParkSlot_0": {
-      "position": {
-        "x": 133,
-        "y": 205
+      "Dimensions": {
+        "height": 112,
+        "width": 91
       },
-      "taken": false
+      "position": {
+        "x": 11,
+        "y": 11
+      },
+      "taken": true
     },
     "ParkSlot_1": {
+      "Dimensions": {
+        "height": 113,
+        "width": 59
+      },
       "position": {
-        "x": 238,
-        "y": 203
+        "x": 322,
+        "y": 10
       },
       "taken": false
     },
     "ParkSlot_2": {
+      "Dimensions": {
+        "height": 112,
+        "width": 27
+      },
       "position": {
-        "x": 354,
-        "y": 205
+        "x": 217,
+        "y": 123
       },
       "taken": true
     },
     "ParkSlot_3": {
-      "position": {
-        "x": 247,
-        "y": 71
+      "Dimensions": {
+        "height": 112,
+        "width": 28
       },
-      "taken": true
+      "position": {
+        "x": 119,
+        "y": 11
+      },
+      "taken": false
     },
     "ParkSlot_4": {
+      "Dimensions": {
+        "height": 112,
+        "width": 29
+      },
       "position": {
-        "x": 247,
-        "y": 308
+        "x": 163,
+        "y": 11
       },
       "taken": false
     },
@@ -40,6 +60,10 @@
   },
   "floor1": {
     "ParkSlot_0": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 10,
         "y": 10
@@ -47,6 +71,10 @@
       "taken": false
     },
     "ParkSlot_1": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 10,
         "y": 370
@@ -54,20 +82,32 @@
       "taken": false
     },
     "ParkSlot_2": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 510,
         "y": 370
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_3": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 258,
         "y": 177
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_4": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 510,
         "y": 10
@@ -78,6 +118,10 @@
   },
   "floor2": {
     "ParkSlot_0": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 10,
         "y": 370
@@ -85,6 +129,10 @@
       "taken": false
     },
     "ParkSlot_1": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 10,
         "y": 213
@@ -92,20 +140,32 @@
       "taken": false
     },
     "ParkSlot_2": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 10,
         "y": 67
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_3": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 126,
         "y": 10
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_4": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 243,
         "y": 10
@@ -116,6 +176,10 @@
   },
   "floor3": {
     "ParkSlot_0": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 10,
         "y": 370
@@ -123,27 +187,43 @@
       "taken": false
     },
     "ParkSlot_1": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 127,
         "y": 370
       },
-      "taken": false
+      "taken": true
     },
     "ParkSlot_2": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 255,
         "y": 370
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_3": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 387,
         "y": 370
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_4": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 510,
         "y": 370
@@ -154,34 +234,54 @@
   },
   "floor4": {
     "ParkSlot_0": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 43,
         "y": 11
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_1": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 375,
         "y": 10
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_2": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 510,
         "y": 370
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_3": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 510,
         "y": 175
       },
-      "taken": true
+      "taken": false
     },
     "ParkSlot_4": {
+      "Dimensions": {
+        "height": 90,
+        "width": 70
+      },
       "position": {
         "x": 510,
         "y": 10

@@ -6,6 +6,8 @@ struct DB_parkSlot
   bool is_taken;
   int pos_x;
   int pos_y;
+  int width;
+  int height;
 };
 
 struct DB_floor

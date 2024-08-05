@@ -34,6 +34,7 @@
             justify-content: center;
             border: 1px solid #000;
             border-radius: 5px;
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
         }
 
         .free {
@@ -51,6 +52,15 @@
         }
         .ads-section input {
             margin-bottom: 10px;
+        }
+        .resize-handle {
+            width: 10px;
+            height: 10px;
+            background: #000;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            cursor: se-resize;
         }
     </style>
     <!-- Include jQuery and jQuery UI -->
@@ -111,52 +121,60 @@
             tabsContainer.appendChild(adsTab);
         }
 
-        // Function to generate parking spots
-        /*function generateParkingSpots(floor, data) {
+        function generateParkingSpots(floor, data) {
             const parkingLot = document.getElementById('parkingLot');
             parkingLot.innerHTML = '';
+            const parkingLotRect = parkingLot.getBoundingClientRect(); // Get container dimensions
+            const borderWidth = parseInt(window.getComputedStyle(parkingLot).borderWidth, 10);
+
             for (let spot in data) {
                 if (spot.startsWith('ParkSlot_')) {  // Ensure we only handle parking slots
                     const isTaken = data[spot].taken;
                     const parkingSpot = document.createElement('div');
                     parkingSpot.className = 'parking-spot ' + (isTaken ? 'occupied' : 'free');
                     parkingSpot.innerText = '';
+                    parkingSpot.floor_id = floor; // Set floor ID
+                    parkingSpot.id = spot; // Set the spot ID
+
+                    // Set initial position from Firebase data
+                    const x = Math.min(Math.max(data[spot].position.x, 0), parkingLotRect.width - parkingSpot.offsetWidth); // Ensure x is within bounds
+                    const y = Math.min(Math.max(data[spot].position.y, 0), parkingLotRect.height - parkingSpot.offsetHeight); // Ensure y is within bounds
+                    parkingSpot.style.position = 'absolute'; // Ensure absolute positioning
+                    parkingSpot.style.left = `${x - borderWidth}px`;
+                    parkingSpot.style.top = `${y - borderWidth}px`;
+
+                    // Set initial dimentions from Firebase data
+                    if (data[spot].Dimensions) {
+                        parkingSpot.style.width = `${data[spot].Dimensions.width}px`;
+                        parkingSpot.style.height = `${data[spot].Dimensions.height}px`;
+                    }
+
+                    const resizeHandle = document.createElement('div');
+                    resizeHandle.className = 'resize-handle';
+                    parkingSpot.appendChild(resizeHandle);
+
                     parkingLot.appendChild(parkingSpot);
+                    
+                    $(parkingSpot).resizable({
+                        handles: 'se',
+                        containment: ".parking-lot",
+                        resize: function(event, ui) {
+                            // Use ui.helper instead of ui.element
+                            $(ui.helper).css({
+                                width: `${ui.size.width}px`,
+                                height: `${ui.size.height}px`
+                            });
+                        }
+                    });
                 }
             }
-        }*/
 
-        function generateParkingSpots(floor, data) {
-        const parkingLot = document.getElementById('parkingLot');
-        parkingLot.innerHTML = '';
-        const parkingLotRect = parkingLot.getBoundingClientRect(); // Get container dimensions
-        const borderWidth = parseInt(window.getComputedStyle(parkingLot).borderWidth, 10);
-
-        for (let spot in data) {
-            if (spot.startsWith('ParkSlot_')) {  // Ensure we only handle parking slots
-                const isTaken = data[spot].taken;
-                const parkingSpot = document.createElement('div');
-                parkingSpot.className = 'parking-spot ' + (isTaken ? 'occupied' : 'free');
-                parkingSpot.innerText = '';
-                parkingSpot.floor_id = floor; // Set floor ID
-                parkingSpot.id = spot; // Set the spot ID
-
-                // Set initial position from Firebase data
-                const x = Math.min(Math.max(data[spot].position.x, 0), parkingLotRect.width - parkingSpot.offsetWidth); // Ensure x is within bounds
-                const y = Math.min(Math.max(data[spot].position.y, 0), parkingLotRect.height - parkingSpot.offsetHeight); // Ensure y is within bounds
-                parkingSpot.style.position = 'absolute'; // Ensure absolute positioning
-                parkingSpot.style.left = `${x - borderWidth}px`;
-                parkingSpot.style.top = `${y - borderWidth}px`;
-
-                parkingLot.appendChild(parkingSpot);
-            }
+            // Make parking spots draggable
+            $(".parking-spot").draggable({
+                containment: ".parking-lot"
+            });
+            
         }
-
-        // Make parking spots draggable
-        $(".parking-spot").draggable({
-            containment: ".parking-lot"
-        });
-    }
 
         // Function to generate ad section
         function generateAds(adText) {
@@ -255,36 +273,46 @@
         }
 
         function savePositions() {
-    const floor = currentFloor; // Use the currentFloor variable
-    const floorRef = ref(database, `floor${floor}`);
-    const parkingSpots = document.querySelectorAll('.parking-spot');
+            const floor = currentFloor; // Use the currentFloor variable
+            const floorRef = ref(database, `floor${floor}`);
+            const parkingSpots = document.querySelectorAll('.parking-spot');
 
-    const updates = {};
-    parkingSpots.forEach(spot => {
-        const id = spot.id; // Use the entire ID directly
-        const floor_id = spot.floor_id;
+            const updates = {};
+            parkingSpots.forEach(spot => {
+                const id = spot.id; // Use the entire ID directly
+                const floor_id = spot.floor_id;
 
-        console.log(`Spot ${id}`);
-        console.log(`currentFloor ${currentFloor}`);
-        console.log(`floor_id ${floor_id}`);
+                console.log(`Spot ${id}`);
+                console.log(`currentFloor ${currentFloor}`);
+                console.log(`floor_id ${floor_id}`);
 
-        if (floor_id === currentFloor) { // Ensure we only update slots for the current floor
-            const rect = spot.getBoundingClientRect();
-            const parkingLotRect = document.getElementById('parkingLot').getBoundingClientRect();
-            const x = rect.left - parkingLotRect.left;
-            const y = rect.top - parkingLotRect.top;
+                if (floor_id === currentFloor) { // Ensure we only update slots for the current floor
+                    const rect = spot.getBoundingClientRect();
+                    const parkingLotRect = document.getElementById('parkingLot').getBoundingClientRect();
+                    const x = rect.left - parkingLotRect.left;
+                    const y = rect.top - parkingLotRect.top;
 
-            updates[`${id}/position`] = { x: Math.round(x), y: Math.round(y) }; // Use 'position' to store coordinates
-            console.log(`Updating floor ${floor_id}, ${id} with position x=${x}, y=${y}`);
+                    const basewidth = parseInt(window.getComputedStyle(spot).width, 10);
+                    const baseHeight = parseInt(window.getComputedStyle(spot).height, 10);
+
+                    // Fetch updated dimensions
+                    const width = spot.offsetWidth;
+                    const height = spot.offsetHeight;
+
+                    updates[`${id}/position`] = { x: Math.round(x), y: Math.round(y) }; // Use 'position' to store coordinates
+                    updates[`${id}/Dimensions`] = { width: width, height: height }; // Store dimensions
+                    console.log(`Updating floor ${floor_id}, parkslot_${id}`)
+                    console.log(`position x = ${x}, y = ${y}`);
+                    console.log(`width = ${width}, height = ${height}`);
+                }
+            });
+
+            update(floorRef, updates).then(() => {
+                alert('Positions saved successfully!');
+            }).catch((error) => {
+                console.error("Error saving positions:", error);
+            });
         }
-    });
-
-    update(floorRef, updates).then(() => {
-        alert('Positions saved successfully!');
-    }).catch((error) => {
-        console.error("Error saving positions:", error);
-    });
-}
 
         // Attach the savePositions function to the button
         document.getElementById('savePositionsButton').addEventListener('click', savePositions);
