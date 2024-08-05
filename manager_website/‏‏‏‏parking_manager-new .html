@@ -203,6 +203,9 @@
             tabs[floor].classList.add('active');
             document.getElementById('adsSection').style.display = 'none'; // Hide Ads section
             document.getElementById('parkingLot').style.display = 'flex'; // Show Parking section
+            
+            document.getElementById('savePositionsButton').style.display = 'flex';
+            document.getElementById('clearSlotsButton').style.display = 'flex';
         }
 
         // Function to load the ad text
@@ -217,6 +220,8 @@
             tabs[tabs.length - 1].classList.add('active');
             document.getElementById('parkingLot').style.display = 'none'; // Hide Parking section
             document.getElementById('adsSection').style.display = 'flex'; // Show Ads section
+            document.getElementById('savePositionsButton').style.display = 'none';
+            document.getElementById('clearSlotsButton').style.display = 'none';
         }
 
         // Function to update the ad text
@@ -322,7 +327,7 @@
         generateTabs(floors);
     </script>
 
-    <button id="savePositionsButton">Save Positions</button>
-    <button id="clearSlotsButton">Clear All Slots</button>
+    <button id="savePositionsButton" style="display:none;">Save Positions</button>
+    <button id="clearSlotsButton" style="display:none;">Clear All Slots</button>
 </body>
 </html>
