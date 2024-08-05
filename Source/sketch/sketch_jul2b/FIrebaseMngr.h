@@ -181,14 +181,34 @@ public:
 
               bool isTaken;
               if(getBool("floor" + String(i) + "/ParkSlot_" + String(j) + "/taken", &isTaken))
-              {
                 db_parkingLot->floors[i].slots[j].is_taken = isTaken;
-                // String output = "floor" + String(i) + ", Parkslot_" + String(j) + ", taken = " + String(isTaken);
-                // Serial.println(output);
-              }
               else
               {
                 Serial.println("Error pulling isTaken");
+                is_error = true;
+              }
+
+              int pos_x;
+              if(getInt("floor" + String(i) + "/ParkSlot_" + String(j) + "/position/x", &pos_x))
+              {
+                Serial.println("loaded floor: " + String(i) + ", slot: " + String(j) + ", x = " + String(pos_x));
+                db_parkingLot->floors[i].slots[j].pos_x = pos_x;
+              }
+              else
+              {
+                Serial.println("Error pulling pos_x");
+                is_error = true;
+              }
+
+              int pos_y;
+              if(getInt("floor" + String(i) + "/ParkSlot_" + String(j) + "/position/y", &pos_y))
+              {
+                Serial.println("loaded floor: " + String(i) + ", slot: " + String(j) + ", y = " + String(pos_y));
+                db_parkingLot->floors[i].slots[j].pos_y = pos_y;
+              }
+              else
+              {
+                Serial.println("Error pulling pos_y");
                 is_error = true;
               }
             }

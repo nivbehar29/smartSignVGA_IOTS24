@@ -19,24 +19,28 @@
             background-color: #5b63fa;
         }
         .parking-lot {
-            display: flex;
-            flex-wrap: wrap;
-            margin-top: 20px;
+            position: relative; /* Ensure relative positioning for absolute children */
+            width: 570px;
+            height: 450px;
+            overflow: hidden; /* Ensure no overflow */
+            border: 11px solid #000;  /* Optional: to visualize the container boundaries */
         }
+
         .parking-spot {
-            width: 80px;
-            height: 180px;
-            margin: 5px;
+            width: 70px; /* Adjust the width as needed */
+            height: 90px; /* Adjust the height as needed */
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid #000;
             border-radius: 5px;
         }
+
         .free {
             background-color: rgb(0, 124, 10);
             color: white;
         }
+
         .occupied {
             background-color: rgb(255, 0, 0);
             color: white;
@@ -49,6 +53,10 @@
             margin-bottom: 10px;
         }
     </style>
+    <!-- Include jQuery and jQuery UI -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 </head>
 <body>
     <h1>Parking Lot Manager</h1>
@@ -61,8 +69,6 @@
     <div id="adsSection" class="ads-section">
         <!-- Ads content will be dynamically generated here -->
     </div>
-
-    <button id="clearSlotsButton">Clear All Slots</button>
 
     <script type="module">
         // Import the functions you need from the SDKs you need
@@ -81,7 +87,7 @@
             .then(() => {
                 console.log('Signed in anonymously');
                 // Load initial data after signing in
-                loadParkingLot(1); // Load the first floor by default
+                loadParkingLot(0); // Load the first floor by default
             })
             .catch((error) => {
                 console.error('Error signing in anonymously:', error);
@@ -106,7 +112,7 @@
         }
 
         // Function to generate parking spots
-        function generateParkingSpots(floor, data) {
+        /*function generateParkingSpots(floor, data) {
             const parkingLot = document.getElementById('parkingLot');
             parkingLot.innerHTML = '';
             for (let spot in data) {
@@ -118,7 +124,39 @@
                     parkingLot.appendChild(parkingSpot);
                 }
             }
+        }*/
+
+        function generateParkingSpots(floor, data) {
+        const parkingLot = document.getElementById('parkingLot');
+        parkingLot.innerHTML = '';
+        const parkingLotRect = parkingLot.getBoundingClientRect(); // Get container dimensions
+        const borderWidth = parseInt(window.getComputedStyle(parkingLot).borderWidth, 10);
+
+        for (let spot in data) {
+            if (spot.startsWith('ParkSlot_')) {  // Ensure we only handle parking slots
+                const isTaken = data[spot].taken;
+                const parkingSpot = document.createElement('div');
+                parkingSpot.className = 'parking-spot ' + (isTaken ? 'occupied' : 'free');
+                parkingSpot.innerText = '';
+                parkingSpot.floor_id = floor; // Set floor ID
+                parkingSpot.id = spot; // Set the spot ID
+
+                // Set initial position from Firebase data
+                const x = Math.min(Math.max(data[spot].position.x, 0), parkingLotRect.width - parkingSpot.offsetWidth); // Ensure x is within bounds
+                const y = Math.min(Math.max(data[spot].position.y, 0), parkingLotRect.height - parkingSpot.offsetHeight); // Ensure y is within bounds
+                parkingSpot.style.position = 'absolute'; // Ensure absolute positioning
+                parkingSpot.style.left = `${x - borderWidth}px`;
+                parkingSpot.style.top = `${y - borderWidth}px`;
+
+                parkingLot.appendChild(parkingSpot);
+            }
         }
+
+        // Make parking spots draggable
+        $(".parking-spot").draggable({
+            containment: ".parking-lot"
+        });
+    }
 
         // Function to generate ad section
         function generateAds(adText) {
@@ -130,8 +168,12 @@
             `;
         }
 
-        // Function to load the parking lot data for a specific floor
+        // Declare the currentFloor variable to track the current floor
+        let currentFloor = 0; // Default to floor 0, change as needed
+
+        // Update the current floor in the loadParkingLot function
         function loadParkingLot(floor) {
+            currentFloor = floor; // Update the current floor variable
             const floorRef = ref(database, `floor${floor}`);
             onValue(floorRef, (snapshot) => {
                 const data = snapshot.val();
@@ -208,9 +250,51 @@
         // Set up the button click event handler
         document.getElementById('clearSlotsButton').addEventListener('click', clearAllSlots);
 
+        function getCurrentFloor() {
+            return currentFloor; // Return the currently selected floor
+        }
+
+        function savePositions() {
+    const floor = currentFloor; // Use the currentFloor variable
+    const floorRef = ref(database, `floor${floor}`);
+    const parkingSpots = document.querySelectorAll('.parking-spot');
+
+    const updates = {};
+    parkingSpots.forEach(spot => {
+        const id = spot.id; // Use the entire ID directly
+        const floor_id = spot.floor_id;
+
+        console.log(`Spot ${id}`);
+        console.log(`currentFloor ${currentFloor}`);
+        console.log(`floor_id ${floor_id}`);
+
+        if (floor_id === currentFloor) { // Ensure we only update slots for the current floor
+            const rect = spot.getBoundingClientRect();
+            const parkingLotRect = document.getElementById('parkingLot').getBoundingClientRect();
+            const x = rect.left - parkingLotRect.left;
+            const y = rect.top - parkingLotRect.top;
+
+            updates[`${id}/position`] = { x: Math.round(x), y: Math.round(y) }; // Use 'position' to store coordinates
+            console.log(`Updating floor ${floor_id}, ${id} with position x=${x}, y=${y}`);
+        }
+    });
+
+    update(floorRef, updates).then(() => {
+        alert('Positions saved successfully!');
+    }).catch((error) => {
+        console.error("Error saving positions:", error);
+    });
+}
+
+        // Attach the savePositions function to the button
+        document.getElementById('savePositionsButton').addEventListener('click', savePositions);
+
         // Initialize the tabs
         const floors = [0, 1, 2, 3, 4]; // Adjust this array to match the number of floors in your Firebase
         generateTabs(floors);
     </script>
+
+    <button id="savePositionsButton">Save Positions</button>
+    <button id="clearSlotsButton">Clear All Slots</button>
 </body>
 </html>

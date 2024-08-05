@@ -4,6 +4,8 @@ struct DB_parkSlot
 {
   bool is_changed = false; // ** This is not part of the database! ** indicates whether this slot has been changed by clicking on it and push the finish button.
   bool is_taken;
+  int pos_x;
+  int pos_y;
 };
 
 struct DB_floor

@@ -31,10 +31,12 @@ public:
     int num_of_floors;
     //ParkingLotFrame* curr_frame;
 
+    int taken;
+
     int width;
     int height;
-    int x_pos;
-    int y_pos;
+    int pos_x;
+    int pos_y;
 
     int floorId;
     int slotId;
@@ -43,18 +45,28 @@ public:
     std::function<void()> onChooseButtonClickCB;
 
     ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width, int height, int floorId, int slotId, std::function<void()> onChooseButtonClickCB_t)
-        : state(FREE), frame(frameToSet), canvas(cvToSet), x_pos(x), y_pos(y), width(width), height(height), floorId(floorId), slotId(slotId)
+        : state(FREE), frame(frameToSet), canvas(cvToSet), pos_x(x), pos_y(y), width(width), height(height), floorId(floorId), slotId(slotId)
     {
 
       // set callback function for Choose button clicked
       onChooseButtonClickCB = onChooseButtonClickCB_t;
 
-      int offset_y = 30;
-      int ChooseButtonExt = calcWidthOfText(&fabgl::FONT_std_14, "Choose");
-      Size ChooseButtonSize(ChooseButtonExt + 10, 20);
-      ChooseButton = new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
+      taken = false;
+
+      if(db_parkingLot != nullptr)
+      {
+        taken = db_parkingLot->floors[floorId].slots[slotId].is_taken;
+        pos_x = db_parkingLot->floors[floorId].slots[slotId].pos_x;
+        pos_y = db_parkingLot->floors[floorId].slots[slotId].pos_y;
+      }
+
+      // int offset_y = 30;
+      // int ChooseButtonExt = calcWidthOfText(&fabgl::FONT_std_14, "Choose");
+      // Size ChooseButtonSize(ChooseButtonExt + 10, 20);
+      // ChooseButton = new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
+      ChooseButton = new uiCheckBox(frame, Point(pos_x, pos_y), Size(50, 120), uiCheckBoxKind::RadioButton);
       
-      if(db_parkingLot != nullptr && db_parkingLot->floors[floorId].slots[slotId].is_taken)
+      if(taken)
       {
         SetGroupTaken();
         ChooseButton->setChecked(true);
@@ -90,8 +102,8 @@ public:
 
     void setPos(int x, int y)
     {
-      x_pos = x;
-      y_pos = y;
+      pos_x = x;
+      pos_y = y;
     }
 
     int calcWidthOfText(fabgl::FontInfo const * fontInfo, char const * text)

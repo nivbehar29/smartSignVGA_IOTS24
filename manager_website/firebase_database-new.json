@@ -2,90 +2,190 @@
   "advs": "",
   "floor0": {
     "ParkSlot_0": {
+      "position": {
+        "x": 133,
+        "y": 205
+      },
       "taken": false
     },
     "ParkSlot_1": {
+      "position": {
+        "x": 238,
+        "y": 203
+      },
       "taken": false
     },
     "ParkSlot_2": {
+      "position": {
+        "x": 354,
+        "y": 205
+      },
       "taken": true
     },
     "ParkSlot_3": {
+      "position": {
+        "x": 247,
+        "y": 71
+      },
       "taken": true
     },
     "ParkSlot_4": {
+      "position": {
+        "x": 247,
+        "y": 308
+      },
       "taken": false
     },
     "numSlots": 5
   },
   "floor1": {
     "ParkSlot_0": {
+      "position": {
+        "x": 10,
+        "y": 10
+      },
       "taken": false
     },
     "ParkSlot_1": {
+      "position": {
+        "x": 10,
+        "y": 370
+      },
       "taken": false
     },
     "ParkSlot_2": {
-      "taken": false
+      "position": {
+        "x": 510,
+        "y": 370
+      },
+      "taken": true
     },
     "ParkSlot_3": {
-      "taken": false
+      "position": {
+        "x": 258,
+        "y": 177
+      },
+      "taken": true
     },
     "ParkSlot_4": {
+      "position": {
+        "x": 510,
+        "y": 10
+      },
       "taken": false
     },
     "numSlots": 5
   },
   "floor2": {
     "ParkSlot_0": {
+      "position": {
+        "x": 10,
+        "y": 370
+      },
       "taken": false
     },
     "ParkSlot_1": {
+      "position": {
+        "x": 10,
+        "y": 213
+      },
       "taken": false
     },
     "ParkSlot_2": {
-      "taken": false
+      "position": {
+        "x": 10,
+        "y": 67
+      },
+      "taken": true
     },
     "ParkSlot_3": {
-      "taken": false
+      "position": {
+        "x": 126,
+        "y": 10
+      },
+      "taken": true
     },
     "ParkSlot_4": {
+      "position": {
+        "x": 243,
+        "y": 10
+      },
       "taken": false
     },
     "numSlots": 5
   },
   "floor3": {
     "ParkSlot_0": {
+      "position": {
+        "x": 10,
+        "y": 370
+      },
       "taken": false
     },
     "ParkSlot_1": {
+      "position": {
+        "x": 127,
+        "y": 370
+      },
       "taken": false
     },
     "ParkSlot_2": {
-      "taken": false
+      "position": {
+        "x": 255,
+        "y": 370
+      },
+      "taken": true
     },
     "ParkSlot_3": {
-      "taken": false
+      "position": {
+        "x": 387,
+        "y": 370
+      },
+      "taken": true
     },
     "ParkSlot_4": {
+      "position": {
+        "x": 510,
+        "y": 370
+      },
       "taken": false
     },
     "numSlots": 5
   },
   "floor4": {
     "ParkSlot_0": {
-      "taken": false
+      "position": {
+        "x": 43,
+        "y": 11
+      },
+      "taken": true
     },
     "ParkSlot_1": {
-      "taken": false
+      "position": {
+        "x": 375,
+        "y": 10
+      },
+      "taken": true
     },
     "ParkSlot_2": {
-      "taken": false
+      "position": {
+        "x": 510,
+        "y": 370
+      },
+      "taken": true
     },
     "ParkSlot_3": {
-      "taken": false
+      "position": {
+        "x": 510,
+        "y": 175
+      },
+      "taken": true
     },
     "ParkSlot_4": {
+      "position": {
+        "x": 510,
+        "y": 10
+      },
       "taken": false
     },
     "numSlots": 5
