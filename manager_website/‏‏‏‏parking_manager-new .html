@@ -175,11 +175,10 @@
                         handles: 'se',
                         containment: ".parking-lot",
                         resize: function(event, ui) {
-                            // Use ui.helper instead of ui.element
-                            $(ui.helper).css({
-                                width: `${ui.size.width}px`,
-                                height: `${ui.size.height}px`
-                            });
+                            const snapToGrid = 5;
+                            // Snap the size to 5-pixel increments
+                            ui.size.width = Math.round(ui.size.width / snapToGrid) * snapToGrid;
+                            ui.size.height = Math.round(ui.size.height / snapToGrid) * snapToGrid;
                         }
                     });
                 }
@@ -187,7 +186,13 @@
 
             // Make parking spots draggable
             $(".parking-spot").draggable({
-                containment: ".parking-lot"
+                containment: ".parking-lot",
+                drag: function(event, ui) {
+                    const snapToGrid = 5;
+                    // Snap the position to 5-pixel increments
+                    ui.position.left = Math.round(ui.position.left / snapToGrid) * snapToGrid;
+                    ui.position.top = Math.round(ui.position.top / snapToGrid) * snapToGrid;
+                }
             });
             
         }
