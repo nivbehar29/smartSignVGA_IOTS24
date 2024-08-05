@@ -71,6 +71,44 @@
             right: 0;
             cursor: se-resize;
         }
+        
+        .menu {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #f9f9f9;
+            border-left: 2px solid #ccc;
+            padding: 10px;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .menu h3 {
+            margin-top: 0;
+        }
+
+        .menu div {
+            margin-bottom: 10px;
+        }
+
+        .menu label {
+            display: block;
+        }
+
+        .menu button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .menu button:hover {
+            background-color: #0056b3;
+        }
     </style>
     <!-- Include jQuery and jQuery UI -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -87,6 +125,27 @@
     </div>
     <div id="adsSection" class="ads-section">
         <!-- Ads content will be dynamically generated here -->
+    </div>
+
+    <!-- Menu Container -->
+    <div id="menu" class="menu">
+        <h3>Parking Slot Configuration</h3>
+        <div>
+            <label for="slot-select">Select Slot:</label>
+            <select id="slot-select">
+                <!-- Options will be dynamically populated -->
+            </select>
+        </div>
+        <div>
+            <label><input type="checkbox" id="disabled-checkbox"> Disabled</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="motorcycle-checkbox"> Motorcycle</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="electric-checkbox"> Electric</label>
+        </div>
+        <button id="apply-button">Apply</button>
     </div>
 
     <script type="module">
@@ -338,9 +397,69 @@
         // Attach the savePositions function to the button
         document.getElementById('savePositionsButton').addEventListener('click', savePositions);
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const slotSelect = document.getElementById('slot-select');
+            const disabledCheckbox = document.getElementById('disabled-checkbox');
+            const motorcycleCheckbox = document.getElementById('motorcycle-checkbox');
+            const electricCheckbox = document.getElementById('electric-checkbox');
+            const applyButton = document.getElementById('apply-button');
+
+            // Function to populate slots into the dropdown menu
+            function populateSlotSelect(slots) {
+                slotSelect.innerHTML = '';
+                slots.forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = slot.id;
+                    option.textContent = slot.id;
+                    slotSelect.appendChild(option);
+                });
+            }
+
+            // Function to handle slot selection
+            function handleSlotSelection() {
+                const selectedSlotId = slotSelect.value;
+                if (selectedSlotId) {
+                    // Fetch and update the slot's properties from the database if needed
+                    // For simplicity, we use hardcoded values here
+                    // Set the checkboxes based on slot's current properties
+                    // e.g., disabledCheckbox.checked = slot.disabled;
+                }
+            }
+
+            // Apply button event listener
+            applyButton.addEventListener('click', () => {
+                const selectedSlotId = slotSelect.value;
+                if (selectedSlotId) {
+                    // Update the slot's properties based on the checkboxes
+                    const properties = {
+                        disabled: disabledCheckbox.checked,
+                        motorcycle: motorcycleCheckbox.checked,
+                        electric: electricCheckbox.checked
+                    };
+                    // Update the slot in the database or data model
+                    console.log('Updating slot', selectedSlotId, 'with properties', properties);
+                    // Example: updateSlotInDatabase(selectedSlotId, properties);
+                }
+            });
+
+            // Load slots and populate the dropdown
+            // Example slots, replace with actual data from the database
+            const exampleSlots = [
+                { id: 'ParkSlot_0' },
+                { id: 'ParkSlot_1' },
+                // Add more slots as needed
+            ];
+
+            populateSlotSelect(exampleSlots);
+
+            // Add event listener for slot selection changes
+            slotSelect.addEventListener('change', handleSlotSelection);
+        });
+
         // Initialize the tabs
         const floors = [0, 1, 2, 3, 4]; // Adjust this array to match the number of floors in your Firebase
         generateTabs(floors);
+        
     </script>
 
     <button id="savePositionsButton" style="display:none;">Save Positions</button>
