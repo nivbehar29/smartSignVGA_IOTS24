@@ -8,6 +8,7 @@ struct DB_parkSlot
   int pos_y;
   int width;
   int height;
+  int type;
 };
 
 struct DB_floor

@@ -58,6 +58,7 @@ public:
       int height = height_t;
       int pos_x = x;
       int pos_y = y;
+      int type = 0;
 
       int floorId = floorId_t;
       int slotId = slotId_t;
@@ -69,13 +70,23 @@ public:
         pos_y = db_parkingLot->floors[floorId].slots[slotId].pos_y;
         width = db_parkingLot->floors[floorId].slots[slotId].width;
         height = db_parkingLot->floors[floorId].slots[slotId].height;
+        type = db_parkingLot->floors[floorId].slots[slotId].type;
       }
 
       // int offset_y = 30;
-      // int ChooseButtonExt = calcWidthOfText(&fabgl::FONT_std_14, "Choose");
+      String type_str = String(type);
+      const char* type_cstr = type_str.c_str();
+      int typeTextExt = calcWidthOfText(&fabgl::FONT_std_14, type_cstr);
       // Size ChooseButtonSize(ChooseButtonExt + 10, 20);
       // ChooseButton = new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
       ChooseButton = new uiCheckBox(frame, Point(pos_x, pos_y), Size(width, height), uiCheckBoxKind::RadioButton);
+
+      // add label for the type of the parking slot
+      // 1 - regular
+      // 2 - disabled
+      // 3 - electric
+      // 4 - motorcycle
+      uiLabel* u = new uiLabel(ChooseButton, type_cstr, Point(0, 0), Size(typeTextExt, 14), true);
       
       if(taken)
       {
