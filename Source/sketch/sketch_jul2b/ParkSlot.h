@@ -11,6 +11,11 @@
 #include "DBAux.h"
 extern DB_parkingLot* db_parkingLot;
 
+#define TAKEN_COL (RGB888(128,0,0))
+#define CLICKED_COL (RGB888(0,128,0))
+#define MOUSE_OVER_COL (RGB888(40,93,255))
+#define FREE_COL (RGB888(128,128,128))
+
 class ParkSlot {
 
 
@@ -76,15 +81,23 @@ public:
       {
         SetGroupTaken();
         ChooseButton->setChecked(true);
+        ChooseButton->checkBoxStyle().checkedBackgroundColor=TAKEN_COL;
+        ChooseButton->checkBoxStyle().backgroundColor=TAKEN_COL;
+        ChooseButton->checkBoxStyle().foregroundColor=TAKEN_COL; 
+        ChooseButton->checkBoxStyle().mouseOverBackgroundColor=TAKEN_COL;
+        ChooseButton->checkBoxStyle().mouseOverForegroundColor=TAKEN_COL;
       }
       else
       {
         ChooseButton->setGroupIndex(1);
-        ChooseButton->checkBoxStyle().checkedBackgroundColor=RGB888(0,128,0);
+        ChooseButton->checkBoxStyle().checkedBackgroundColor=CLICKED_COL;
+        ChooseButton->checkBoxStyle().backgroundColor=FREE_COL;
+        ChooseButton->checkBoxStyle().foregroundColor=FREE_COL; 
+        ChooseButton->checkBoxStyle().mouseOverBackgroundColor=MOUSE_OVER_COL;
+        ChooseButton->checkBoxStyle().mouseOverForegroundColor=MOUSE_OVER_COL;
       }
       
-      ChooseButton->checkBoxStyle().mouseOverBackgroundColor=RGB888(0,0,0);
-      ChooseButton->checkBoxStyle().foregroundColor=RGB888(0,128,0);
+      // ChooseButton->checkBoxStyle().foregroundColor=RGB888(0,128,0);
       ChooseButton->repaint();
       ChooseButton->onClick = [&]() {onChooseButtonClick();};
     }
@@ -95,7 +108,10 @@ public:
       ChooseButton->setGroupIndex(-1);
 
       // change the desired park slot color to 'taken' color 
-      ChooseButton->checkBoxStyle().checkedBackgroundColor = RGB888(128,0,0);
+      ChooseButton->checkBoxStyle().checkedBackgroundColor = TAKEN_COL;
+      ChooseButton->checkBoxStyle().foregroundColor=TAKEN_COL;
+      ChooseButton->checkBoxStyle().mouseOverBackgroundColor=TAKEN_COL;
+      ChooseButton->checkBoxStyle().mouseOverForegroundColor=TAKEN_COL;
     }
     
     void uncheckNotTaken() 
@@ -103,6 +119,10 @@ public:
       if(ChooseButton->groupIndex() != -1)
       {
           ChooseButton->setChecked(false);
+          ChooseButton->checkBoxStyle().backgroundColor=FREE_COL;
+          ChooseButton->checkBoxStyle().foregroundColor=FREE_COL; 
+          ChooseButton->checkBoxStyle().mouseOverBackgroundColor=MOUSE_OVER_COL;
+          ChooseButton->checkBoxStyle().mouseOverForegroundColor=MOUSE_OVER_COL;
       }
     }
 
@@ -123,6 +143,8 @@ public:
       {
         // call callback function
         onChooseButtonClickCB();
+
+        ChooseButton->checkBoxStyle().foregroundColor=CLICKED_COL; 
       }
     }
 };
