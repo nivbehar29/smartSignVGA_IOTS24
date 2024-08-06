@@ -71,6 +71,44 @@
             right: 0;
             cursor: se-resize;
         }
+        
+        .menu {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #f9f9f9;
+            border-left: 2px solid #ccc;
+            padding: 10px;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .menu h3 {
+            margin-top: 0;
+        }
+
+        .menu div {
+            margin-bottom: 10px;
+        }
+
+        .menu label {
+            display: block;
+        }
+
+        .menu button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .menu button:hover {
+            background-color: #0056b3;
+        }
     </style>
     <!-- Include jQuery and jQuery UI -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -87,6 +125,20 @@
     </div>
     <div id="adsSection" class="ads-section">
         <!-- Ads content will be dynamically generated here -->
+    </div>
+
+    <div id="menu" class="menu">
+        <h3>Parking Slot Configuration</h3>
+        <div>
+            <label><input type="checkbox" id="disabled-checkbox"> Disabled</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="motorcycle-checkbox"> Motorcycle</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="electric-checkbox"> Electric</label>
+        </div>
+        <button id="apply-button">Apply</button>
     </div>
 
     <script type="module">
@@ -148,6 +200,12 @@
             tabsContainer.appendChild(adsTab);
         }
 
+        function isParkSlotData(spot)
+        {
+            return /^P\d/.test(spot);
+            
+        }
+
         function generateParkingSpots(floor, data) {
             const parkingLot = document.getElementById('parkingLot');
             parkingLot.innerHTML = '';
@@ -155,7 +213,7 @@
             const borderWidth = parseInt(window.getComputedStyle(parkingLot).borderWidth, 10);
 
             for (let spot in data) {
-                if (spot.startsWith('P')) {  // Ensure we only handle parking slots
+                if (isParkSlotData(spot)) {  // Ensure we only handle parking slots
                     const isTaken = data[spot].t;
                     const parkingSpot = document.createElement('div');
                     parkingSpot.className = 'parking-spot ' + (isTaken ? 'occupied' : 'free');
@@ -164,6 +222,7 @@
                     parkingSpot.id = spot; // Set the spot ID
 
                     // Set initial position from Firebase data
+
                     const x = Math.min(Math.max(data[spot].Pos.x, 0), parkingLotRect.width - parkingSpot.offsetWidth); // Ensure x is within bounds
                     const y = Math.min(Math.max(data[spot].Pos.y, 0), parkingLotRect.height - parkingSpot.offsetHeight); // Ensure y is within bounds
                     parkingSpot.style.position = 'absolute'; // Ensure absolute positioning
@@ -188,10 +247,20 @@
                     parkingSpot.appendChild(resizeHandle);
 
                     parkingLot.appendChild(parkingSpot);
+
+                    // Add click event listener to update currentSlot
+                    parkingSpot.addEventListener('click', function() {
+                        currentSlot = this.id;
+                        console.log(`current park id ${currentSlot}:`);
+                    });
                     
                     $(parkingSpot).resizable({
                         handles: 'se',
                         containment: ".parking-lot",
+                        start: function(event, ui) {
+                            currentSlot = this.id;  // Update currentSlot with the ID of the resized element
+                            console.log(`current park id ${currentSlot}:`);
+                        },
                         resize: function(event, ui) {
                             const snapToGrid = 2;
                             // Snap the size to 5-pixel increments
@@ -210,6 +279,8 @@
                     // Snap the position to 5-pixel increments
                     ui.position.left = Math.round(ui.position.left / snapToGrid) * snapToGrid;
                     ui.position.top = Math.round(ui.position.top / snapToGrid) * snapToGrid;
+                    currentSlot = this.id;
+                    console.log(`current park id ${currentSlot}:`);
                 }
             });
             
@@ -226,11 +297,13 @@
         }
 
         // Declare the currentFloor variable to track the current floor
-        let currentFloor = 0; // Default to floor 0, change as needed
+        let currentFloor = 0; // Default to floor 0
+        let currentSlot = -1; // Default to park -1 (not park)
 
         // Update the current floor in the loadParkingLot function
         function loadParkingLot(floor) {
             currentFloor = floor; // Update the current floor variable
+            currentSlot = -1;
             const floorRef = ref(database, `floor${floor}`);
             onValue(floorRef, (snapshot) => {
                 const data = snapshot.val();
@@ -295,7 +368,7 @@
 
                     const updates = {};
                     for (let spot in data) {
-                        if (spot.startsWith('P')) {
+                        if (isParkSlotData(spot)) {
                             updates[`${spot}/t`] = false;  // Set the slot to free
                         }
                     }
@@ -370,7 +443,7 @@
             get(floorRef).then(snapshot => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    const slotKeys = Object.keys(data).filter(key => key.startsWith('P'));
+                    const slotKeys = Object.keys(data).filter(key => isParkSlotData(key));
 
                     if (slotKeys.length > 0) {
                         const firstSlotKey = slotKeys[0];
@@ -436,7 +509,7 @@
             get(floorRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    const slotKeys = Object.keys(data).filter(key => key.startsWith('P'));
+                    const slotKeys = Object.keys(data).filter(key => isParkSlotData(key));
 
                     if (slotKeys.length > 0) {
                         // Determine the last slot based on the highest numeric ID
@@ -483,6 +556,65 @@
                 console.error("Error fetching data:", error);
             });
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const disabledCheckbox = document.getElementById('disabled-checkbox');
+            const motorcycleCheckbox = document.getElementById('motorcycle-checkbox');
+            const electricCheckbox = document.getElementById('electric-checkbox');
+            const applyButton = document.getElementById('apply-button');
+
+            // Apply button event listener
+            applyButton.addEventListener('click', () => {
+                const selectedSlotId = currentSlot;
+                if (selectedSlotId != -1) {
+                    // Determine the property type based on the checkboxes
+                    let type = 1; // Default to regular
+                    let checkedCount = 0;
+
+                    if (disabledCheckbox.checked) {
+                        type = 2;
+                        checkedCount++;
+                    }
+                    if (motorcycleCheckbox.checked) {
+                        type = 4;
+                        checkedCount++;
+                    }
+                    if (electricCheckbox.checked) {
+                        type = 3;
+                        checkedCount++;
+                    }
+
+                    if (checkedCount > 1) {
+                        alert("Please select only one type.");
+                        return;
+                    }
+
+                    const properties = {
+                        kind: type
+                    };
+
+                    // Update the slot in the database
+                    const currentFloor = getCurrentFloor(); // Function to get the current floor
+                    const slotPath = `floor${currentFloor}/${selectedSlotId}/K`;
+
+                    const updates = {};
+                    updates[slotPath] = type;
+
+                    set(ref(database, slotPath), type).then(() => {
+                        console.log('Slot type updated successfully!');
+                    }).catch((error) => {
+                        console.error("Error updating slot type:", error);
+                    });
+
+                    console.log('Updating slot', selectedSlotId, 'with properties', properties);
+                }
+                else
+                {
+                    alert('Please select a slot first');
+                }
+            });
+
+        });
 
     </script>
 
