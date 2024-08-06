@@ -33,7 +33,7 @@
             align-items: center;
             justify-content: center;
             border: 1px solid #000;
-            border-radius: 5px;
+            border-radius: 2px;
             box-sizing: border-box; /* Include padding and border in element's total width and height */
         }
         .parking-spot-label {
@@ -44,7 +44,7 @@
             color: white; /* White text color for better contrast */
             padding: 2px 5px;
             border-radius: 3px;
-            font-size: 12px; /* Adjust font size as needed */
+            font-size: 8px; /* Adjust font size as needed */
         }
         .free {
             background-color: rgb(0, 124, 10);
@@ -111,6 +111,24 @@
             .catch((error) => {
                 console.error('Error signing in anonymously:', error);
             });
+
+        
+        // Set up the button click event handler
+        document.getElementById('clearSlotsButton').addEventListener('click', clearAllSlots);
+
+
+        // Attach the savePositions function to the button
+        document.getElementById('savePositionsButton').addEventListener('click', savePositions);
+
+        // Attach the addSlotButton function to the button
+        document.getElementById('addSlotButton').addEventListener('click', addNewSlot);
+
+        // Attach the deleteSlotButton function to the button
+        document.getElementById('deleteSlotButton').onclick = deleteLastSlot;
+
+        // Initialize the tabs
+        const floors = [0, 1, 2, 3, 4]; // Adjust this array to match the number of floors in your Firebase
+        generateTabs(floors);
 
         // Function to generate tabs based on floors
         function generateTabs(floors) {
@@ -225,8 +243,12 @@
             document.getElementById('adsSection').style.display = 'none'; // Hide Ads section
             document.getElementById('parkingLot').style.display = 'flex'; // Show Parking section
             
+            // Show Parking section
             document.getElementById('savePositionsButton').style.display = 'flex';
             document.getElementById('clearSlotsButton').style.display = 'flex';
+            document.getElementById('addSlotButton').style.display = 'flex';
+            document.getElementById('deleteSlotButton').style.display = 'flex';
+
         }
 
         // Function to load the ad text
@@ -241,8 +263,12 @@
             tabs[tabs.length - 1].classList.add('active');
             document.getElementById('parkingLot').style.display = 'none'; // Hide Parking section
             document.getElementById('adsSection').style.display = 'flex'; // Show Ads section
+
+            // Hide ParkingLot buttons
             document.getElementById('savePositionsButton').style.display = 'none';
             document.getElementById('clearSlotsButton').style.display = 'none';
+            document.getElementById('addSlotButton').style.display = 'none';
+            document.getElementById('deleteSlotButton').style.display = 'none';
         }
 
         // Function to update the ad text
@@ -257,42 +283,37 @@
         };
 
         function clearAllSlots() {
-            const floors = [0, 1, 2, 3, 4];  // Adjust as needed
+            const floor = getCurrentFloor();
 
-            floors.forEach(floor => {
-                const floorRef = ref(database, `floor${floor}`);
+            const floorRef = ref(database, `floor${floor}`);
 
-                // Fetch the data once
-                get(floorRef).then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        console.log(`Current data for floor ${floor}:`, data);
+            // Fetch the data once
+            get(floorRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    console.log(`Current data for floor ${floor}:`, data);
 
-                        const updates = {};
-                        for (let spot in data) {
-                            if (spot.startsWith('ParkSlot_')) {
-                                updates[`${spot}/taken`] = false;  // Set the slot to free
-                            }
+                    const updates = {};
+                    for (let spot in data) {
+                        if (spot.startsWith('ParkSlot_')) {
+                            updates[`${spot}/taken`] = false;  // Set the slot to free
                         }
-                        console.log(`Updating floor ${floor} with:`, updates);
-
-                        // Apply the updates to the Firebase database
-                        update(floorRef, updates).then(() => {
-                            console.log(`All slots on floor ${floor} cleared.`);
-                        }).catch((error) => {
-                            console.error("Error clearing slots:", error);
-                        });
-                    } else {
-                        console.log(`No data available for floor ${floor}`);
                     }
-                }).catch((error) => {
-                    console.error("Error fetching data:", error);
-                });
+                    console.log(`Updating floor ${floor} with:`, updates);
+
+                    // Apply the updates to the Firebase database
+                    update(floorRef, updates).then(() => {
+                        console.log(`All slots on floor ${floor} cleared.`);
+                    }).catch((error) => {
+                        console.error("Error clearing slots:", error);
+                    });
+                } else {
+                    console.log(`No data available for floor ${floor}`);
+                }
+            }).catch((error) => {
+                console.error("Error fetching data:", error);
             });
         }
-
-        // Set up the button click event handler
-        document.getElementById('clearSlotsButton').addEventListener('click', clearAllSlots);
 
         function getCurrentFloor() {
             return currentFloor; // Return the currently selected floor
@@ -340,15 +361,134 @@
             });
         }
 
-        // Attach the savePositions function to the button
-        document.getElementById('savePositionsButton').addEventListener('click', savePositions);
+        function addNewSlot() {
+            const floor = getCurrentFloor(); // Function to get the current floor
+            const floorRef = ref(database, `floor${floor}`);
+            
+            // Fetch the current slots data
+            get(floorRef).then(snapshot => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const slotKeys = Object.keys(data).filter(key => key.startsWith('ParkSlot_'));
 
-        // Initialize the tabs
-        const floors = [0, 1, 2, 3, 4]; // Adjust this array to match the number of floors in your Firebase
-        generateTabs(floors);
+                    if (slotKeys.length > 0) {
+                        const firstSlotKey = slotKeys[0];
+                        const firstSlotData = data[firstSlotKey];
+                        
+                        // Generate the new slot ID based on the number of existing slots
+                        const newSlotId = `ParkSlot_${slotKeys.length}`;
+
+                        // Create new slot data by copying the first slot's data
+                        const newSlotData = { ...firstSlotData };
+                        newSlotData.taken = false;  // Ensure the new slot is 'not taken'
+
+                        // Update Firebase with the new slot
+                        const updates = {};
+                        updates[newSlotId] = newSlotData;
+
+                        // Update the new slot position to some default or incremented position
+                        updates[newSlotId].position = {
+                            x: firstSlotData.position.x + 10, // example offset
+                            y: firstSlotData.position.y + 10  // example offset
+                        };
+
+                        update(floorRef, updates).then(() => {
+                            console.log(`New slot ${newSlotId} added successfully!`);
+
+                            // Fetch the current numSlots
+                            const numSlotsRef = ref(database, `floor${floor}/numSlots`);
+                            get(numSlotsRef).then((snapshot) => {
+                                let numSlots = snapshot.exists() ? snapshot.val() : 0;
+                                numSlots += 1;
+
+                                // Update the numSlots in Firebase
+                                set(numSlotsRef, numSlots).then(() => {
+                                    console.log(`numSlots updated to ${numSlots} for floor ${floor}`);
+                                }).catch((error) => {
+                                    console.error("Error updating numSlots:", error);
+                                });
+                            }).catch((error) => {
+                                console.error("Error fetching numSlots:", error);
+                            });
+
+                            // Optionally, update the UI with the new slot
+                            generateParkingSpots(floor, { ...data, [newSlotId]: newSlotData });
+                        }).catch(error => {
+                            console.error("Error adding new slot:", error);
+                        });
+                    } else {
+                        console.log(`No ParkSlot found on floor ${floor}`);
+                    }
+                } else {
+                    console.log(`No data available for floor ${floor}`);
+                }
+            }).catch(error => {
+                console.error("Error fetching data:", error);
+            });
+        }
+
+        function deleteLastSlot() {
+            const floor = getCurrentFloor(); // Function to get the current floor
+            const floorRef = ref(database, `floor${floor}`);
+
+            // Fetch the current slots data
+            get(floorRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const slotKeys = Object.keys(data).filter(key => key.startsWith('ParkSlot_'));
+
+                    if (slotKeys.length > 0) {
+                        // Determine the last slot based on the highest numeric ID
+                        const lastSlotKey = slotKeys.reduce((prev, curr) => {
+                            const prevId = parseInt(prev.replace('ParkSlot_', ''));
+                            const currId = parseInt(curr.replace('ParkSlot_', ''));
+                            return currId > prevId ? curr : prev;
+                        });
+
+                        // Delete the last slot from Firebase
+                        const updates = {};
+                        updates[lastSlotKey] = null; // Setting the value to null will delete the slot
+
+                        update(floorRef, updates).then(() => {
+                            console.log(`Slot ${lastSlotKey} deleted successfully!`);
+
+                            // Fetch the current numSlots
+                            const numSlotsRef = ref(database, `floor${floor}/numSlots`);
+                            get(numSlotsRef).then((snapshot) => {
+                                let numSlots = snapshot.exists() ? snapshot.val() : 0;
+                                if (numSlots > 0) {
+                                    numSlots -= 1;
+
+                                    // Update the numSlots in Firebase
+                                    set(numSlotsRef, numSlots).then(() => {
+                                        console.log(`numSlots updated to ${numSlots} for floor ${floor}`);
+                                    }).catch((error) => {
+                                        console.error("Error updating numSlots:", error);
+                                    });
+                                }
+                            }).catch((error) => {
+                                console.error("Error fetching numSlots:", error);
+                            });
+                        }).catch((error) => {
+                            console.error("Error deleting slot:", error);
+                        });
+                    } else {
+                        console.error("No slots to delete.");
+                    }
+                } else {
+                    console.error("No data available for the current floor.");
+                }
+            }).catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+        }
+
     </script>
 
     <button id="savePositionsButton" style="display:none;">Save Positions</button>
     <button id="clearSlotsButton" style="display:none;">Clear All Slots</button>
+    <button id="addSlotButton" style="display:none;">Add Slot</button>
+    <button id="deleteSlotButton" style="display:none;">Delete Last Slot</button>
+
 </body>
 </html>
