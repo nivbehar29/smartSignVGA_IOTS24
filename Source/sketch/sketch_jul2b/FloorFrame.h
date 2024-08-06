@@ -55,7 +55,7 @@ public:
 
       sprintf(floor_text, "floor %d", floor_id);
 
-      frame = new uiFrame(parent, floor_text, Point(65, 20), Size(ResX - 70, ResY-30), false);
+      frame = new uiFrame(parent, nullptr, Point(65, 20), Size(ResX - 70, ResY-30), false);
 
       // Frame properties
       fabgl::uiFrameProps& props = frame->frameProps();
@@ -64,6 +64,11 @@ public:
       props.hasMaximizeButton = 0;
       props.moveable = 0;
       props.resizeable = 0;
+
+      // frame uiWindowStyle 
+      fabgl::uiWindowStyle& style = frame->windowStyle();
+      style.borderSize = 1;
+      style.focusedBorderSize = 1;
     
       // Floor text
       new uiLabel(frame, floor_text, Point(0,0));

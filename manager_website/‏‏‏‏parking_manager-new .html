@@ -268,6 +268,38 @@
                             ui.size.height = Math.round(ui.size.height / snapToGrid) * snapToGrid;
                         }
                     });
+
+                    // Add click event listener to update the checkboxes based on the slot type
+                    parkingSpot.addEventListener('click', () => {
+                        const disabledCheckbox = document.getElementById('disabled-checkbox');
+                        const motorcycleCheckbox = document.getElementById('motorcycle-checkbox');
+                        const electricCheckbox = document.getElementById('electric-checkbox');
+                        currentSlot = spot; // Update the global currentSlot variable
+
+                        // Reset checkboxes
+                        disabledCheckbox.checked = false;
+                        motorcycleCheckbox.checked = false;
+                        electricCheckbox.checked = false;
+
+                        // Get the type from Firebase data
+                        const slotType = data[spot].K; // Assuming 'K' stores the type
+
+                        // Update checkboxes based on slotType
+                        switch (slotType) {
+                            case 2:
+                                disabledCheckbox.checked = true;
+                                break;
+                            case 3:
+                                electricCheckbox.checked = true;
+                                break;
+                            case 4:
+                                motorcycleCheckbox.checked = true;
+                                break;
+                            default:
+                                // Regular slot, no checkboxes checked
+                                break;
+                        }
+                    });
                 }
             }
 
