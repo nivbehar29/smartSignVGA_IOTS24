@@ -155,8 +155,8 @@
             const borderWidth = parseInt(window.getComputedStyle(parkingLot).borderWidth, 10);
 
             for (let spot in data) {
-                if (spot.startsWith('ParkSlot_')) {  // Ensure we only handle parking slots
-                    const isTaken = data[spot].taken;
+                if (spot.startsWith('P')) {  // Ensure we only handle parking slots
+                    const isTaken = data[spot].t;
                     const parkingSpot = document.createElement('div');
                     parkingSpot.className = 'parking-spot ' + (isTaken ? 'occupied' : 'free');
                     parkingSpot.innerText = '';
@@ -164,22 +164,22 @@
                     parkingSpot.id = spot; // Set the spot ID
 
                     // Set initial position from Firebase data
-                    const x = Math.min(Math.max(data[spot].position.x, 0), parkingLotRect.width - parkingSpot.offsetWidth); // Ensure x is within bounds
-                    const y = Math.min(Math.max(data[spot].position.y, 0), parkingLotRect.height - parkingSpot.offsetHeight); // Ensure y is within bounds
+                    const x = Math.min(Math.max(data[spot].Pos.x, 0), parkingLotRect.width - parkingSpot.offsetWidth); // Ensure x is within bounds
+                    const y = Math.min(Math.max(data[spot].Pos.y, 0), parkingLotRect.height - parkingSpot.offsetHeight); // Ensure y is within bounds
                     parkingSpot.style.position = 'absolute'; // Ensure absolute positioning
                     parkingSpot.style.left = `${x - borderWidth}px`;
                     parkingSpot.style.top = `${y - borderWidth}px`;
 
                     // Set initial dimentions from Firebase data
-                    if (data[spot].Dimensions) {
-                        parkingSpot.style.width = `${data[spot].Dimensions.width}px`;
-                        parkingSpot.style.height = `${data[spot].Dimensions.height}px`;
+                    if (data[spot].Dim) {
+                        parkingSpot.style.width = `${data[spot].Dim.w}px`;
+                        parkingSpot.style.height = `${data[spot].Dim.h}px`;
                     }
 
                     // Create and append label
                     const label = document.createElement('div');
                     label.className = 'parking-spot-label';
-                    label.innerText = `${floor}${spot.replace('ParkSlot_', '')}`;
+                    label.innerText = `${floor}${spot.replace('P', '')}`;
                     // label.innerText = spot.split('_')[1]; // Extract the numeric ID from the spot string
                     parkingSpot.appendChild(label);
 
@@ -193,7 +193,7 @@
                         handles: 'se',
                         containment: ".parking-lot",
                         resize: function(event, ui) {
-                            const snapToGrid = 5;
+                            const snapToGrid = 2;
                             // Snap the size to 5-pixel increments
                             ui.size.width = Math.round(ui.size.width / snapToGrid) * snapToGrid;
                             ui.size.height = Math.round(ui.size.height / snapToGrid) * snapToGrid;
@@ -206,7 +206,7 @@
             $(".parking-spot").draggable({
                 containment: ".parking-lot",
                 drag: function(event, ui) {
-                    const snapToGrid = 5;
+                    const snapToGrid = 2;
                     // Snap the position to 5-pixel increments
                     ui.position.left = Math.round(ui.position.left / snapToGrid) * snapToGrid;
                     ui.position.top = Math.round(ui.position.top / snapToGrid) * snapToGrid;
@@ -295,8 +295,8 @@
 
                     const updates = {};
                     for (let spot in data) {
-                        if (spot.startsWith('ParkSlot_')) {
-                            updates[`${spot}/taken`] = false;  // Set the slot to free
+                        if (spot.startsWith('P')) {
+                            updates[`${spot}/t`] = false;  // Set the slot to free
                         }
                     }
                     console.log(`Updating floor ${floor} with:`, updates);
@@ -346,9 +346,10 @@
                     const width = spot.offsetWidth;
                     const height = spot.offsetHeight;
 
-                    updates[`${id}/position`] = { x: Math.round(x), y: Math.round(y) }; // Use 'position' to store coordinates
-                    updates[`${id}/Dimensions`] = { width: width, height: height }; // Store dimensions
-                    console.log(`Updating floor ${floor_id}, parkslot_${id}`)
+                    // BUG - the minus one is to fix a bug which every time we save the slots position, they are offsets 1 pixel on x/y axis
+                    updates[`${id}/Pos`] = { x: Math.round(x) , y: Math.round(y)  }; // Use 'position' to store coordinates
+                    updates[`${id}/Dim`] = { w: width, h: height }; // Store dimensions
+                    console.log(`Updating floor ${floor_id}, P${id}`)
                     console.log(`position x = ${x}, y = ${y}`);
                     console.log(`width = ${width}, height = ${height}`);
                 }
@@ -369,27 +370,27 @@
             get(floorRef).then(snapshot => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    const slotKeys = Object.keys(data).filter(key => key.startsWith('ParkSlot_'));
+                    const slotKeys = Object.keys(data).filter(key => key.startsWith('P'));
 
                     if (slotKeys.length > 0) {
                         const firstSlotKey = slotKeys[0];
                         const firstSlotData = data[firstSlotKey];
                         
                         // Generate the new slot ID based on the number of existing slots
-                        const newSlotId = `ParkSlot_${slotKeys.length}`;
+                        const newSlotId = `P${slotKeys.length}`;
 
                         // Create new slot data by copying the first slot's data
                         const newSlotData = { ...firstSlotData };
-                        newSlotData.taken = false;  // Ensure the new slot is 'not taken'
+                        newSlotData.t = false;  // Ensure the new slot is 'not taken'
 
                         // Update Firebase with the new slot
                         const updates = {};
                         updates[newSlotId] = newSlotData;
 
                         // Update the new slot position to some default or incremented position
-                        updates[newSlotId].position = {
-                            x: firstSlotData.position.x + 10, // example offset
-                            y: firstSlotData.position.y + 10  // example offset
+                        updates[newSlotId].Pos = {
+                            x: firstSlotData.Pos.x, // example offset
+                            y: firstSlotData.Pos.y  // example offset
                         };
 
                         update(floorRef, updates).then(() => {
@@ -435,13 +436,13 @@
             get(floorRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    const slotKeys = Object.keys(data).filter(key => key.startsWith('ParkSlot_'));
+                    const slotKeys = Object.keys(data).filter(key => key.startsWith('P'));
 
                     if (slotKeys.length > 0) {
                         // Determine the last slot based on the highest numeric ID
                         const lastSlotKey = slotKeys.reduce((prev, curr) => {
-                            const prevId = parseInt(prev.replace('ParkSlot_', ''));
-                            const currId = parseInt(curr.replace('ParkSlot_', ''));
+                            const prevId = parseInt(prev.replace('P', ''));
+                            const currId = parseInt(curr.replace('P', ''));
                             return currId > prevId ? curr : prev;
                         });
 

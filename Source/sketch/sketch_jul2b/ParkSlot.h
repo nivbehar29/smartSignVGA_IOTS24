@@ -22,36 +22,40 @@ public:
         TAKEN
     };
 
-    ParkStates state;
+    // ParkStates state;
     fabgl::Canvas* canvas;
     fabgl::uiFrame* frame;
     uiCheckBox* ChooseButton;
-    //parking_floor* Floorarr;
-    int current_floor_id;
-    int num_of_floors;
-    //ParkingLotFrame* curr_frame;
 
-    int taken;
+    // int taken;
 
-    int width;
-    int height;
-    int pos_x;
-    int pos_y;
+    // int width;
+    // int height;
+    // int pos_x;
+    // int pos_y;
 
-    int floorId;
-    int slotId;
+    // int floorId;
+    // int slotId;
 
     // callback function to be called when park slot choose button has been clicked
     std::function<void()> onChooseButtonClickCB;
 
-    ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width, int height, int floorId, int slotId, std::function<void()> onChooseButtonClickCB_t)
-        : state(FREE), frame(frameToSet), canvas(cvToSet), pos_x(x), pos_y(y), width(width), height(height), floorId(floorId), slotId(slotId)
+    ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width_t, int height_t, int floorId_t, int slotId_t, std::function<void()> onChooseButtonClickCB_t)
+        : /*state(FREE),*/ frame(frameToSet), canvas(cvToSet)/*, pos_x(x), pos_y(y), width(width), height(height), floorId(floorId), slotId(slotId)*/
     {
 
       // set callback function for Choose button clicked
       onChooseButtonClickCB = onChooseButtonClickCB_t;
 
-      taken = false;
+      int taken = false;
+
+      int width = width_t;
+      int height = height_t;
+      int pos_x = x;
+      int pos_y = y;
+
+      int floorId = floorId_t;
+      int slotId = slotId_t;
 
       if(db_parkingLot != nullptr)
       {
@@ -102,11 +106,11 @@ public:
       }
     }
 
-    void setPos(int x, int y)
-    {
-      pos_x = x;
-      pos_y = y;
-    }
+    // void setPos(int x, int y)
+    // {
+    //   pos_x = x;
+    //   pos_y = y;
+    // }
 
     int calcWidthOfText(fabgl::FontInfo const * fontInfo, char const * text)
     {

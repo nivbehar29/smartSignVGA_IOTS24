@@ -13,10 +13,10 @@ extern DB_parkingLot* db_parkingLot;
 
 
 struct parking_floor {
-  int num_of_regular_spaces;
-  int num_of_disabled_spaces;
-  int num_of_electric_spaces;
-  int num_of_motor_spaces;
+  // int num_of_regular_spaces;
+  // int num_of_disabled_spaces;
+  // int num_of_electric_spaces;
+  // int num_of_motor_spaces;
   char floor_text[20];
   uiStaticLabel* floor_label;
   uiCheckBox* floor_box;
@@ -69,10 +69,10 @@ public:
     //
     for (int i = 0; i < num_of_floors; i++)
     {
-      FloorArr[i].num_of_regular_spaces = 10;
-      FloorArr[i].num_of_electric_spaces = 5;
-      FloorArr[i].num_of_disabled_spaces = 2;
-      FloorArr[i].num_of_motor_spaces = 2;
+      // FloorArr[i].num_of_regular_spaces = 10;
+      // FloorArr[i].num_of_electric_spaces = 5;
+      // FloorArr[i].num_of_disabled_spaces = 2;
+      // FloorArr[i].num_of_motor_spaces = 2;
       sprintf(FloorArr[i].floor_text, "Floor %d", i);
 
       int offset_y = 30;
@@ -153,25 +153,57 @@ public:
   }
 
   void onFloorCheckboxClick(int floor_id) {
-    // if this is the first time we are showing this floor, initiate it.
-    if (FloorArr[floor_id].floor_frame == nullptr) {
-      // set callback function to be called when a park slot has been clicked
-      auto func = [&, this]() {
-        this->uncheckParkingSlots();
-      };
 
-      // create a new floor fram and send the CB function to it
-      FloorArr[floor_id].floor_frame = new FloorFrame(frame, ResX, ResY, app, floor_id, func);
-    }
+    if(floor_id != current_floor_id)
+    {
+      // if this is the first time we are showing this floor, initiate it.
+      if (FloorArr[floor_id].floor_frame == nullptr) {
+        // set callback function to be called when a park slot has been clicked
+        auto func = [&, this]() {
+          this->uncheckParkingSlots();
+        };
 
-    // hide the current floor and show the new floor
-    if (current_floor_id != floor_id) {
-      if (current_floor_id >= 0 && FloorArr[current_floor_id].floor_frame != nullptr) {
-        FloorArr[current_floor_id].floor_frame->hideFrame();
+        // create a new floor fram and send the CB function to it
+        FloorArr[floor_id].floor_frame = new FloorFrame(frame, ResX, ResY, app, floor_id, func);
       }
 
-      FloorArr[floor_id].floor_frame->showFrame();
-      current_floor_id = floor_id;
+      int last_floor_id = current_floor_id;
+
+      // hide the current floor and show the new floor
+      if (current_floor_id != floor_id) {
+        if (current_floor_id >= 0 && FloorArr[current_floor_id].floor_frame != nullptr) {
+          FloorArr[current_floor_id].floor_frame->hideFrame();
+        }
+
+        FloorArr[floor_id].floor_frame->showFrame();
+        current_floor_id = floor_id;
+      }
+
+      // delete last floor frame to save memory
+      if(last_floor_id != -1)
+      {
+        freeFloorArrSlot(last_floor_id);
+      }
+    }
+  }
+
+  void freeFloorArrSlot(int i)
+  {
+    if(FloorArr[i].floor_frame != nullptr)
+    {
+      for (int j = 0; j < FloorArr[i].floor_frame->park_slots_num; j++)
+      {
+        // Serial.println("delete FloorArr[" + String(i) + "].floor_frame->park_slots[" + String(j) + "]");
+        delete FloorArr[i].floor_frame->park_slots[j];
+      }
+
+      // Serial.println("free FloorArr[" + String(i) + "].floor_frame->park_slots");
+      free(FloorArr[i].floor_frame->park_slots);
+
+      // Serial.println("delete FloorArr[" + String(i) + "].floor_frame");
+      app->destroyWindow(FloorArr[i].floor_frame->frame);
+      delete FloorArr[i].floor_frame;
+      FloorArr[i].floor_frame = nullptr;
     }
   }
 
@@ -179,20 +211,7 @@ public:
   {
     for (int i = 0; i < num_of_floors; i++)
     {
-      if(FloorArr[i].floor_frame != nullptr)
-      {
-        for (int j = 0; j < FloorArr[i].floor_frame->park_slots_num; j++)
-        {
-          Serial.println("delete FloorArr[" + String(i) + "].floor_frame->park_slots[" + String(j) + "]");
-          delete FloorArr[i].floor_frame->park_slots[j];
-        }
-
-        Serial.println("free FloorArr[" + String(i) + "].floor_frame->park_slots");
-        free(FloorArr[i].floor_frame->park_slots);
-
-        Serial.println("delete FloorArr[" + String(i) + "].floor_frame");
-        delete FloorArr[i].floor_frame;
-      }
+      freeFloorArrSlot(i);
     }
 
     Serial.println("free FloorArr");

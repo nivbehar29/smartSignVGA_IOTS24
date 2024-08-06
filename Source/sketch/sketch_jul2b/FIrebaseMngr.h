@@ -281,20 +281,20 @@ public:
 
           for(int i = 0; i < numFloors && !is_error; i++)
           {
-            fbdo.setBSSLBufferSize(2048 /* Rx buffer size in bytes from 512 - 16384 */, 1024 /* Tx buffer size in bytes from 512 - 16384 */);
+            fbdo.setBSSLBufferSize(16384 /* Rx buffer size in bytes from 512 - 16384 */, 512 /* Tx buffer size in bytes from 512 - 16384 */);
             String floor_path = "/floor" + String(i);
 
             bool is_data = Firebase.RTDB.getJSON(&fbdo, floor_path);
-            Serial.printf("Get json... %s\n", is_data ? fbdo.to<FirebaseJson>().raw() : fbdo.errorReason().c_str());
-
+            
             if(is_data)
             {
+              Serial.printf("Get json... %s\n",  fbdo.to<FirebaseJson>().raw());
               FirebaseJson json = fbdo.to<FirebaseJson>();
               String jsonString;
               json.toString(jsonString);
 
               JSONVar myObject =  JSON.parse(jsonString);
-              Serial.println(myObject);
+              // Serial.println(myObject);
 
               int numSlots = myObject["numSlots"];
 
@@ -305,18 +305,19 @@ public:
               {
                 db_parkingLot->floors[i].slots[j].is_changed = false;
 
-                String parkSlot_s = "ParkSlot_" + String(j);
-                db_parkingLot->floors[i].slots[j].is_taken = myObject[parkSlot_s]["taken"];
-                db_parkingLot->floors[i].slots[j].pos_x = myObject[parkSlot_s]["position"]["x"];
-                db_parkingLot->floors[i].slots[j].pos_y = myObject[parkSlot_s]["position"]["y"];
-                db_parkingLot->floors[i].slots[j].width = myObject[parkSlot_s]["Dimensions"]["width"];
-                db_parkingLot->floors[i].slots[j].height = myObject[parkSlot_s]["Dimensions"]["height"];
+                String parkSlot_s = "P" + String(j);
+                db_parkingLot->floors[i].slots[j].is_taken = myObject[parkSlot_s]["t"];
+                db_parkingLot->floors[i].slots[j].pos_x = myObject[parkSlot_s]["Pos"]["x"];
+                db_parkingLot->floors[i].slots[j].pos_y = myObject[parkSlot_s]["Pos"]["y"];
+                db_parkingLot->floors[i].slots[j].width = myObject[parkSlot_s]["Dim"]["w"];
+                db_parkingLot->floors[i].slots[j].height = myObject[parkSlot_s]["Dim"]["h"];
               }
 
             }
             else
             {
               Serial.println("Error occurred while pulling floor " + String(i));
+              Serial.println("Firebase Error Reason:" + fbdo.errorReason());
               is_error = true;
             }
           }
@@ -356,7 +357,7 @@ public:
             if(db_parkingLot->floors[i].slots[j].is_changed)
             {
               bool val_to_set = db_parkingLot->floors[i].slots[j].is_taken;
-              if(Firebase.RTDB.setBool(&fbdo, "floor" + String(i) + "/ParkSlot_" + String(j) + "/taken", val_to_set))
+              if(Firebase.RTDB.setBool(&fbdo, "floor" + String(i) + "/P" + String(j) + "/t", val_to_set))
               {
                 db_parkingLot->floors[i].slots[j].is_changed = false;
                 Serial.println("set floor: " + String(i) + ", slot: " + String(j));
