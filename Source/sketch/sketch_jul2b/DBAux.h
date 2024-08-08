@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 struct DB_parkSlot
 {
@@ -20,6 +21,7 @@ struct DB_floor
 struct DB_parkingLot
 {
   int num_floors;
+  char* adv=nullptr;
   DB_floor* floors;
 };
 

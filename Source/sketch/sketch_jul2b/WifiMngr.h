@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include "keys/openweathermap_key.h"
 
+
 bool setupWifi()
 {
   WiFi.mode(WIFI_STA); //Optional

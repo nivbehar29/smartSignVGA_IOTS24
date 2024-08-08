@@ -9,6 +9,9 @@
 
 #include "OptionsFrame.h"
 
+#include "DBAux.h"
+extern DB_parkingLot* db_parkingLot;
+
 // extern JSONVar myObject;
 
 class ParkingApp : public uiApp {
@@ -38,6 +41,8 @@ class ParkingApp : public uiApp {
 
     int ResX = 640;
     int ResY = 480;
+
+
 
     void init() {
 
@@ -93,7 +98,7 @@ class ParkingApp : public uiApp {
 
       // Flashing Advertisement Text
       int FlashingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Advertisement !!!");
-      FlashingAdvText = new uiLabel(rootWindow(), "Some Advertisement !!!", Point(ResX / 2 - FlashingAdvtextExt / 2, 400));
+      FlashingAdvText = new uiLabel(rootWindow(), (db_parkingLot->adv), Point(ResX / 2 - FlashingAdvtextExt / 2, 400));
       FlashingAdvText->labelStyle().backgroundColor = RGB888(0,0,64);
       FlashingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
       FlashingAdvText->update();

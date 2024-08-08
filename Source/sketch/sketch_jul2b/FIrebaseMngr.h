@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Firebase_ESP_Client.h>
+//#include <FirebaseESP32.h>
 // #include <FirebaseClient.h>
 //Provide the token generation process info.
 #include "addons/TokenHelper.h"
@@ -157,127 +158,48 @@ public:
       return false;
     }
 
-    // get full DB. return true if succeeded, false otherwise
-    bool getDB()
+ 
+    bool getString(String path)
     {
-      int numFloors;
-      bool is_error = false;
-
-      if(getInt("numFloors", &numFloors))
-      {
-        db_parkingLot = (DB_parkingLot*)malloc(sizeof(DB_parkingLot));
-        db_parkingLot->num_floors = numFloors;
-        db_parkingLot->floors = (DB_floor*)malloc(sizeof(DB_floor) * numFloors);
-
-        for(int i = 0; i < numFloors && !is_error; i++)
+     
+        if (Firebase.RTDB.getString(&fbdo, path))
         {
-          int numSlots;
-          if(getInt("floor" + String(i) + "/numSlots", &numSlots))
-          {
-            db_parkingLot->floors[i].num_slots = numSlots;
-            db_parkingLot->floors[i].slots = (DB_parkSlot*)malloc(sizeof(DB_parkSlot) * numSlots);
+          
+             if (fbdo.dataType() == "string")
 
-            for(int j = 0; j < numSlots && !is_error; j++)
-            {
-              db_parkingLot->floors[i].slots[j].is_changed = false;
-
-              bool isTaken;
-              if(getBool("floor" + String(i) + "/ParkSlot_" + String(j) + "/taken", &isTaken))
-                db_parkingLot->floors[i].slots[j].is_taken = isTaken;
-              else
-              {
-                Serial.println("Error pulling isTaken");
-                is_error = true;
-              }
-
-              // Position
-              int pos_x;
-              if(getInt("floor" + String(i) + "/ParkSlot_" + String(j) + "/position/x", &pos_x))
-              {
-                Serial.println("loaded floor: " + String(i) + ", slot: " + String(j) + ", x = " + String(pos_x));
-                db_parkingLot->floors[i].slots[j].pos_x = pos_x;
-              }
-              else
-              {
-                Serial.println("Error pulling pos_x");
-                is_error = true;
-              }
-
-              int pos_y;
-              if(getInt("floor" + String(i) + "/ParkSlot_" + String(j) + "/position/y", &pos_y))
-              {
-                Serial.println("loaded floor: " + String(i) + ", slot: " + String(j) + ", y = " + String(pos_y));
-                db_parkingLot->floors[i].slots[j].pos_y = pos_y;
-              }
-              else
-              {
-                Serial.println("Error pulling pos_y");
-                is_error = true;
-              }
-
-              // Dimensions
-              int width;
-              if(getInt("floor" + String(i) + "/ParkSlot_" + String(j) + "/Dimensions/width", &width))
-              {
-                Serial.println("loaded floor: " + String(i) + ", slot: " + String(j) + ", width = " + String(width));
-                db_parkingLot->floors[i].slots[j].width = width;
-              }
-              else
-              {
-                Serial.println("Error pulling width");
-                is_error = true;
-              }
-
-              int height;
-              if(getInt("floor" + String(i) + "/ParkSlot_" + String(j) + "/Dimensions/height", &height))
-              {
-                Serial.println("loaded floor: " + String(i) + ", slot: " + String(j) + ", height = " + String(height));
-                db_parkingLot->floors[i].slots[j].height = height;
-              }
-              else
-              {
-                Serial.println("Error pulling height");
-                is_error = true;
-              }
-            }
-          }
-          else
-          {
-            Serial.println("Error pulling numSlots");
-            is_error = true;
-          }
+                {  
+                  int len=strlen(fbdo.stringData().c_str());
+                  db_parkingLot->adv= (char*)malloc(sizeof(char)*len);
+                  strcpy(db_parkingLot->adv,fbdo.stringData().c_str());
+                }
         }
-      }
-      else
-      {
-        Serial.println("Error pulling numFloors");
-        is_error = true;
-      }
-
-      if(is_error)
-      {
-        // TODO: suppose to free alloced floors/parkSlots
-        Serial.println("Error occured while pulling database, set db_parkingLot to null");
-        db_parkingLot = nullptr;
-      }
-
-      return !is_error;
+        else
+        {
+          Serial.println("Error getting data: " + fbdo.errorReason());
+          return false;
+        }
+        return true;
+    
     }
 
     bool getDB2()
     {
       bool is_error = false;
+      int numFloors;
       
 
-      if (Firebase.ready() && signupOK)
+      if(Firebase.ready() && signupOK)
       {
-        int numFloors;
-
+        
         if(getInt("numFloors", &numFloors))
         {
           db_parkingLot = (DB_parkingLot*)malloc(sizeof(DB_parkingLot));
+
           db_parkingLot->num_floors = numFloors;
           db_parkingLot->floors = (DB_floor*)malloc(sizeof(DB_floor) * numFloors);
+          // db_parkingLot->adv=(char*)malloc(sizeof(char)*50);
+          getString("ad");
+          
 
           for(int i = 0; i < numFloors && !is_error; i++)
           {
@@ -300,7 +222,7 @@ public:
 
               db_parkingLot->floors[i].num_slots = numSlots;
               db_parkingLot->floors[i].slots = (DB_parkSlot*)malloc(sizeof(DB_parkSlot) * numSlots);
-
+              
               for(int j = 0; j < numSlots; j++)
               {
                 db_parkingLot->floors[i].slots[j].is_changed = false;
@@ -329,6 +251,7 @@ public:
           is_error = true;
         }
       }
+      
       else
       {
         Serial.printf("Firebase not ready!!!!!!!!!!!!!!!!!!!!!!!");
@@ -344,6 +267,7 @@ public:
 
       return !is_error;
     }
+    
 
     bool setDB()
     {
