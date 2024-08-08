@@ -42,11 +42,14 @@ public:
     // int floorId;
     // int slotId;
 
+    int selectedParkingType = TYPE_REGULAR;
+
     // callback function to be called when park slot choose button has been clicked
     std::function<void()> onChooseButtonClickCB;
 
-    ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width_t, int height_t, int floorId_t, int slotId_t, std::function<void()> onChooseButtonClickCB_t)
-        : /*state(FREE),*/ frame(frameToSet), canvas(cvToSet)/*, pos_x(x), pos_y(y), width(width), height(height), floorId(floorId), slotId(slotId)*/
+    ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width_t, int height_t, int floorId_t, int slotId_t,
+             int selected_parking_type,std::function<void()> onChooseButtonClickCB_t)
+        : frame(frameToSet), canvas(cvToSet), selectedParkingType(selected_parking_type)
     {
 
       // set callback function for Choose button clicked
@@ -97,7 +100,7 @@ public:
       // 4 - motorcycle
       uiLabel* u = new uiLabel(ChooseButton, type_cstr, Point(0, 0), Size(typeTextExt, 14), true);
       
-      if(taken)
+      if(taken || type != selectedParkingType)
       {
         SetGroupTaken();
         ChooseButton->setChecked(true);

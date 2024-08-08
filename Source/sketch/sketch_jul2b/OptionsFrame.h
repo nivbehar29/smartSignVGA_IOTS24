@@ -10,6 +10,8 @@ class OptionsFrame : public GeneralFrame {
 
   public:
 
+  int selectedParkingType = TYPE_REGULAR;
+  uiCheckBox* regularCB;
   uiCheckBox* disabledCB;
   uiCheckBox* electricCarCB;
   uiCheckBox* motorcycleCB;
@@ -53,11 +55,7 @@ class OptionsFrame : public GeneralFrame {
     int next_y_top_offset = 40;
     int next_x_left_offset = 10;
     uiButton* NextButton = new uiButton(frame, "Next", Point(ResX - NextButtonSize.width - next_x_left_offset, ResY - NextButtonSize.height - next_y_top_offset), NextButtonSize);
-    NextButton->onClick = [&]() { 
-                                    app->showWindow(frame, 0);
-                                    app->showWindow(parkingLotFrame->frame, 1);
-                                    app->setActiveWindow(parkingLotFrame->frame); 
-                                };
+    NextButton->onClick = [&]() { onNextButtonClick();};
 
     // Setup Checkboxes
     int cbSizeXY = 55;
@@ -66,21 +64,37 @@ class OptionsFrame : public GeneralFrame {
     int labelsFontHeight = (&fabgl::FONT_std_24)->height;
     int cbTextPosX = cbLeftOffset + cbSizeXY + cbTextLeftOffset;
 
-    uiStaticLabel* disabledCBLabel =     new uiStaticLabel(frame, "Disabled",      Point(cbTextPosX,  50 + cbSizeXY/2 - labelsFontHeight/2));
-    uiStaticLabel* electricCarCBLabel =  new uiStaticLabel(frame, "Electric Car",  Point(cbTextPosX,  50 + cbSizeXY + cbSizeXY/2 + cbSizeXY/2 - labelsFontHeight/2));
-    uiStaticLabel* motorcycleCBLabel =   new uiStaticLabel(frame, "Motorcycle",    Point(cbTextPosX,  50 + cbSizeXY*3 + cbSizeXY/2 - labelsFontHeight/2));
+    uiStaticLabel* regularCBLabel =      new uiStaticLabel(frame, "Regular",       Point(cbTextPosX,  50 + cbSizeXY/2 - labelsFontHeight/2));
+    uiStaticLabel* disabledCBLabel =     new uiStaticLabel(frame, "Disabled",      Point(cbTextPosX,  50 + cbSizeXY + cbSizeXY/2 + cbSizeXY/2 - labelsFontHeight/2));
+    uiStaticLabel* electricCarCBLabel =  new uiStaticLabel(frame, "Electric Car",  Point(cbTextPosX,  50 + cbSizeXY*3 + cbSizeXY/2 - labelsFontHeight/2));
+    uiStaticLabel* motorcycleCBLabel =   new uiStaticLabel(frame, "Motorcycle",    Point(cbTextPosX,  50 + cbSizeXY*5 - labelsFontHeight/2));
 
+    regularCBLabel->labelStyle().textFont =     &fabgl::FONT_std_24;
     disabledCBLabel->labelStyle().textFont =    &fabgl::FONT_std_24;
     electricCarCBLabel->labelStyle().textFont = &fabgl::FONT_std_24;
     motorcycleCBLabel->labelStyle().textFont =  &fabgl::FONT_std_24;
 
+    regularCBLabel->update();
     disabledCBLabel->update();
     electricCarCBLabel->update();
     motorcycleCBLabel->update();
 
-    disabledCB = new uiCheckBox(frame,    Point(cbLeftOffset, 50),                          Size(cbSizeXY, cbSizeXY));
-    electricCarCB = new uiCheckBox(frame, Point(cbLeftOffset, 50 + cbSizeXY + cbSizeXY/2),  Size(cbSizeXY, cbSizeXY));
-    motorcycleCB = new uiCheckBox(frame,  Point(cbLeftOffset, 50 + cbSizeXY*3),             Size(cbSizeXY, cbSizeXY));
+    // Parking type radio buttons
+    regularCB =     new uiCheckBox(frame, Point(cbLeftOffset, 50),                            Size(cbSizeXY, cbSizeXY), uiCheckBoxKind::RadioButton);
+    disabledCB =    new uiCheckBox(frame, Point(cbLeftOffset, 50 + cbSizeXY + cbSizeXY/2),    Size(cbSizeXY, cbSizeXY), uiCheckBoxKind::RadioButton);
+    electricCarCB = new uiCheckBox(frame, Point(cbLeftOffset, 50 + cbSizeXY*3),               Size(cbSizeXY, cbSizeXY), uiCheckBoxKind::RadioButton);
+    motorcycleCB =  new uiCheckBox(frame, Point(cbLeftOffset, 50 + cbSizeXY*4 + cbSizeXY/2),  Size(cbSizeXY, cbSizeXY), uiCheckBoxKind::RadioButton);
+
+    // Set radio buttons to be on the same group
+    regularCB->setGroupIndex(2);
+    disabledCB->setGroupIndex(2);
+    electricCarCB->setGroupIndex(2);
+    motorcycleCB->setGroupIndex(2);
+
+    regularCB->onClick = [&]()      {selectedParkingType = TYPE_REGULAR;};
+    disabledCB->onClick = [&]()     {selectedParkingType = TYPE_DISABLED;};
+    electricCarCB->onClick = [&]()  {selectedParkingType = TYPE_ELECTRIC;};
+    motorcycleCB->onClick = [&]()   {selectedParkingType = TYPE_MOTORCYCLE;};
 
     // Time slider
     TimesliderLabel = new uiLabel(frame, "0", Point(ResX/2 + 100,50));
@@ -95,6 +109,26 @@ class OptionsFrame : public GeneralFrame {
                                       TimesliderLabel->update();
                                   };
 
+  }
+
+  void showFrame()
+  {
+    selectedParkingType = TYPE_REGULAR;
+    regularCB->setChecked(true);
+    app->showWindow(frame, 1);
+  }
+
+  void onNextButtonClick()
+  {
+    // Hide current windows
+    app->showWindow(frame, 0);
+
+    // Notify the next window abut the chosen parking type 
+    Serial.println("OptionsFrame: NextClick: selected parking type is " + String(selectedParkingType));
+    parkingLotFrame->setSelectedParkingType(selectedParkingType);
+
+    // Show the next window and set it as active window
+    parkingLotFrame->showFrame();
   }
 
   void freeResources()

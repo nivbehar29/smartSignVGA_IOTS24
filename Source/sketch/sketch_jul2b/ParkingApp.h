@@ -70,7 +70,8 @@ class ParkingApp : public uiApp {
       int startTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Start");
       int buttonSizeX = startTextExt + 20;
       StartButton = new uiButton(rootWindow(), "Start", Point(ResX/2 - buttonSizeX/2, ResY/2), Size(buttonSizeX, 20));
-      StartButton->onClick = [&]() {  showWindow(optionsFrame->frame, true);
+      StartButton->onClick = [&]() {  
+                                      optionsFrame->showFrame();
                                       setActiveWindow(optionsFrame->frame);
                                     };
 

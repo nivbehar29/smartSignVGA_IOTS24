@@ -29,6 +29,7 @@ public:
     int park_slots_num;
     int current_floor_id;
     int num_of_floors;
+    int selectedParkingType = TYPE_REGULAR;
     std::function<void()> onParkSlotChooseButtonClickCB;
 
     FloorFrame(uiFrame * parent_t, int ResX_t, int ResY_t, uiApp* app_t, int floor_id_t,std::function<void()> onParkSlotChooseButtonClickCB_t)
@@ -84,6 +85,11 @@ public:
       FloorPaint();
     }
 
+    void setSelectedParkingType(int type)
+    {
+      selectedParkingType = type;
+    }
+
     void FloorPaint()
     {
       // initiate if this is the first time we paint it
@@ -98,7 +104,7 @@ public:
         for(int i = 0; i < park_slots_num; i++)
         {
           int width = 50;
-          park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 120, floor_id, i, onParkSlotChooseButtonClickCB);
+          park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 120, floor_id, i, selectedParkingType, onParkSlotChooseButtonClickCB);
           offset_x += width + 5;
         }
 

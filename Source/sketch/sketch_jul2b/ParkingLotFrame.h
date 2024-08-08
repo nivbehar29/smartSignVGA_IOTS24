@@ -29,6 +29,7 @@ public:
   int num_of_floors;
   parking_floor* FloorArr;
   int current_floor_id;
+  int selectedParkingType;
 
 
   ParkingLotFrame(uiFrame* parent_t, int ResX_t, int ResY_t, uiApp* app_t, int FloorsNum) {
@@ -95,10 +96,26 @@ public:
     // current_floor_id = 0;
   }
 
+  void showFrame()
+  {
+    app->showWindow(frame, 1);
+    app->setActiveWindow(frame);
+
+    FloorArr[0].floor_box->setChecked(true);
+    onFloorCheckboxClick(0);
+    
+  }
+
   void onFinishButtonClicked() {
     app->showWindow(frame, 0);
     int floor_id;
     int choosen_slot = AssignParkingSlot(floor_id);  // if the function succeed, it will assign a value to the floor_id as well
+
+    if(current_floor_id != -1)
+    {
+      freeFloorArrSlot(current_floor_id);
+      current_floor_id = -1;
+    }
 
     if (choosen_slot != -1)
     {
@@ -169,22 +186,29 @@ public:
 
       int last_floor_id = current_floor_id;
 
-      // hide the current floor and show the new floor
+      // Hide the current floor and show the new floor
       if (current_floor_id != floor_id) {
         if (current_floor_id >= 0 && FloorArr[current_floor_id].floor_frame != nullptr) {
+          // Hide current floor
           FloorArr[current_floor_id].floor_frame->hideFrame();
+
+          // Delete last floor frame to save memory
+          freeFloorArrSlot(last_floor_id);
         }
 
+        // Set selected parking type to the new floor
+        FloorArr[floor_id].floor_frame->setSelectedParkingType(selectedParkingType);
+
+        // Show selected floor
         FloorArr[floor_id].floor_frame->showFrame();
         current_floor_id = floor_id;
       }
-
-      // delete last floor frame to save memory
-      if(last_floor_id != -1)
-      {
-        freeFloorArrSlot(last_floor_id);
-      }
     }
+  }
+
+  void setSelectedParkingType(int type)
+  {
+    selectedParkingType = type;
   }
 
   void freeFloorArrSlot(int i)
