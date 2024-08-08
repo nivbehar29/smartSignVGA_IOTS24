@@ -73,8 +73,17 @@ public:
         type = db_parkingLot->floors[floorId].slots[slotId].type;
       }
 
+
       // int offset_y = 30;
-      String type_str = String(type);
+      String type_str;
+      if(type == TYPE_REGULAR)
+        type_str = "Regular";
+      else if(type == TYPE_DISABLED)
+        type_str = "Disabled";
+      else if(type == TYPE_ELECTRIC)
+        type_str = "Electric";
+      else if(type == TYPE_MOTORCYCLE)
+        type_str = "Motor";
       const char* type_cstr = type_str.c_str();
       int typeTextExt = calcWidthOfText(&fabgl::FONT_std_14, type_cstr);
       // Size ChooseButtonSize(ChooseButtonExt + 10, 20);

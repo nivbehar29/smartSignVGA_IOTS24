@@ -97,8 +97,11 @@ class ParkingApp : public uiApp {
       }
 
       // Flashing Advertisement Text
-      int FlashingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Advertisement !!!");
-      FlashingAdvText = new uiLabel(rootWindow(), (db_parkingLot->adv), Point(ResX / 2 - FlashingAdvtextExt / 2, 400));
+      char* flashing_adv = "Some Advertisement";
+      if(db_parkingLot != nullptr && db_parkingLot->adv != nullptr)
+        flashing_adv = db_parkingLot->adv;
+      int FlashingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, flashing_adv);
+      FlashingAdvText = new uiLabel(rootWindow(), flashing_adv, Point(ResX / 2 - FlashingAdvtextExt / 2, 400));
       FlashingAdvText->labelStyle().backgroundColor = RGB888(0,0,64);
       FlashingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
       FlashingAdvText->update();
@@ -106,8 +109,11 @@ class ParkingApp : public uiApp {
       
 
       // Moving Advertisement Text
-      MvoingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, "Some Moving Advertisement !!!");
-      MovingAdvText = new uiLabel(rootWindow(), "Some Moving Advertisement !!!", Point(ResX / 2 - MvoingAdvtextExt / 2, 300));
+      char* moving_adv = "Some Moving Advertisement";
+      if(db_parkingLot != nullptr && db_parkingLot->movingAdv != nullptr)
+        moving_adv = db_parkingLot->movingAdv;
+      MvoingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, moving_adv);
+      MovingAdvText = new uiLabel(rootWindow(), moving_adv, Point(ResX, 300));
       MovingAdvText->labelStyle().backgroundColor = RGB888(255,255,255);
       MovingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
       MovingAdvText->update();

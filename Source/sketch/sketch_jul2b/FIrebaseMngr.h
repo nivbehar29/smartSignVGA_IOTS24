@@ -158,20 +158,19 @@ public:
       return false;
     }
 
- 
-    bool getString(String path)
+    bool getString(String path, String* target)
     {
-     
         if (Firebase.RTDB.getString(&fbdo, path))
         {
-          
-             if (fbdo.dataType() == "string")
-
-                {  
-                  int len=strlen(fbdo.stringData().c_str());
-                  db_parkingLot->adv= (char*)malloc(sizeof(char)*len);
-                  strcpy(db_parkingLot->adv,fbdo.stringData().c_str());
-                }
+            if (fbdo.dataType() == "string")
+            {  
+              *target = fbdo.stringData();
+            }
+            else
+            {
+              Serial.println("Error getting data: not a string");
+              return false;
+            }
         }
         else
         {
@@ -180,6 +179,35 @@ public:
         }
         return true;
     
+    }
+
+    void getAdvs()
+    {
+        String adv_target;
+        bool is_string = getString("ad", &adv_target);
+        if(is_string)
+        {
+          int len = strlen(adv_target.c_str());
+          db_parkingLot->adv = (char*)malloc(sizeof(char)*len);
+          strcpy(db_parkingLot->adv,adv_target.c_str());
+        }
+        else
+        {
+          Serial.println("error with ad");
+        }
+
+        String adv2_target;
+        is_string = getString("ad2", &adv2_target);
+        if(is_string)
+        {
+          int len = strlen(adv2_target.c_str());
+          db_parkingLot->movingAdv = (char*)malloc(sizeof(char)*len);
+          strcpy(db_parkingLot->movingAdv,adv2_target.c_str());
+        }
+        else
+        {
+          Serial.println("error with moving adv");
+        }
     }
 
     bool getDB2()
@@ -197,8 +225,9 @@ public:
 
           db_parkingLot->num_floors = numFloors;
           db_parkingLot->floors = (DB_floor*)malloc(sizeof(DB_floor) * numFloors);
-          // db_parkingLot->adv=(char*)malloc(sizeof(char)*50);
-          getString("ad");
+
+          // Get advertisements text
+          getAdvs();
           
 
           for(int i = 0; i < numFloors && !is_error; i++)
