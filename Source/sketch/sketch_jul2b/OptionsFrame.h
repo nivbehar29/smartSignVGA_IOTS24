@@ -5,6 +5,7 @@
 #include "fabui.h"
 #include "GeneralFrame.h"
 #include "ParkingLotFrame.h"
+#include "Bitmaps.h"
 
 class OptionsFrame : public GeneralFrame {
 
@@ -62,7 +63,12 @@ class OptionsFrame : public GeneralFrame {
     int cbLeftOffset = 20;
     int cbTextLeftOffset = 10;
     int labelsFontHeight = (&fabgl::FONT_std_24)->height;
-    int cbTextPosX = cbLeftOffset + cbSizeXY + cbTextLeftOffset;
+    int cbTextPosX = cbLeftOffset + cbSizeXY + cbTextLeftOffset + cbSizeXY + 10;
+
+    Point regularCBPos = Point(cbTextPosX,  50 + cbSizeXY/2 - labelsFontHeight/2);
+    Point disabledCBPos = Point(cbTextPosX,  50 + cbSizeXY + cbSizeXY/2 + cbSizeXY/2 - labelsFontHeight/2);
+    Point electricCarCBPos = Point(cbTextPosX,  50 + cbSizeXY*3 + cbSizeXY/2 - labelsFontHeight/2);
+    Point motorcycleCBPos = Point(cbTextPosX,  50 + cbSizeXY*5 - labelsFontHeight/2);
 
     uiStaticLabel* regularCBLabel =      new uiStaticLabel(frame, "Regular",       Point(cbTextPosX,  50 + cbSizeXY/2 - labelsFontHeight/2));
     uiStaticLabel* disabledCBLabel =     new uiStaticLabel(frame, "Disabled",      Point(cbTextPosX,  50 + cbSizeXY + cbSizeXY/2 + cbSizeXY/2 - labelsFontHeight/2));
@@ -85,6 +91,11 @@ class OptionsFrame : public GeneralFrame {
     electricCarCB = new uiCheckBox(frame, Point(cbLeftOffset, 50 + cbSizeXY*3),               Size(cbSizeXY, cbSizeXY), uiCheckBoxKind::RadioButton);
     motorcycleCB =  new uiCheckBox(frame, Point(cbLeftOffset, 50 + cbSizeXY*4 + cbSizeXY/2),  Size(cbSizeXY, cbSizeXY), uiCheckBoxKind::RadioButton);
 
+    uiImage* regularImage = new uiImage(frame, &regular_car_bitmap, Point(cbLeftOffset + cbSizeXY + 10, 50));
+    uiImage* disabledImage = new uiImage(frame, &disabled_car_bitmap, Point(cbLeftOffset + cbSizeXY + 10, 50 + cbSizeXY + cbSizeXY/2));
+    uiImage* electricCarImage = new uiImage(frame, &electric_car_bitmap, Point(cbLeftOffset + cbSizeXY + 10, 50 + cbSizeXY*3));
+    uiImage* motorcycleImage = new uiImage(frame, &motorcycle_bitmap, Point(cbLeftOffset + cbSizeXY + 10, 50 + cbSizeXY*4 + cbSizeXY/2));
+
     // Set radio buttons to be on the same group
     regularCB->setGroupIndex(2);
     disabledCB->setGroupIndex(2);
@@ -96,18 +107,18 @@ class OptionsFrame : public GeneralFrame {
     electricCarCB->onClick = [&]()  {selectedParkingType = TYPE_ELECTRIC;};
     motorcycleCB->onClick = [&]()   {selectedParkingType = TYPE_MOTORCYCLE;};
 
-    // Time slider
-    TimesliderLabel = new uiLabel(frame, "0", Point(ResX/2 + 100,50));
-    Timeslider1 = new uiSlider(frame, Point(ResX/2 +30 ,50), Size(17, 400), uiOrientation::Vertical);
-    Timeslider1->anchors().right = true;
-    Timeslider1->setup(0, 24, 1);
-    Timeslider1->setPosition(20);
-    Timeslider1->onChange = [&]() {
-                                      int val = Timeslider1->position();
-                                      int hours = val;
-                                      TimesliderLabel->setTextFmt("hours = %d",hours);
-                                      TimesliderLabel->update();
-                                  };
+    // // Time slider
+    // TimesliderLabel = new uiLabel(frame, "0", Point(ResX/2 + 100,50));
+    // Timeslider1 = new uiSlider(frame, Point(ResX/2 +30 ,50), Size(17, 400), uiOrientation::Vertical);
+    // Timeslider1->anchors().right = true;
+    // Timeslider1->setup(0, 24, 1);
+    // Timeslider1->setPosition(20);
+    // Timeslider1->onChange = [&]() {
+    //                                   int val = Timeslider1->position();
+    //                                   int hours = val;
+    //                                   TimesliderLabel->setTextFmt("hours = %d",hours);
+    //                                   TimesliderLabel->update();
+    //                               };
 
   }
 

@@ -37,9 +37,9 @@ def save_rgba2222_bitmap_to_file(rgba2222_bitmap, output_file):
 
 if __name__ == "__main__":
     # Path to the image file
-    image_path = 'red_light_60x52.jpg'
+    image_path = 'motorcycle_50x50.png'
     # Path to the output file
-    output_file = 'red_light_60x52.txt'
+    output_file = 'motorcycle_50x50.txt'
     
     # Convert image to RGBA2222 bitmap
     rgba2222_bitmap = image_to_rgba2222_bitmap(image_path)
