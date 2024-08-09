@@ -31,6 +31,9 @@ public:
   int current_floor_id;
   int selectedParkingType;
 
+  uiMessageBoxResult* msg = nullptr;
+  uiTimerHandle msgTimer;
+
 
   ParkingLotFrame(uiFrame* parent_t, int ResX_t, int ResY_t, uiApp* app_t, int FloorsNum) {
 
@@ -59,12 +62,22 @@ public:
 
     // Finish Button
     int FinishTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Finish");
-    Size FinishButtonSize(FinishTextExt + 20, 20);
-    int cancel_y_top_offset = 40;
-    int cancel_x_left_offset = 10;
-    uiButton* FinishButton = new uiButton(frame, "Finish", Point(cancel_x_left_offset, ResY - FinishButtonSize.height - cancel_y_top_offset), FinishButtonSize);
+    Size FinishButtonSize(50, 20);
+    int finish_y_top_offset = 40;
+    int finish_x_left_offset = 10;
+    uiButton* FinishButton = new uiButton(frame, "Finish", Point(finish_x_left_offset, ResY - FinishButtonSize.height - finish_y_top_offset), FinishButtonSize);
     FinishButton->onClick = [&]() {
       onFinishButtonClicked();
+    };
+
+    // Cancel Button
+    int CancelTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Cancel");
+    Size CancelButtonSize(50, 20);
+    int cancel_y_top_offset = 10;
+    int cancel_x_left_offset = 10;
+    uiButton* CancelButton = new uiButton(frame, "Cancel", Point(cancel_x_left_offset, ResY - CancelButtonSize.height - cancel_y_top_offset - FinishButtonSize.height - finish_y_top_offset), CancelButtonSize);
+    CancelButton->onClick = [&]() {
+      onCancelButtonClicked();
     };
 
     //
@@ -107,18 +120,19 @@ public:
   }
 
   void onFinishButtonClicked() {
-    app->showWindow(frame, 0);
+    
     int floor_id;
-    int choosen_slot = AssignParkingSlot(floor_id);  // if the function succeed, it will assign a value to the floor_id as well
+    int choosen_slot = AssignParkingSlot(floor_id);  // if the function succeed, it will assign a value to the floor_id and return the parking slot id , else - return -1
 
-    if(current_floor_id != -1)
+    if(choosen_slot != -1)
     {
-      freeFloorArrSlot(current_floor_id);
-      current_floor_id = -1;
-    }
+      app->showWindow(frame, 0);
+      if(current_floor_id != -1)
+      {
+        freeFloorArrSlot(current_floor_id);
+        current_floor_id = -1;
+      }
 
-    if (choosen_slot != -1)
-    {
       if(db_parkingLot != nullptr)
       {
         db_parkingLot->floors[floor_id].slots[choosen_slot].is_taken = true;
@@ -127,11 +141,22 @@ public:
         app->quit(app->exitCode);
       }
     }
+    else
+    {
+      // Show a massage to the customer
+      Serial.println("Please select a slot");
+      uiMessageBoxResult msg_result = app->messageBox(nullptr, "Please select a slot", "Ok");                                          
+    }
+  }
 
-    // Serial.begin(115200);
-    // string FormatLine = formatString(FloorArr[choosen_slot].floor_id,choosen_slot);
-    //mySerial.printf("data from vga to esp * %s *", FormatLine);
-    //  mySerial.printf("data from vga to esp * %s *", choosen_slot);
+  void onCancelButtonClicked()
+  {
+    app->showWindow(frame, 0);
+    if(current_floor_id != -1)
+    {
+      freeFloorArrSlot(current_floor_id);
+      current_floor_id = -1;
+    }
   }
 
 
