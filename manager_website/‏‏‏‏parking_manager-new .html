@@ -46,6 +46,11 @@
             border-radius: 3px;
             font-size: 8px; /* Adjust font size as needed */
         }
+        .highlighted {
+            border: 3px solid rgb(0, 247, 255);
+            box-shadow: 0 0 50px 12px rgb(0, 0, 0); /* Glow effect with yellow color */
+            z-index: 100;
+        }
         .free {
             background-color: rgb(0, 124, 10);
             color: white;
@@ -206,6 +211,51 @@
             
         }
 
+        // Declare the currentFloor variable to track the current floor
+        let currentFloor = 0; // Default to floor 0
+        let currentSlot = -1; // Default to park -1 (not park)
+        let currentlyHighlightedSlot = null; // Keep track of the currently highlighted slot
+
+        function highlightSpot(spot) {
+            if (currentlyHighlightedSlot) {
+                currentlyHighlightedSlot.classList.remove('highlighted');
+            }
+            spot.classList.add('highlighted');
+            currentlyHighlightedSlot = spot;
+        }
+
+        function updateMenuBaseOnSpot(spot, data)
+        {
+            const disabledCheckbox = document.getElementById('disabled-checkbox');
+            const motorcycleCheckbox = document.getElementById('motorcycle-checkbox');
+            const electricCheckbox = document.getElementById('electric-checkbox');
+            currentSlot = spot; // Update the global currentSlot variable
+
+            // Reset checkboxes
+            disabledCheckbox.checked = false;
+            motorcycleCheckbox.checked = false;
+            electricCheckbox.checked = false;
+
+            // Get the type from Firebase data
+            const slotType = data[spot].K; // Assuming 'K' stores the type
+
+            // Update checkboxes based on slotType
+            switch (slotType) {
+                case 2:
+                    disabledCheckbox.checked = true;
+                    break;
+                case 3:
+                    electricCheckbox.checked = true;
+                    break;
+                case 4:
+                    motorcycleCheckbox.checked = true;
+                    break;
+                default:
+                    // Regular slot, no checkboxes checked
+                    break;
+            }
+        }
+
         function generateParkingSpots(floor, data) {
             const parkingLot = document.getElementById('parkingLot');
             parkingLot.innerHTML = '';
@@ -260,6 +310,7 @@
                         start: function(event, ui) {
                             currentSlot = this.id;  // Update currentSlot with the ID of the resized element
                             console.log(`current park id ${currentSlot}:`);
+                            highlightSpot(parkingSpot);
                         },
                         resize: function(event, ui) {
                             const snapToGrid = 2;
@@ -271,34 +322,8 @@
 
                     // Add click event listener to update the checkboxes based on the slot type
                     parkingSpot.addEventListener('click', () => {
-                        const disabledCheckbox = document.getElementById('disabled-checkbox');
-                        const motorcycleCheckbox = document.getElementById('motorcycle-checkbox');
-                        const electricCheckbox = document.getElementById('electric-checkbox');
-                        currentSlot = spot; // Update the global currentSlot variable
-
-                        // Reset checkboxes
-                        disabledCheckbox.checked = false;
-                        motorcycleCheckbox.checked = false;
-                        electricCheckbox.checked = false;
-
-                        // Get the type from Firebase data
-                        const slotType = data[spot].K; // Assuming 'K' stores the type
-
-                        // Update checkboxes based on slotType
-                        switch (slotType) {
-                            case 2:
-                                disabledCheckbox.checked = true;
-                                break;
-                            case 3:
-                                electricCheckbox.checked = true;
-                                break;
-                            case 4:
-                                motorcycleCheckbox.checked = true;
-                                break;
-                            default:
-                                // Regular slot, no checkboxes checked
-                                break;
-                        }
+                        updateMenuBaseOnSpot(spot, data);
+                        highlightSpot(parkingSpot);
                     });
                 }
             }
@@ -307,12 +332,17 @@
             $(".parking-spot").draggable({
                 containment: ".parking-lot",
                 drag: function(event, ui) {
+                    // console.log(`${ui}`);
                     const snapToGrid = 2;
                     // Snap the position to 5-pixel increments
                     ui.position.left = Math.round(ui.position.left / snapToGrid) * snapToGrid;
                     ui.position.top = Math.round(ui.position.top / snapToGrid) * snapToGrid;
                     currentSlot = this.id;
-                    console.log(`current park id ${currentSlot}:`);
+                    console.log(`current park id: ${currentSlot}`);
+
+                    updateMenuBaseOnSpot(currentSlot, data);
+                    highlightSpot(this);
+                    
                 }
             });
             
@@ -327,10 +357,6 @@
                 <button onclick="updateAd()">Update Ad</button>
             `;
         }
-
-        // Declare the currentFloor variable to track the current floor
-        let currentFloor = 0; // Default to floor 0
-        let currentSlot = -1; // Default to park -1 (not park)
 
         // Update the current floor in the loadParkingLot function
         function loadParkingLot(floor) {
@@ -597,8 +623,7 @@
 
             // Apply button event listener
             applyButton.addEventListener('click', () => {
-                const selectedSlotId = currentSlot;
-                if (selectedSlotId != -1) {
+                if (currentSlot != -1) {
                     // Determine the property type based on the checkboxes
                     let type = 1; // Default to regular
                     let checkedCount = 0;
@@ -627,7 +652,7 @@
 
                     // Update the slot in the database
                     const currentFloor = getCurrentFloor(); // Function to get the current floor
-                    const slotPath = `floor${currentFloor}/${selectedSlotId}/K`;
+                    const slotPath = `floor${currentFloor}/${currentSlot}/K`;
 
                     const updates = {};
                     updates[slotPath] = type;
@@ -638,7 +663,13 @@
                         console.error("Error updating slot type:", error);
                     });
 
-                    console.log('Updating slot', selectedSlotId, 'with properties', properties);
+                    console.log('Updating slot', currentSlot, 'with properties', properties);
+
+                    currentSlot = -1; // Reset the currentSlot after updating
+                    // Reset the checkboxes
+                    disabledCheckbox.checked = false;
+                    motorcycleCheckbox.checked = false;
+                    electricCheckbox.checked = false;
                 }
                 else
                 {
