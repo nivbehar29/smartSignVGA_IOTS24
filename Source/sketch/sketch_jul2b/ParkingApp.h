@@ -8,6 +8,7 @@
 #include "fabui.h"
 
 #include "OptionsFrame.h"
+#include "ExitFrame.h"
 
 #include "DBAux.h"
 extern DB_parkingLot* db_parkingLot;
@@ -25,8 +26,10 @@ class ParkingApp : public uiApp {
     JSONVar* weatherObj;
 
     uiButton* StartButton;
+    uiButton* ExitButton;
 
     OptionsFrame* optionsFrame;
+    ExitFrame* exitFrame;
 
     uiLabel* WelcomeText;
     
@@ -68,12 +71,23 @@ class ParkingApp : public uiApp {
 
       // Start button
       int startTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Start");
-      int buttonSizeX = startTextExt + 20;
-      StartButton = new uiButton(rootWindow(), "Start", Point(ResX/2 - buttonSizeX/2, ResY/2), Size(buttonSizeX, 20));
+      int startButtonSizeX = startTextExt + 20;
+      StartButton = new uiButton(rootWindow(), "Start", Point(ResX/2 - startButtonSizeX/2, ResY/2), Size(startButtonSizeX, 20));
       StartButton->onClick = [&]() {  
                                       optionsFrame->showFrame();
                                       setActiveWindow(optionsFrame->frame);
                                     };
+
+      exitFrame = new ExitFrame(rootWindow(), ResX, ResY, app());
+      // Exit button
+      // int exitTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Exit");
+      int exitButtonSizeX = startButtonSizeX;
+      int startButtonHeight = 14;
+      ExitButton = new uiButton(rootWindow(), "Exit", Point(ResX/2 - exitButtonSizeX/2, ResY/2 + startButtonHeight + 10), Size(exitButtonSizeX, 20));
+      ExitButton->onClick = [&]() {  
+                                    exitFrame->showFrame();
+                                    setActiveWindow(exitFrame->frame);
+                                  };
 
       // Restart button
       int restartTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Restart");

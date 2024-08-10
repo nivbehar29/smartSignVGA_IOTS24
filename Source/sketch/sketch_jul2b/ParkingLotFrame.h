@@ -124,19 +124,25 @@ public:
     int floor_id;
     int choosen_slot = AssignParkingSlot(floor_id);  // if the function succeed, it will assign a value to the floor_id and return the parking slot id , else - return -1
 
-    if(choosen_slot != -1)
+    if(choosen_slot != -1 && current_floor_id != -1)
     {
       app->showWindow(frame, 0);
-      if(current_floor_id != -1)
-      {
-        freeFloorArrSlot(current_floor_id);
-        current_floor_id = -1;
-      }
+      Serial.println("Calling freeFloorArrSlot()");
+      freeFloorArrSlot(current_floor_id);
+      current_floor_id = -1;
 
       if(db_parkingLot != nullptr)
       {
         db_parkingLot->floors[floor_id].slots[choosen_slot].is_taken = true;
         db_parkingLot->floors[floor_id].slots[choosen_slot].is_changed = true;
+
+        // Show a massage to the customer
+        String choosen_slot_str =  String(choosen_slot);
+        if(choosen_slot_str.length() == 1)
+          choosen_slot_str = String(0) + choosen_slot_str;
+        String msg_str = "Your parking code is: " + String(floor_id) + choosen_slot_str + ". Please save it.";
+        Serial.println(msg_str);
+        app->messageBox(nullptr, msg_str.c_str(), "Ok", nullptr, nullptr, uiMessageBoxIcon::Info); 
 
         app->quit(app->exitCode);
       }
@@ -145,7 +151,7 @@ public:
     {
       // Show a massage to the customer
       Serial.println("Please select a slot");
-      uiMessageBoxResult msg_result = app->messageBox(nullptr, "Please select a slot", "Ok");                                          
+      app->messageBox(nullptr, "Please select a slot", "Ok", nullptr, nullptr, uiMessageBoxIcon::Error);                                          
     }
   }
 

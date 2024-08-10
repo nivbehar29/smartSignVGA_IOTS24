@@ -1,5 +1,4 @@
 #include "fabgl.h"
-#include "bitmapsWarehouse.h"
 #include "fabui.h"
 
 #include "WifiMngr.h"
