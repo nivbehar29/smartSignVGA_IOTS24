@@ -262,6 +262,17 @@
             const parkingLotRect = parkingLot.getBoundingClientRect(); // Get container dimensions
             const borderWidth = parseInt(window.getComputedStyle(parkingLot).borderWidth, 10);
 
+            // Highlight the corresponding floor tab
+            const tabsContainer = document.getElementById('tabs');
+            const tabs = tabsContainer.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                if (tabs[i].innerText === `Floor ${floor}`) {
+                    tabs[i].classList.add('active');
+                } else {
+                    tabs[i].classList.remove('active');
+                }
+            }
+
             for (let spot in data) {
                 if (isParkSlotData(spot)) {  // Ensure we only handle parking slots
                     const isTaken = data[spot].t;
