@@ -4,6 +4,7 @@
 #pragma once
 
 #include "fabgl.h"
+#include "fabui.h"
 #include "GeneralFrame.h"
 #include "ParkingLotFrame.h"
 #include "FloorFrame.h"
@@ -98,17 +99,13 @@ public:
       // 2 - disabled
       // 3 - electric
       // 4 - motorcycle
-      uiLabel* u = new uiLabel(ChooseButton, type_cstr, Point(0, 0), Size(typeTextExt, 14), true);
+      uiLabel* u = new uiLabel(ChooseButton, type_cstr, Point(3, 5), Size(typeTextExt, 14), true);
+      // uiLabel* u = new uiLabel(ChooseButton, type_cstr, Point(width / 2 - typeTextExt / 2, 5));
       
       if(taken || type != selectedParkingType)
       {
         SetGroupTaken();
         ChooseButton->setChecked(true);
-        ChooseButton->checkBoxStyle().checkedBackgroundColor=TAKEN_COL;
-        ChooseButton->checkBoxStyle().backgroundColor=TAKEN_COL;
-        ChooseButton->checkBoxStyle().foregroundColor=TAKEN_COL; 
-        ChooseButton->checkBoxStyle().mouseOverBackgroundColor=TAKEN_COL;
-        ChooseButton->checkBoxStyle().mouseOverForegroundColor=TAKEN_COL;
       }
       else
       {
@@ -127,14 +124,20 @@ public:
 
     void SetGroupTaken()
     {
-      // set in 'taken' park slots group
+      // Set in 'taken' park slots group
       ChooseButton->setGroupIndex(-1);
 
-      // change the desired park slot color to 'taken' color 
+      // Change the desired park slot color to 'taken' color 
       ChooseButton->checkBoxStyle().checkedBackgroundColor = TAKEN_COL;
+      ChooseButton->checkBoxStyle().backgroundColor=TAKEN_COL;
       ChooseButton->checkBoxStyle().foregroundColor=TAKEN_COL;
       ChooseButton->checkBoxStyle().mouseOverBackgroundColor=TAKEN_COL;
       ChooseButton->checkBoxStyle().mouseOverForegroundColor=TAKEN_COL;
+
+      // Set button uncheckable
+      fabgl::uiWindowProps& props = ChooseButton->windowProps();
+      props.activable = 0;
+      props.focusable = 0;
     }
     
     void uncheckNotTaken() 
