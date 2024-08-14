@@ -207,20 +207,9 @@ public:
 
     if(floor_id != current_floor_id)
     {
-      // if this is the first time we are showing this floor, initiate it.
-      if (FloorArr[floor_id].floor_frame == nullptr) {
-        // set callback function to be called when a park slot has been clicked
-        auto func = [&, this]() {
-          this->uncheckParkingSlots();
-        };
-
-        // create a new floor fram and send the CB function to it
-        FloorArr[floor_id].floor_frame = new FloorFrame(frame, ResX, ResY, app, floor_id, func);
-      }
-
       int last_floor_id = current_floor_id;
 
-      // Hide the current floor and show the new floor
+      // Hide and free the current floor
       if (current_floor_id != floor_id) {
         if (current_floor_id >= 0 && FloorArr[current_floor_id].floor_frame != nullptr) {
           // Hide current floor
@@ -229,6 +218,17 @@ public:
           // Delete last floor frame to save memory
           freeFloorArrSlot(last_floor_id);
         }
+      }
+
+      // Create and show the new floor
+      if (FloorArr[floor_id].floor_frame == nullptr) {
+        // set callback function to be called when a park slot has been clicked
+        auto func = [&, this]() {
+          this->uncheckParkingSlots();
+        };
+
+        // create a new floor frame and send the CB function to it
+        FloorArr[floor_id].floor_frame = new FloorFrame(frame, ResX, ResY, app, floor_id, func);
 
         // Set selected parking type to the new floor
         FloorArr[floor_id].floor_frame->setSelectedParkingType(selectedParkingType);

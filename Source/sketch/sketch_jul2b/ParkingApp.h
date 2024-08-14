@@ -82,12 +82,14 @@ class ParkingApp : public uiApp {
       StartButton->buttonStyle().textColor=RGB888(255,255,255);
       StartButton->buttonStyle().textFont = &fabgl::FONT_std_16;
       StartButton->buttonStyle().backgroundColor = RGB888(0,153,153);
+
       exitFrame = new ExitFrame(rootWindow(), ResX, ResY, app());
+      
       // Exit button
       // int exitTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Exit");
       int exitButtonSizeX = startButtonSizeX;
       int startButtonHeight = 16;
-      ExitButton = new uiButton(rootWindow(), "Exit ", Point(ResX/2 - exitButtonSizeX/2, ResY/2 + startButtonHeight + 10), Size(exitButtonSizeX, 30));
+      ExitButton = new uiButton(rootWindow(), "Exit  ", Point(ResX/2 - exitButtonSizeX/2, ResY/2 + startButtonHeight + 10), Size(exitButtonSizeX, 30));
       ExitButton->buttonStyle().textFont = &fabgl::FONT_std_16;
       ExitButton->buttonStyle().textColor = RGB888(255,255,255);
       ExitButton->buttonStyle().backgroundColor = RGB888(153,0,0);

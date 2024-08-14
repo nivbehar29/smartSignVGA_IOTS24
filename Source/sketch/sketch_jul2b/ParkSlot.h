@@ -32,6 +32,7 @@ public:
     fabgl::Canvas* canvas;
     fabgl::uiFrame* frame;
     uiCheckBox* ChooseButton;
+    uiLabel* slotUiLabel;
 
     // int taken;
 
@@ -79,46 +80,26 @@ public:
         //code=db_parkingLot->floors[floorId].slots[slotId].slot_code;
       }
 
-
-      // int offset_y = 30;
-      String type_str;
-      if(type == TYPE_REGULAR)
-        type_str = "Regular";
-      else if(type == TYPE_DISABLED)
-        type_str = "Disabled";
-      else if(type == TYPE_ELECTRIC)
-        type_str = "Electric";
-      else if(type == TYPE_MOTORCYCLE)
-        type_str = "Motor";
-
-      const char* type_cstr = type_str.c_str();
-      
-      // int len = strlen(code.c_str());
-      // char* type_cstr_t = (char*)malloc(sizeof(char)*len);
-      // strcpy(type_cstr_t,code.c_str());
-      // const char* type_cstr=type_cstr_t;
-
-       int typeTextExt = calcWidthOfText(&fabgl::FONT_std_14, type_cstr);
-
-      // Size ChooseButtonSize(ChooseButtonExt + 10, 20);
-      // ChooseButton = new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
       ChooseButton = new uiCheckBox(frame, Point(pos_x, pos_y), Size(width, height), uiCheckBoxKind::RadioButton);
-
-      // add label for the type of the parking slot
-      // 1 - regular
-      // 2 - disabled
-      // 3 - electric
-      // 4 - motorcycle
-
-     
       
-      // int len = strlen(code.c_str());
-      // char* new_type_cstr = (char*)malloc(sizeof(char)*len);
-      // strcpy(new_type_cstr,code.c_str());
-      // const char* new_type_cstr_t=new_type_cstr;
-      uiLabel* u = new uiLabel(ChooseButton, type_cstr, Point(3, 5), Size(typeTextExt, 14), true);
-      // uiLabel* u = new uiLabel(ChooseButton, type_cstr, Point(width / 2 - typeTextExt / 2, 5));
+
+      // Add a label for the slot - floor id + slot id
+      String slot_id_label = String(slotId);
+      if(slotId < 10)
+      {
+        // In case the slot id is 1 digit number - add a zero before it
+        slot_id_label = String("0") + slot_id_label;
+      }
       
+        
+      String slot_label = String(floorId) + slot_id_label;
+      slot_label = " " + slot_label + " ";
+      const char* slot_label_cstr = slot_label.c_str();
+      int slot_label_TextExt = calcWidthOfText(&fabgl::FONT_std_14, slot_label_cstr);
+
+      slotUiLabel = new uiLabel(ChooseButton, slot_label_cstr, Point(width / 2 - slot_label_TextExt / 2 ,0), Size(slot_label_TextExt, 14), true);
+      slotUiLabel->labelStyle().backgroundColor = RGB888(255,255,255);
+
       if(taken || (type != selectedParkingType && !(selectedParkingType == TYPE_DISABLED && type == TYPE_REGULAR)))
       {
         SetGroupTaken();

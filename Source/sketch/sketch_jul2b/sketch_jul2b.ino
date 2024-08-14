@@ -53,10 +53,10 @@ void printMem()
 }
 
 void setup(){
+  Serial.begin(115200);  // Start the serial communication
+
   Serial.println("Memory at setup():");
   printMem();
-
-  Serial.begin(115200);  // Start the serial communication
 
   // Setup display controller
   // DisplayController = new fabgl::VGA16Controller();
