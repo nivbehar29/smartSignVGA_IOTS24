@@ -52,13 +52,15 @@ class ParkingApp : public uiApp {
       // set root window background color to dark green
       // 1000 1100 1100 0001 1111 1111
       // color picker: https://codepen.io/kevinli/pen/GRpXOvo
-      rootWindow()->frameStyle().backgroundColor = RGB888(140, 193, 255);
+      rootWindow()->frameStyle().backgroundColor = RGB888(0, 0, 0);
 
       // Welcome Text
       int textExt = calcWidthOfText(&fabgl::FONT_std_24, "Welcome To The Parking Lot!");
-      WelcomeText = new uiLabel(rootWindow(), "Welcome To The Parking Lot!", Point(ResX / 2 - textExt / 2, 150));
+      WelcomeText = new uiLabel(rootWindow(), "Welcome To The Parking Lot!", Point(ResX / 2 - textExt / 2, 160));
       WelcomeText->labelStyle().backgroundColor = rootWindow()->frameStyle().backgroundColor;
-      WelcomeText->labelStyle().textFont        = &fabgl::FONT_std_24;
+      WelcomeText->labelStyle().textColor =RGB888(255,255,255);
+      WelcomeText->labelStyle().textFont = &fabgl::FONT_10x20 ;
+      //WelcomeText->labelStyle().textFont        = &fabgl::FONT_std_24;
       WelcomeText->update();
 
       // frame where to put buttons
@@ -70,20 +72,26 @@ class ParkingApp : public uiApp {
       optionsFrame = new OptionsFrame(rootWindow(), ResX, ResY, app());
 
       // Start button
-      int startTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Start");
-      int startButtonSizeX = startTextExt + 20;
-      StartButton = new uiButton(rootWindow(), "Start", Point(ResX/2 - startButtonSizeX/2, ResY/2), Size(startButtonSizeX, 20));
-      StartButton->onClick = [&]() {  
+      int startTextExt = calcWidthOfText(&fabgl::FONT_std_16, "Start ");
+      int startButtonSizeX = startTextExt + 30;
+      StartButton = new uiButton(rootWindow(), "Start ", Point(ResX/2 - startButtonSizeX/2, ResY/2 - 10), Size(startButtonSizeX, 30));
+           StartButton->onClick = [&]() {  
                                       optionsFrame->showFrame();
                                       setActiveWindow(optionsFrame->frame);
                                     };
-
+      StartButton->buttonStyle().textColor=RGB888(255,255,255);
+      StartButton->buttonStyle().textFont = &fabgl::FONT_std_16;
+      StartButton->buttonStyle().backgroundColor = RGB888(0,153,153);
       exitFrame = new ExitFrame(rootWindow(), ResX, ResY, app());
       // Exit button
       // int exitTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Exit");
       int exitButtonSizeX = startButtonSizeX;
-      int startButtonHeight = 14;
-      ExitButton = new uiButton(rootWindow(), "Exit", Point(ResX/2 - exitButtonSizeX/2, ResY/2 + startButtonHeight + 10), Size(exitButtonSizeX, 20));
+      int startButtonHeight = 16;
+      ExitButton = new uiButton(rootWindow(), "Exit ", Point(ResX/2 - exitButtonSizeX/2, ResY/2 + startButtonHeight + 10), Size(exitButtonSizeX, 30));
+      ExitButton->buttonStyle().textFont = &fabgl::FONT_std_16;
+      ExitButton->buttonStyle().textColor = RGB888(255,255,255);
+      ExitButton->buttonStyle().backgroundColor = RGB888(153,0,0);
+      //ExitButton->buttonStyle().textFont =
       ExitButton->onClick = [&]() {  
                                     exitFrame->showFrame();
                                     setActiveWindow(exitFrame->frame);
@@ -128,7 +136,7 @@ class ParkingApp : public uiApp {
       if(db_parkingLot != nullptr && db_parkingLot->movingAdv != nullptr)
         moving_adv = db_parkingLot->movingAdv;
       MvoingAdvtextExt = calcWidthOfText(&fabgl::FONT_std_24, moving_adv);
-      MovingAdvText = new uiLabel(rootWindow(), moving_adv, Point(ResX, 300));
+      MovingAdvText = new uiLabel(rootWindow(), moving_adv, Point(ResX, 100));
       MovingAdvText->labelStyle().backgroundColor = RGB888(255,255,255);
       MovingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
       MovingAdvText->update();

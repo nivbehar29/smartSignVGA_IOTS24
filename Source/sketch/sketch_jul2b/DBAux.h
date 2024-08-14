@@ -15,6 +15,7 @@ struct DB_parkSlot
   int width;
   int height;
   int type;
+  //String slot_code;
 };
 
 struct DB_floor

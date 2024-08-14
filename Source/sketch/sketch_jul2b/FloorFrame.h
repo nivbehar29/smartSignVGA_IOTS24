@@ -56,7 +56,7 @@ public:
 
       sprintf(floor_text, "floor %d", floor_id);
 
-      frame = new uiFrame(parent, nullptr, Point(65, 20), Size(ResX - 70, ResY-30), false);
+      frame = new uiFrame(parent, nullptr, Point(65, 0), Size(ResX - 70, ResY), false);
 
       // Frame properties
       fabgl::uiFrameProps& props = frame->frameProps();
@@ -104,6 +104,7 @@ public:
         for(int i = 0; i < park_slots_num; i++)
         {
           int width = 50;
+          //park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 120, floor_id, i, selectedParkingType, onParkSlotChooseButtonClickCB);
           park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 120, floor_id, i, selectedParkingType, onParkSlotChooseButtonClickCB);
           offset_x += width + 5;
         }

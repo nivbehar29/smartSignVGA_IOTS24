@@ -63,6 +63,7 @@ public:
       int pos_x = x;
       int pos_y = y;
       int type = 0;
+      //String code;
 
       int floorId = floorId_t;
       int slotId = slotId_t;
@@ -75,6 +76,7 @@ public:
         width = db_parkingLot->floors[floorId].slots[slotId].width;
         height = db_parkingLot->floors[floorId].slots[slotId].height;
         type = db_parkingLot->floors[floorId].slots[slotId].type;
+        //code=db_parkingLot->floors[floorId].slots[slotId].slot_code;
       }
 
 
@@ -88,8 +90,16 @@ public:
         type_str = "Electric";
       else if(type == TYPE_MOTORCYCLE)
         type_str = "Motor";
+
       const char* type_cstr = type_str.c_str();
-      int typeTextExt = calcWidthOfText(&fabgl::FONT_std_14, type_cstr);
+      
+      // int len = strlen(code.c_str());
+      // char* type_cstr_t = (char*)malloc(sizeof(char)*len);
+      // strcpy(type_cstr_t,code.c_str());
+      // const char* type_cstr=type_cstr_t;
+
+       int typeTextExt = calcWidthOfText(&fabgl::FONT_std_14, type_cstr);
+
       // Size ChooseButtonSize(ChooseButtonExt + 10, 20);
       // ChooseButton = new uiCheckBox(frame, Point(x + width/2 - ChooseButtonSize.width/2, y + height - ChooseButtonSize.height - 5), Size(50, 120), uiCheckBoxKind::RadioButton);
       ChooseButton = new uiCheckBox(frame, Point(pos_x, pos_y), Size(width, height), uiCheckBoxKind::RadioButton);
@@ -99,10 +109,17 @@ public:
       // 2 - disabled
       // 3 - electric
       // 4 - motorcycle
+
+     
+      
+      // int len = strlen(code.c_str());
+      // char* new_type_cstr = (char*)malloc(sizeof(char)*len);
+      // strcpy(new_type_cstr,code.c_str());
+      // const char* new_type_cstr_t=new_type_cstr;
       uiLabel* u = new uiLabel(ChooseButton, type_cstr, Point(3, 5), Size(typeTextExt, 14), true);
       // uiLabel* u = new uiLabel(ChooseButton, type_cstr, Point(width / 2 - typeTextExt / 2, 5));
       
-      if(taken || type != selectedParkingType)
+      if(taken || (type != selectedParkingType && !(selectedParkingType == TYPE_DISABLED && type == TYPE_REGULAR)))
       {
         SetGroupTaken();
         ChooseButton->setChecked(true);

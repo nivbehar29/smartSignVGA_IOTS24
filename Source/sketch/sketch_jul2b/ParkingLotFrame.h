@@ -48,7 +48,7 @@ public:
     ResX = ResX_t;
     ResY = ResY_t;
     app = app_t;
-    frame = new uiFrame(parent, "Parking Lot Frame", Point(0, 0), Size(ResX, ResY), false);
+    frame = new uiFrame(parent, "", Point(0, 0), Size(ResX, ResY), false);
 
     FloorArr = (parking_floor*)malloc(num_of_floors * sizeof(parking_floor));
 
@@ -66,6 +66,9 @@ public:
     int finish_y_top_offset = 40;
     int finish_x_left_offset = 10;
     uiButton* FinishButton = new uiButton(frame, "Finish", Point(finish_x_left_offset, ResY - FinishButtonSize.height - finish_y_top_offset), FinishButtonSize);
+    FinishButton->buttonStyle().textColor=RGB888(255,255,255);
+    //FinishButton->buttonStyle().textFont = &fabgl::FONT_std_16;
+    FinishButton->buttonStyle().backgroundColor = RGB888(0,153,153);
     FinishButton->onClick = [&]() {
       onFinishButtonClicked();
     };

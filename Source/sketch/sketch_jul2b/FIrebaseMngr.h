@@ -263,6 +263,7 @@ public:
                 db_parkingLot->floors[i].slots[j].width = myObject[parkSlot_s]["Dim"]["w"];
                 db_parkingLot->floors[i].slots[j].height = myObject[parkSlot_s]["Dim"]["h"];
                 db_parkingLot->floors[i].slots[j].type = myObject[parkSlot_s]["K"];
+                //db_parkingLot->floors[i].slots[j].slot_code = String(i)+String(j);
               }
 
             }
