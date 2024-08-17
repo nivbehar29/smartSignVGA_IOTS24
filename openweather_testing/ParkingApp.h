@@ -7,7 +7,14 @@
 #include "fabgl.h"
 #include "fabui.h"
 
-// extern JSONVar myObject;
+#include "Bitmaps.h"
+
+
+#define IMAGE_WIDTH 100
+#define IMAGE_HEIGHT 100
+
+uint8_t weatherIconBuffer[IMAGE_WIDTH * IMAGE_HEIGHT];
+Bitmap weatherIconBitmap;
 
 class ParkingApp : public uiApp {
 
@@ -28,7 +35,7 @@ class ParkingApp : public uiApp {
       // set root window background color to dark green
       // 1000 1100 1100 0001 1111 1111
       // color picker: https://codepen.io/kevinli/pen/GRpXOvo
-      rootWindow()->frameStyle().backgroundColor = RGB888(0, 0, 0);
+      rootWindow()->frameStyle().backgroundColor = RGB888(0, 0, 255);
 
       // Welcome Text
       int textExt = calcWidthOfText(&fabgl::FONT_std_24, "Welcome To The Parking Lot!");
@@ -60,6 +67,17 @@ class ParkingApp : public uiApp {
         dtostrf(fahrenheitToCelcius((*weatherObj)["main"]["temp"]), 6, 2, buffer);  // Convert float to string with 2 decimal places
 
         uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200 , 100));
+
+        weatherIconBitmap = Bitmap(IMAGE_WIDTH, IMAGE_HEIGHT, weatherIconBuffer, PixelFormat::RGBA2222);
+        uiImage* weatherIconImage = new uiImage(rootWindow(), &weatherIconBitmap, Point(ResX / 2, ResY / 2), Size(IMAGE_WIDTH, IMAGE_HEIGHT), true);
+
+        // for (int i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        //   Serial.print("weatherIconBuffer[");
+        //   Serial.print(i);
+        //   Serial.print("]: ");
+        //   Serial.println(weatherIconBuffer[i], BIN); // Print in binary to verify
+        // }
+
       }
 
     }
