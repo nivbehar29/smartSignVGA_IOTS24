@@ -9,12 +9,10 @@
 
 #include "Bitmaps.h"
 
+#include "Weather.h"
 
-#define IMAGE_WIDTH 100
-#define IMAGE_HEIGHT 100
-
-uint8_t weatherIconBuffer[IMAGE_WIDTH * IMAGE_HEIGHT];
 Bitmap weatherIconBitmap;
+extern uint8_t weatherIconBuffer[];
 
 class ParkingApp : public uiApp {
 
