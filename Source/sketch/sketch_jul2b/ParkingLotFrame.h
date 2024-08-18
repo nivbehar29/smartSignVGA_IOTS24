@@ -62,8 +62,8 @@ public:
 
     // Finish Button
     int FinishTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Finish");
-    Size FinishButtonSize(50, 20);
-    int finish_y_top_offset = 40;
+    Size FinishButtonSize(50, 40);
+    int finish_y_top_offset = 70;
     int finish_x_left_offset = 10;
     uiButton* FinishButton = new uiButton(frame, "Finish", Point(finish_x_left_offset, ResY - FinishButtonSize.height - finish_y_top_offset), FinishButtonSize);
     FinishButton->buttonStyle().textColor=RGB888(255,255,255);
@@ -75,7 +75,7 @@ public:
 
     // Cancel Button
     int CancelTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Cancel");
-    Size CancelButtonSize(50, 20);
+    Size CancelButtonSize(50, 40);
     int cancel_y_top_offset = 10;
     int cancel_x_left_offset = 10;
     uiButton* CancelButton = new uiButton(frame, "Cancel", Point(cancel_x_left_offset, ResY - CancelButtonSize.height - cancel_y_top_offset - FinishButtonSize.height - finish_y_top_offset), CancelButtonSize);

@@ -239,7 +239,7 @@ public:
             
             if(is_data)
             {
-              Serial.printf("Get json... %s\n",  fbdo.to<FirebaseJson>().raw());
+              // Serial.printf("Get json... %s\n",  fbdo.to<FirebaseJson>().raw());
               FirebaseJson json = fbdo.to<FirebaseJson>();
               String jsonString;
               json.toString(jsonString);

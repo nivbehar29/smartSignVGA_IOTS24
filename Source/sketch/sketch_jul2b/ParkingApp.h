@@ -72,9 +72,9 @@ class ParkingApp : public uiApp {
       optionsFrame = new OptionsFrame(rootWindow(), ResX, ResY, app());
 
       // Start button
-      int startTextExt = calcWidthOfText(&fabgl::FONT_std_16, "Start ");
+      int startTextExt = calcWidthOfText(&fabgl::FONT_std_16, "Enter ");
       int startButtonSizeX = startTextExt + 30;
-      StartButton = new uiButton(rootWindow(), "Start ", Point(ResX/2 - startButtonSizeX/2, ResY/2 - 10), Size(startButtonSizeX, 30));
+      StartButton = new uiButton(rootWindow(), "Enter ", Point(ResX/2 - startButtonSizeX/2, ResY/2 - 10), Size(startButtonSizeX, 30));
            StartButton->onClick = [&]() {  
                                       optionsFrame->showFrame();
                                       setActiveWindow(optionsFrame->frame);
@@ -89,7 +89,7 @@ class ParkingApp : public uiApp {
       // int exitTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Exit");
       int exitButtonSizeX = startButtonSizeX;
       int startButtonHeight = 16;
-      ExitButton = new uiButton(rootWindow(), "Exit  ", Point(ResX/2 - exitButtonSizeX/2, ResY/2 + startButtonHeight + 10), Size(exitButtonSizeX, 30));
+      ExitButton = new uiButton(rootWindow(), "Leave ", Point(ResX/2 - exitButtonSizeX/2, ResY/2 + startButtonHeight + 10), Size(exitButtonSizeX, 30));
       ExitButton->buttonStyle().textFont = &fabgl::FONT_std_16;
       ExitButton->buttonStyle().textColor = RGB888(255,255,255);
       ExitButton->buttonStyle().backgroundColor = RGB888(153,0,0);
@@ -109,16 +109,23 @@ class ParkingApp : public uiApp {
 
       if(weatherObj != nullptr)
       {
-        uiLabel* weather_city_label = new uiLabel(rootWindow(), "City:", Point(ResX / 2 + 200, 10));
-        uiLabel* weather_city_info = new uiLabel(rootWindow(), "Haifa", Point(ResX / 2 + 200 , 40));
-        uiLabel* weather_temperature_label = new uiLabel(rootWindow(), "Temperature:", Point(ResX / 2 + 200 , 70));
+        int weather_city_label_text_ext = calcWidthOfText(&fabgl::FONT_std_16, "City: Haifa");
+        uiLabel* weather_city_label = new uiLabel(rootWindow(), "City: Haifa", Point(ResX / 2 - weather_city_label_text_ext / 2, 10));
+
+        String temperature_str = "Temperature: ";
+
+        // uiLabel* weather_temperature_label = new uiLabel(rootWindow(), "Temperature:", Point(ResX / 2, 70));
 
         char buffer[20];  // Make sure this buffer is large enough to hold the converted value
 
         // dtostrf(float value, minimum width, precision, buffer)
         dtostrf(fahrenheitToCelcius((*weatherObj)["main"]["temp"]), 6, 2, buffer);  // Convert float to string with 2 decimal places
 
-        uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200 , 100));
+        temperature_str = temperature_str + String(buffer);
+        int weather_temperature_info_text_ext = calcWidthOfText(&fabgl::FONT_std_16, temperature_str.c_str());
+
+
+        uiLabel* weather_temperature_info = new uiLabel(rootWindow(), temperature_str.c_str(), Point(ResX / 2 - weather_temperature_info_text_ext / 2, 40));
       }
 
       // Flashing Advertisement Text

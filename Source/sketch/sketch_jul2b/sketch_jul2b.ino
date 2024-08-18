@@ -70,11 +70,12 @@ void setup(){
 
 }
 
-bool done_with_weather = true;
+bool done_with_weather = false;
 bool weather_succeeded = false;
 JSONVar myObject;
 extern DB_parkingLot* db_parkingLot;
 bool first_app_run = true;
+int quitCounter = 0;
 
 void loop() {
 
@@ -90,7 +91,7 @@ void loop() {
       String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&APPID=" + openWeatherMapApiKey;
       
       jsonBuffer = httpGETRequest(serverPath.c_str());
-      Serial.println(jsonBuffer);
+      // Serial.println(jsonBuffer);
       myObject = JSON.parse(jsonBuffer);
   
       // JSON.typeof(jsonVar) can be used to get the type of the var
@@ -107,16 +108,16 @@ void loop() {
         done_with_weather = true;
         weather_succeeded = true;
 
-        Serial.print("JSON object = ");
-        Serial.println(myObject);
-        Serial.print("Temperature: ");
-        Serial.println(myObject["main"]["temp"]);
-        Serial.print("Pressure: ");
-        Serial.println(myObject["main"]["pressure"]);
-        Serial.print("Humidity: ");
-        Serial.println(myObject["main"]["humidity"]);
-        Serial.print("Wind Speed: ");
-        Serial.println(myObject["wind"]["speed"]);
+        // Serial.print("JSON object = ");
+        // Serial.println(myObject);
+        // Serial.print("Temperature: ");
+        // Serial.println(myObject["main"]["temp"]);
+        // Serial.print("Pressure: ");
+        // Serial.println(myObject["main"]["pressure"]);
+        // Serial.print("Humidity: ");
+        // Serial.println(myObject["main"]["humidity"]);
+        // Serial.print("Wind Speed: ");
+        // Serial.println(myObject["wind"]["speed"]);
       }
     }
     else
@@ -185,6 +186,8 @@ void loop() {
     else
       ParkingApp(nullptr).runAsync(DisplayController, 3500).joinAsyncRun();
 
+    quitCounter++;
+
     Serial.println("Memory after quit app:");
     printMem();
 
@@ -232,8 +235,11 @@ void loop() {
 
     first_app_run = false;
 
-    // Serial.println("RESTART !!");
-    // ESP.restart();
+    if(quitCounter == 4)
+    {
+      Serial.println("RESTART !!");
+      ESP.restart();
+    }
 
     // // Kick off application and wait for it to quit
     // if(weather_succeeded)
