@@ -2,7 +2,7 @@
 
 #include <WiFi.h>
 #include "keys/openweathermap_key.h"
-// #include "pngle.h"
+#include "pngle.h"
 
 // Weather parameters
 String city = "Haifa";
@@ -12,99 +12,97 @@ String jsonBuffer;
 JSONVar myObject;
 
 const char* imageUrl = "http://openweathermap.org/img/wn/01n@2x.png";
-uint8_t* pngBuffer = nullptr;
-size_t pngBufferSize = 0;
 
 #define IMAGE_WIDTH 100
 #define IMAGE_HEIGHT 100
 //uint8_t weatherIconBuffer[IMAGE_WIDTH * IMAGE_HEIGHT];
 uint8_t* weatherIconBuffer = nullptr;
 
-// void pngle_on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4])
-// {
-//   if (x < IMAGE_WIDTH && y < IMAGE_HEIGHT)
-//   {
-//     int index = y * IMAGE_WIDTH + x;
+void pngle_on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4])
+{
+  if (x < IMAGE_WIDTH && y < IMAGE_HEIGHT)
+  {
+    int index = y * IMAGE_WIDTH + x;
 
-//     uint8_t r = (rgba[0] >> 6) & 0b11;
-//     uint8_t g = (rgba[1] >> 6) & 0b11;
-//     uint8_t b = (rgba[2] >> 6) & 0b11;
-//     uint8_t a = (rgba[3] >> 6) & 0b11;
+    uint8_t r = (rgba[0] >> 6) & 0b11;
+    uint8_t g = (rgba[1] >> 6) & 0b11;
+    uint8_t b = (rgba[2] >> 6) & 0b11;
+    uint8_t a = (rgba[3] >> 6) & 0b11;
 
-//     if(a == 0b00)
-//     {
-//       r = 0;
-//       g = 3;
-//       b = 0;
-//       a = 3;
-//     }
+    if(a == 0b00)
+    {
+      r = 0;
+      g = 3;
+      b = 0;
+      a = 3;
+    }
 
-//     weatherIconBuffer[index] = (a << 6) | (b << 4) | (g << 2) | r;
-//   }
-// }
+    weatherIconBuffer[index] = (a << 6) | (b << 4) | (g << 2) | r;
+  }
+}
 
-// void load_png(const char *url, double scale = 1.0)
-// {
-//   HTTPClient http;
+void load_png(const char *url, double scale = 1.0)
+{
+  HTTPClient http;
 
-//   http.begin(url);
+  http.begin(url);
 
-//   int httpCode = http.GET();
-//   if (httpCode != HTTP_CODE_OK) {
-//     Serial.printf("HTTP ERROR: %u\n", httpCode);
-//     http.end();
-//     return ;
-//   }
+  int httpCode = http.GET();
+  if (httpCode != HTTP_CODE_OK) {
+    Serial.printf("HTTP ERROR: %u\n", httpCode);
+    http.end();
+    return ;
+  }
 
-//   weatherIconBuffer = (uint8_t*) malloc(sizeof(uint8_t) * IMAGE_WIDTH * IMAGE_HEIGHT);
+  weatherIconBuffer = (uint8_t*) malloc(sizeof(uint8_t) * IMAGE_WIDTH * IMAGE_HEIGHT);
 
-//   int total = http.getSize();
+  int total = http.getSize();
 
-//   WiFiClient *stream = http.getStreamPtr();
+  WiFiClient *stream = http.getStreamPtr();
 
-//   pngle_t *pngle = pngle_new();
-//   pngle_set_draw_callback(pngle, pngle_on_draw);
-//   double g_scale = scale;
+  pngle_t *pngle = pngle_new();
+  pngle_set_draw_callback(pngle, pngle_on_draw);
+  double g_scale = scale;
 
-//   uint8_t buf[2048];
-//   int remain = 0;
-//   uint32_t timeout = millis();
-//   while (http.connected()  && (total > 0 || remain > 0)) {
+  uint8_t buf[2048];
+  int remain = 0;
+  uint32_t timeout = millis();
+  while (http.connected()  && (total > 0 || remain > 0)) {
 
-//     // Break out of loop after 10s
-//     if ((millis() - timeout) > 10000UL)
-//     {
-//       Serial.println("HTTP request timeout\n");
-//       break;
-//     }
+    // Break out of loop after 10s
+    if ((millis() - timeout) > 10000UL)
+    {
+      Serial.println("HTTP request timeout\n");
+      break;
+    }
 
-//     size_t size = stream->available();
+    size_t size = stream->available();
 
-//     if (!size) { delay(1); continue; }
+    if (!size) { delay(1); continue; }
 
-//     if (size > sizeof(buf) - remain) {
-//       size = sizeof(buf) - remain;
-//     }
+    if (size > sizeof(buf) - remain) {
+      size = sizeof(buf) - remain;
+    }
 
-//     int len = stream->readBytes(buf + remain, size);
-//     if (len > 0) {
-//       int fed = pngle_feed(pngle, buf, remain + len);
-//       if (fed < 0) {
-//         Serial.printf("ERROR: %s\n", pngle_error(pngle));
-//         break;
-//       }
-//       total -= len;
-//       remain = remain + len - fed;
-//       if (remain > 0) memmove(buf, buf + fed, remain);
-//     } else {
-//       delay(1);
-//     }
-//   }
+    int len = stream->readBytes(buf + remain, size);
+    if (len > 0) {
+      int fed = pngle_feed(pngle, buf, remain + len);
+      if (fed < 0) {
+        Serial.printf("ERROR: %s\n", pngle_error(pngle));
+        break;
+      }
+      total -= len;
+      remain = remain + len - fed;
+      if (remain > 0) memmove(buf, buf + fed, remain);
+    } else {
+      delay(1);
+    }
+  }
 
-//   pngle_destroy(pngle);
+  pngle_destroy(pngle);
 
-//   http.end();
-// }
+  http.end();
+}
 
 bool getWeatherDB()
 {
@@ -140,21 +138,9 @@ bool getWeatherDB()
       Serial.print("Wind Speed: ");
       Serial.println(myObject["wind"]["speed"]);
 
-      // String img_url = "http://openweathermap.org/img/wn/10d@2x.png";
+      String img_url = "http://openweathermap.org/img/wn/10d@2x.png";
 
-      // Serial.println("mem before downloading image:");
-      // printMem();
-
-      // load_png(img_url.c_str());
-
-      // Serial.println("mem after downloading image:");
-      // printMem();
-      
-
-
-      // Free the PNG buffer after decoding
-      // free(pngBuffer);
-      // pngBuffer = nullptr;
+      load_png(img_url.c_str());
 
       return true;
 

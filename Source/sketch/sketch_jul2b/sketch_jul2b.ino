@@ -56,6 +56,17 @@ void loop() {
   if(!done_with_weather)
   {
     weather_succeeded = getWeatherDB();
+
+    if(weather_succeeded)
+    {
+      if(isWeatherIconBitmapInitiated == false)
+      {
+        weatherIconBitmap = Bitmap(IMAGE_WIDTH, IMAGE_HEIGHT, weatherIconBuffer, PixelFormat::RGBA2222);
+        // free(weatherIconBuffer);
+        isWeatherIconBitmapInitiated = true;
+      }
+    }
+
     done_with_weather = true;
   }
 

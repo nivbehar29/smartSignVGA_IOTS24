@@ -16,6 +16,8 @@ extern DB_parkingLot* db_parkingLot;
 
 // Weather stuff
 Bitmap weatherIconBitmap;
+bool isWeatherIconBitmapInitiated = false;
+
 // extern uint8_t weatherIconBuffer[];
 extern uint8_t* weatherIconBuffer;
 
@@ -124,10 +126,8 @@ class ParkingApp : public uiApp {
 
         uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200 , 100));
 
-        if(weatherIconBuffer != nullptr)
+        if(isWeatherIconBitmapInitiated == true)
         {
-          weatherIconBitmap = Bitmap(IMAGE_WIDTH, IMAGE_HEIGHT, weatherIconBuffer, PixelFormat::RGBA2222);
-          free(weatherIconBuffer);
           uiImage* weatherIconImage = new uiImage(rootWindow(), &weatherIconBitmap, Point(ResX / 2, ResY / 2), Size(IMAGE_WIDTH, IMAGE_HEIGHT), true);
         }
       }
