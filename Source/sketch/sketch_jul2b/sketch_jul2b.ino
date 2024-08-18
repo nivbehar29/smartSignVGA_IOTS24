@@ -25,6 +25,8 @@ extern JSONVar myObject;
 bool done_with_weather = false;
 bool weather_succeeded = false;
 
+int quitCounter = 0;
+
 void printMem()
 {
   Serial.printf("Free 8bit: %d KiB\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
@@ -114,6 +116,9 @@ void loop() {
     else
       ParkingApp(nullptr).runAsync(DisplayController, 6000).joinAsyncRun();
 
+    // Increment quit counter
+    quitCounter++;
+
     Serial.println("Memory after quit app:");
     printMem();
 
@@ -161,14 +166,11 @@ void loop() {
 
     first_app_run = false;
 
-    // Serial.println("RESTART !!");
-    // ESP.restart();
-
-    // // Kick off application and wait for it to quit
-    // if(weather_succeeded)
-    //   ParkingApp(&myObject).runAsync(&DisplayController, 3500).joinAsyncRun();
-    // else
-    //   ParkingApp(nullptr).runAsync(&DisplayController, 3500).joinAsyncRun();
+    if(quitCounter == 5)
+    {
+      Serial.println("RESTART !!");
+      ESP.restart();
+    }
   }
 }
 

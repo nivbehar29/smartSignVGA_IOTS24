@@ -153,8 +153,8 @@ bool getWeatherDB()
 
 
       // Free the PNG buffer after decoding
-      free(pngBuffer);
-      pngBuffer = nullptr;
+      // free(pngBuffer);
+      // pngBuffer = nullptr;
 
       return true;
 
