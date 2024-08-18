@@ -6,14 +6,18 @@
 
 #include "fabgl.h"
 #include "fabui.h"
-
 #include "OptionsFrame.h"
 #include "ExitFrame.h"
-
+#include "Weather.h"
 #include "DBAux.h"
+
+// Parking Lot Database
 extern DB_parkingLot* db_parkingLot;
 
-// extern JSONVar myObject;
+// Weather stuff
+Bitmap weatherIconBitmap;
+// extern uint8_t weatherIconBuffer[];
+extern uint8_t* weatherIconBuffer;
 
 class ParkingApp : public uiApp {
 
@@ -119,6 +123,13 @@ class ParkingApp : public uiApp {
         dtostrf(fahrenheitToCelcius((*weatherObj)["main"]["temp"]), 6, 2, buffer);  // Convert float to string with 2 decimal places
 
         uiLabel* weather_temperature_info = new uiLabel(rootWindow(), buffer, Point(ResX / 2 + 200 , 100));
+
+        if(weatherIconBuffer != nullptr)
+        {
+          weatherIconBitmap = Bitmap(IMAGE_WIDTH, IMAGE_HEIGHT, weatherIconBuffer, PixelFormat::RGBA2222);
+          free(weatherIconBuffer);
+          uiImage* weatherIconImage = new uiImage(rootWindow(), &weatherIconBitmap, Point(ResX / 2, ResY / 2), Size(IMAGE_WIDTH, IMAGE_HEIGHT), true);
+        }
       }
 
       // Flashing Advertisement Text
