@@ -94,6 +94,7 @@ public:
         floor_canvas = frame->canvas();
         park_slots = (ParkSlot**) malloc(sizeof(ParkSlot*) * park_slots_num);
 
+        // Place parking slots
         int offset_x = 10;
         for(int i = 0; i < park_slots_num; i++)
         {

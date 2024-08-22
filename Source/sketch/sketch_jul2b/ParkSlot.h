@@ -69,16 +69,16 @@ class ParkSlot {
         // In case the slot id is 1 digit number - add a zero before it
         slot_id_label = String("0") + slot_id_label;
       }
-      
-        
       String slot_label = String(floorId) + slot_id_label;
-      slot_label = " " + slot_label + " ";
+      slot_label = " " + slot_label + " "; // add some padding
       const char* slot_label_cstr = slot_label.c_str();
       int slot_label_TextExt = calcWidthOfText(&fabgl::FONT_std_14, slot_label_cstr);
 
       slotUiLabel = new uiLabel(ChooseButton, slot_label_cstr, Point(width / 2 - slot_label_TextExt / 2 ,0), Size(slot_label_TextExt, 14), true);
       slotUiLabel->labelStyle().backgroundColor = RGB888(255,255,255);
 
+      // Set the available types to match what the user chose on the previous window (Options frame).
+      // Notice that for disabled option, it is possible to choose also from regular slots.
       if(taken || (type != selectedParkingType && !(selectedParkingType == TYPE_DISABLED && type == TYPE_REGULAR)))
       {
         SetGroupTaken();
@@ -94,7 +94,6 @@ class ParkSlot {
         ChooseButton->checkBoxStyle().mouseOverForegroundColor=MOUSE_OVER_COL;
       }
       
-      // ChooseButton->checkBoxStyle().foregroundColor=RGB888(0,128,0);
       ChooseButton->repaint();
       ChooseButton->onClick = [&]() {onChooseButtonClick();};
     }

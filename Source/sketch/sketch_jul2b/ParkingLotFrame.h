@@ -28,9 +28,13 @@ public:
 
   ParkingLotFrame(uiFrame* parent_t, int ResX_t, int ResY_t, uiApp* app_t, int FloorsNum) {
 
+    // Try to get data from the database if it was initiated
     if (db_parkingLot != nullptr) {
       num_of_floors = db_parkingLot->num_floors;
-    } else {
+    } 
+    else
+    {
+      // Otherwise - set a default value
       Serial.println("db_parkingLot is null!");
       num_of_floors = FloorsNum;
     }
@@ -58,8 +62,8 @@ public:
     int finish_x_left_offset = 10;
     uiButton* FinishButton = new uiButton(frame, "Finish", Point(finish_x_left_offset, ResY - FinishButtonSize.height - finish_y_top_offset), FinishButtonSize);
     FinishButton->buttonStyle().textColor=RGB888(255,255,255);
-    //FinishButton->buttonStyle().textFont = &fabgl::FONT_std_16;
     FinishButton->buttonStyle().backgroundColor = RGB888(0,153,153);
+
     FinishButton->onClick = [&]() {
       onFinishButtonClicked();
     };
@@ -70,11 +74,12 @@ public:
     int cancel_y_top_offset = 10;
     int cancel_x_left_offset = 10;
     uiButton* CancelButton = new uiButton(frame, "Cancel", Point(cancel_x_left_offset, ResY - CancelButtonSize.height - cancel_y_top_offset - FinishButtonSize.height - finish_y_top_offset), CancelButtonSize);
+    
     CancelButton->onClick = [&]() {
       onCancelButtonClicked();
     };
 
-    //
+    // Place the floors labels and buttons on the left side of the window
     for (int i = 0; i < num_of_floors; i++)
     {
       sprintf(FloorArr[i].floor_text, "Floor %d", i);
@@ -90,6 +95,7 @@ public:
       };
     }
 
+    // Set current showed floor to be -1, i.e non of the floors is showed
     current_floor_id = -1;
   }
 
@@ -106,7 +112,7 @@ public:
   void onFinishButtonClicked() {
     
     int floor_id;
-    int choosen_slot = AssignParkingSlot(floor_id);  // if the function succeed, it will assign a value to the floor_id and return the parking slot id , else - return -1
+    int choosen_slot = AssignParkingSlot(floor_id);  // if this function succeed, it will assign a value to the floor_id and return the parking slot id , else - return -1
 
     if(choosen_slot != -1 && current_floor_id != -1)
     {
@@ -117,6 +123,7 @@ public:
 
       if(db_parkingLot != nullptr)
       {
+        // Update database
         db_parkingLot->floors[floor_id].slots[choosen_slot].is_taken = true;
         db_parkingLot->floors[floor_id].slots[choosen_slot].is_changed = true;
 
@@ -128,6 +135,7 @@ public:
         Serial.println(msg_str);
         app->messageBox(nullptr, msg_str.c_str(), "Ok", nullptr, nullptr, uiMessageBoxIcon::Info); 
 
+        // Quit application
         app->quit(app->exitCode);
       }
     }

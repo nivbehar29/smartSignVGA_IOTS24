@@ -97,6 +97,7 @@ class OptionsFrame : public GeneralFrame {
     electricCarCB = new uiCheckBox(frame, Point(cbLeftOffset, 50 + cbSizeXY*3),               Size(cbSizeXY, cbSizeXY), uiCheckBoxKind::RadioButton);
     motorcycleCB =  new uiCheckBox(frame, Point(cbLeftOffset+300, 50 + cbSizeXY*3),  Size(cbSizeXY, cbSizeXY), uiCheckBoxKind::RadioButton);
 
+    // Parking type icons
     uiImage* regularImage = new uiImage(frame, &regular_car_bitmap, Point(cbLeftOffset + cbSizeXY + 10, 50));
     uiImage* disabledImage = new uiImage(frame, &disabled_car_bitmap, Point(cbLeftOffset + cbSizeXY + 10 + 300, 50));
     uiImage* electricCarImage = new uiImage(frame, &electric_car_bitmap, Point(cbLeftOffset + cbSizeXY + 10, 50 + cbSizeXY*3));
@@ -108,6 +109,7 @@ class OptionsFrame : public GeneralFrame {
     electricCarCB->setGroupIndex(2);
     motorcycleCB->setGroupIndex(2);
 
+    // Define what happens when clicking on the buttons
     regularCB->onClick = [&]()      {selectedParkingType = TYPE_REGULAR;};
     disabledCB->onClick = [&]()     {selectedParkingType = TYPE_DISABLED;};
     electricCarCB->onClick = [&]()  {selectedParkingType = TYPE_ELECTRIC;};
