@@ -1,15 +1,14 @@
-#include <functional>
-//#ifndef PARKSLOT_H
-//#define PARKSLOT_H
 #pragma once
+
+#include <functional>
 
 #include "fabgl.h"
 #include "fabui.h"
 #include "GeneralFrame.h"
 #include "ParkingLotFrame.h"
 #include "FloorFrame.h"
-
 #include "DBAux.h"
+
 extern DB_parkingLot* db_parkingLot;
 
 #define TAKEN_COL (RGB888(128,0,0))
@@ -19,30 +18,12 @@ extern DB_parkingLot* db_parkingLot;
 
 class ParkSlot {
 
+    public:
 
-public:
-
-    enum ParkStates {
-        FREE,
-        WAITING_FOR_VEHICLE,
-        TAKEN
-    };
-
-    // ParkStates state;
     fabgl::Canvas* canvas;
     fabgl::uiFrame* frame;
     uiCheckBox* ChooseButton;
     uiLabel* slotUiLabel;
-
-    // int taken;
-
-    // int width;
-    // int height;
-    // int pos_x;
-    // int pos_y;
-
-    // int floorId;
-    // int slotId;
 
     int selectedParkingType = TYPE_REGULAR;
 
@@ -51,7 +32,7 @@ public:
 
     ParkSlot(fabgl::uiFrame* frameToSet, fabgl::Canvas* cvToSet, int x, int y, int width_t, int height_t, int floorId_t, int slotId_t,
              int selected_parking_type,std::function<void()> onChooseButtonClickCB_t)
-        : frame(frameToSet), canvas(cvToSet), selectedParkingType(selected_parking_type)
+          : frame(frameToSet), canvas(cvToSet), selectedParkingType(selected_parking_type)
     {
 
       // set callback function for Choose button clicked
@@ -64,7 +45,6 @@ public:
       int pos_x = x;
       int pos_y = y;
       int type = 0;
-      //String code;
 
       int floorId = floorId_t;
       int slotId = slotId_t;
@@ -77,7 +57,6 @@ public:
         width = db_parkingLot->floors[floorId].slots[slotId].width;
         height = db_parkingLot->floors[floorId].slots[slotId].height;
         type = db_parkingLot->floors[floorId].slots[slotId].type;
-        //code=db_parkingLot->floors[floorId].slots[slotId].slot_code;
       }
 
       ChooseButton = new uiCheckBox(frame, Point(pos_x, pos_y), Size(width, height), uiCheckBoxKind::RadioButton);
@@ -150,12 +129,6 @@ public:
       }
     }
 
-    // void setPos(int x, int y)
-    // {
-    //   pos_x = x;
-    //   pos_y = y;
-    // }
-
     int calcWidthOfText(fabgl::FontInfo const * fontInfo, char const * text)
     {
       return frame->app()->canvas()->textExtent(fontInfo, text);
@@ -172,5 +145,3 @@ public:
       }
     }
 };
-
-//#endif // PARKSLOT_H

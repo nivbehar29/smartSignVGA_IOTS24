@@ -1,17 +1,16 @@
 #pragma once
 
 #include <Firebase_ESP_Client.h>
-//#include <FirebaseESP32.h>
-// #include <FirebaseClient.h>
-//Provide the token generation process info.
-#include "addons/TokenHelper.h"
-//Provide the RTDB payload printing info and other helper functions.
-#include "addons/RTDBHelper.h"
-
 #include <Arduino_JSON.h>
 
-#include "keys/openweathermap_key.h"
+//Provide the token generation process info.
+#include "addons/TokenHelper.h"
+
+//Provide the RTDB payload printing info and other helper functions.
+#include "addons/RTDBHelper.h"
+#include "keys/keys.h"
 #include "DBAux.h"
+
 extern DB_parkingLot* db_parkingLot;
 
 class FBMngr {
@@ -41,21 +40,15 @@ public:
       Serial.println(API_KEY);
       Serial.println(DATABASE_URL);
 
-      // if(!signupOK)
-      // {
-        if (Firebase.signUp(&config, &auth, "", ""))
-        {
-          Serial.println("Firebase signUp success");
-          signupOK = true;
-        }
-        else{
-          Serial.println("Firebase signUp failed");
-          Serial.printf("%s\n", config.signer.signupError.message.c_str());
-        }
-      // }
-
-      /* Assign the callback function for the long running token generation task */
-      // config.token_status_callback = tokenStatusCallback; //see addons/TokenHelper.h
+      if (Firebase.signUp(&config, &auth, "", ""))
+      {
+        Serial.println("Firebase signUp success");
+        signupOK = true;
+      }
+      else{
+        Serial.println("Firebase signUp failed");
+        Serial.printf("%s\n", config.signer.signupError.message.c_str());
+      }
       
       Firebase.begin(&config, &auth);
       Firebase.reconnectWiFi(false);
@@ -69,7 +62,6 @@ public:
       if (Firebase.ready() && signupOK)
       {
         Serial.println("setIntFlotTest(): 1");
-        //sendDataPrevMillis = millis();
 
         // Write an Int number on the database path test/int
         if (Firebase.RTDB.setInt(&fbdo, "test/int", num))
@@ -218,7 +210,6 @@ public:
 
       if(Firebase.ready() && signupOK)
       {
-        
         if(getInt("numFloors", &numFloors))
         {
           db_parkingLot = (DB_parkingLot*)malloc(sizeof(DB_parkingLot));
@@ -228,7 +219,6 @@ public:
 
           // Get advertisements text
           getAdvs();
-          
 
           for(int i = 0; i < numFloors && !is_error; i++)
           {
@@ -263,13 +253,12 @@ public:
                 db_parkingLot->floors[i].slots[j].width = myObject[parkSlot_s]["Dim"]["w"];
                 db_parkingLot->floors[i].slots[j].height = myObject[parkSlot_s]["Dim"]["h"];
                 db_parkingLot->floors[i].slots[j].type = myObject[parkSlot_s]["K"];
-                //db_parkingLot->floors[i].slots[j].slot_code = String(i)+String(j);
               }
 
             }
             else
             {
-              Serial.println("Error occurred while pulling floor " + String(i));
+              // Serial.println("Error occurred while pulling floor " + String(i));
               Serial.println("Firebase Error Reason:" + fbdo.errorReason());
               is_error = true;
             }
@@ -277,14 +266,14 @@ public:
         }
         else
         {
-          Serial.println("Error occurred while pulling numFlors");
+          // Serial.println("Error occurred while pulling numFlors");
           is_error = true;
         }
       }
       
       else
       {
-        Serial.printf("Firebase not ready!!!!!!!!!!!!!!!!!!!!!!!");
+        // Serial.printf("Firebase not ready!");
         is_error = true;
       }
 
@@ -317,6 +306,7 @@ public:
                 db_parkingLot->floors[i].slots[j].is_changed = false;
                 Serial.println("set floor: " + String(i) + ", slot: " + String(j));
                 Serial.println("Succeed while setting park slot to DB!");
+                delay(100);
               }
               else
               {
@@ -343,12 +333,8 @@ public:
       Firebase.RTDB.endStream(&fbdo);
 
       // Clear the FirebaseData object
-      //fbdo.clear();
       Firebase.RTDB.end(&fbdo);
       Serial.println("EndFB() End");
-
-      // Optionally, you can also end Firebase altogether
-      // Firebase.end(&fbdo);
     }
 
 };

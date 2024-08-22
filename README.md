@@ -13,9 +13,6 @@ A short description of what your project does, the problem it solves, or its mai
 4. [Usage](#usage)
 5. [Configuration](#configuration)
 6. [Examples](#examples)
-7. [Contributing](#contributing)
-8. [License](#license)
-9. [Acknowledgments](#acknowledgments)
 
 ---
 

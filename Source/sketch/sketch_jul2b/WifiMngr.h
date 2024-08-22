@@ -1,8 +1,7 @@
 #pragma once
 
 #include <WiFi.h>
-#include "keys/openweathermap_key.h"
-
+#include "keys/keys.h"
 
 bool setupWifi()
 {

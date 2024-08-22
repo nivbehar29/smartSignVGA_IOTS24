@@ -6,14 +6,11 @@
 
 #include "fabgl.h"
 #include "fabui.h"
-
 #include "OptionsFrame.h"
 #include "ExitFrame.h"
-
 #include "DBAux.h"
-extern DB_parkingLot* db_parkingLot;
 
-// extern JSONVar myObject;
+extern DB_parkingLot* db_parkingLot;
 
 class ParkingApp : public uiApp {
 
@@ -60,13 +57,7 @@ class ParkingApp : public uiApp {
       WelcomeText->labelStyle().backgroundColor = rootWindow()->frameStyle().backgroundColor;
       WelcomeText->labelStyle().textColor =RGB888(255,255,255);
       WelcomeText->labelStyle().textFont = &fabgl::FONT_10x20 ;
-      //WelcomeText->labelStyle().textFont        = &fabgl::FONT_std_24;
       WelcomeText->update();
-
-      // frame where to put buttons
-      // MainFrame = new uiFrame(rootWindow(), "", Point(10, 10), Size(115, 120));
-      // MainFrame->frameStyle().backgroundColor = RGB888(0, 0, 255);
-      // MainFrame->windowStyle().borderSize     = 0;
 
       // button to show TestControlsFrame
       optionsFrame = new OptionsFrame(rootWindow(), ResX, ResY, app());
@@ -114,16 +105,12 @@ class ParkingApp : public uiApp {
 
         String temperature_str = "Temperature: ";
 
-        // uiLabel* weather_temperature_label = new uiLabel(rootWindow(), "Temperature:", Point(ResX / 2, 70));
-
         char buffer[20];  // Make sure this buffer is large enough to hold the converted value
 
-        // dtostrf(float value, minimum width, precision, buffer)
         dtostrf(fahrenheitToCelcius((*weatherObj)["main"]["temp"]), 6, 2, buffer);  // Convert float to string with 2 decimal places
 
         temperature_str = temperature_str + String(buffer);
         int weather_temperature_info_text_ext = calcWidthOfText(&fabgl::FONT_std_16, temperature_str.c_str());
-
 
         uiLabel* weather_temperature_info = new uiLabel(rootWindow(), temperature_str.c_str(), Point(ResX / 2 - weather_temperature_info_text_ext / 2, 40));
       }
@@ -138,8 +125,6 @@ class ParkingApp : public uiApp {
       FlashingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
       FlashingAdvText->update();
       
-      
-
       // Moving Advertisement Text
       char* moving_adv = "Some Moving Advertisement";
       if(db_parkingLot != nullptr && db_parkingLot->movingAdv != nullptr)
@@ -150,7 +135,6 @@ class ParkingApp : public uiApp {
       MovingAdvText->labelStyle().textFont        = &fabgl::FONT_std_24;
       MovingAdvText->update();
       
-
       this->onQuit =  [&]() { 
                               Serial.printf("onQuit() has been called !!!!!!!!");
 
@@ -173,7 +157,6 @@ class ParkingApp : public uiApp {
                                                   };
 
       setTimers();
-
     }
 
     void setTimers()
@@ -192,8 +175,6 @@ class ParkingApp : public uiApp {
 
   void onFlashingAdvTimer()
   {
-    // Serial.printf("Flash timer!\n");
-
     RGB888 curr_col = FlashingAdvText->labelStyle().backgroundColor;
     RGB888 next_col = curr_col;
 
@@ -210,16 +191,10 @@ class ParkingApp : public uiApp {
 
     FlashingAdvText->labelStyle().backgroundColor = next_col;
     FlashingAdvText->update();
-
-    // set new timer
-    //app()->killTimer(FlashingAdvTimer);
-    //FlashingAdvTimer = app()->setTimer(this, 500);
   } 
 
   void onMovingAdvTimer()
   {
-    // Serial.printf("Moving timer!\n");
-
     if(MovingAdvText->pos().X + MvoingAdvtextExt < 0)
     {
       app()->moveWindow(MovingAdvText, ResX, MovingAdvText->pos().Y);
@@ -228,38 +203,7 @@ class ParkingApp : public uiApp {
     {
       app()->moveWindow(MovingAdvText, MovingAdvText->pos().X - 2, MovingAdvText->pos().Y);
     }
-    //MovingAdvText->update();
-
-    // set new timer
-    //app()->killTimer(MovingAdvTimer);
-    //MovingAdvTimer = app()->setTimer(this, 50);
   }
-
-  // void onStartButtonClick() {
-
-  //   OptionsFrame = new uiFrame(rootWindow(), "Options Frame", Point(0, 0), Size(ResX, ResY), true);
-
-  //   // Frame properties
-  //   fabgl::uiFrameProps& props = OptionsFrame->frameProps();
-  //   props.hasCloseButton = 0;
-  //   props.hasMinimizeButton = 0;
-  //   props.hasMaximizeButton = 0;
-  //   props.moveable = 0;
-  //   props.resizeable = 0;
-
-  //   // Cancel Button
-  //   int CancelTextExt = calcWidthOfText(&fabgl::FONT_std_14, "Cancel");
-  //   Size CancelButtonSize(CancelTextExt + 20, 20);
-  //   int y_top_offset = 10;
-  //   int x_left_offset = 10;
-  //   uiButton* CancelButton = new uiButton(OptionsFrame, "Cancel", Point(ResX - CancelButtonSize.width - x_left_offset, ResY - CancelButtonSize.height - y_top_offset), CancelButtonSize);
-  //   CancelButton->onClick = [&]() { app()->showWindow(OptionsFrame, 0);
-  //                                   OptionsFrame = nullptr;
-  //                                 };
-
-
-
-  // }
 
   int calcWidthOfText(fabgl::FontInfo const * fontInfo, char const * text)
   {
@@ -270,7 +214,6 @@ class ParkingApp : public uiApp {
   {
     return c - 273.15;
   }
-
 };
 
 #endif // PARKINGAPP_H

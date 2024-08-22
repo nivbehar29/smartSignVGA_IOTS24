@@ -1,22 +1,13 @@
-//#ifndef PARKINGLOTFRAME_H
-//#define PARKINGLOTFRAME_H
-
 #pragma once
+
 #include "fabgl.h"
 #include "FloorFrame.h"
 #include "string.h"
-#include <HardwareSerial.h>
-HardwareSerial mySerial(1);
-//#include "ParkSlot.h"
 #include "DBAux.h"
+
 extern DB_parkingLot* db_parkingLot;
 
-
 struct parking_floor {
-  // int num_of_regular_spaces;
-  // int num_of_disabled_spaces;
-  // int num_of_electric_spaces;
-  // int num_of_motor_spaces;
   char floor_text[20];
   uiStaticLabel* floor_label;
   uiCheckBox* floor_box;
@@ -86,10 +77,6 @@ public:
     //
     for (int i = 0; i < num_of_floors; i++)
     {
-      // FloorArr[i].num_of_regular_spaces = 10;
-      // FloorArr[i].num_of_electric_spaces = 5;
-      // FloorArr[i].num_of_disabled_spaces = 2;
-      // FloorArr[i].num_of_motor_spaces = 2;
       sprintf(FloorArr[i].floor_text, "Floor %d", i);
 
       int offset_y = 30;
@@ -104,12 +91,6 @@ public:
     }
 
     current_floor_id = -1;
-
-    // Activate first floor by default
-    // FloorArr[0].floor_box->onClick();
-    // FloorArr[0].floor_box->setChecked(true);
-    // onFloorCheckboxClick(0);
-    // current_floor_id = 0;
   }
 
   void showFrame()
@@ -167,14 +148,6 @@ public:
       current_floor_id = -1;
     }
   }
-
-
-  /*String formatString(int floor_id, int i) 
-   {
-  // Create a string in the desired format
-    String formattedString = "F" + String(floor_id) + "P" + String(i);
-    return formattedString;
-    }*/
 
   int AssignParkingSlot(int& floor_id) {
     int curr_parking = -1;
@@ -251,14 +224,11 @@ public:
     {
       for (int j = 0; j < FloorArr[i].floor_frame->park_slots_num; j++)
       {
-        // Serial.println("delete FloorArr[" + String(i) + "].floor_frame->park_slots[" + String(j) + "]");
         delete FloorArr[i].floor_frame->park_slots[j];
       }
 
-      // Serial.println("free FloorArr[" + String(i) + "].floor_frame->park_slots");
       free(FloorArr[i].floor_frame->park_slots);
 
-      // Serial.println("delete FloorArr[" + String(i) + "].floor_frame");
       app->destroyWindow(FloorArr[i].floor_frame->frame);
       delete FloorArr[i].floor_frame;
       FloorArr[i].floor_frame = nullptr;
@@ -276,5 +246,3 @@ public:
     free(FloorArr);
   }
 };
-
-//#endif // PARKINGLOTFRAME_H

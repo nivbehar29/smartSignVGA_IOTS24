@@ -177,7 +177,6 @@ class ExitFrame : public GeneralFrame {
 
           updateCodeText(CodeTextDefault);
           IsCodeTextInit = false;
-          // app->showWindow(frame, 0);
           app->quit(app->exitCode);
         }
         else

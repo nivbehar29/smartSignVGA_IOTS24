@@ -112,20 +112,6 @@ class OptionsFrame : public GeneralFrame {
     disabledCB->onClick = [&]()     {selectedParkingType = TYPE_DISABLED;};
     electricCarCB->onClick = [&]()  {selectedParkingType = TYPE_ELECTRIC;};
     motorcycleCB->onClick = [&]()   {selectedParkingType = TYPE_MOTORCYCLE;};
-
-    // // Time slider
-    // TimesliderLabel = new uiLabel(frame, "0", Point(ResX/2 + 100,50));
-    // Timeslider1 = new uiSlider(frame, Point(ResX/2 +30 ,50), Size(17, 400), uiOrientation::Vertical);
-    // Timeslider1->anchors().right = true;
-    // Timeslider1->setup(0, 24, 1);
-    // Timeslider1->setPosition(20);
-    // Timeslider1->onChange = [&]() {
-    //                                   int val = Timeslider1->position();
-    //                                   int hours = val;
-    //                                   TimesliderLabel->setTextFmt("hours = %d",hours);
-    //                                   TimesliderLabel->update();
-    //                               };
-
   }
 
   void showFrame()

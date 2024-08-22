@@ -1,16 +1,12 @@
-//#ifndef FLOORFRAME_H
-//#define FLOORFRAME_H
-
 #pragma once
 
 #include "fabgl.h"
 #include "GeneralFrame.h"
 #include "ParkSlot.h"
 #include "canvas.h"
-
 #include "string.h"
-
 #include "DBAux.h"
+
 extern DB_parkingLot* db_parkingLot;
 
 class FloorFrame : public GeneralFrame {
@@ -19,7 +15,6 @@ public:
 
     int floor_id = 0;
     char floor_text[20];
-    
 
     uiPaintBox * paintBox;
     Canvas* floor_canvas;
@@ -97,14 +92,12 @@ public:
       {
         // init canvas
         floor_canvas = frame->canvas();
-        //park_slot = new ParkSlot(frame, floor_canvas, 10, 10, 50, 100);
         park_slots = (ParkSlot**) malloc(sizeof(ParkSlot*) * park_slots_num);
 
         int offset_x = 10;
         for(int i = 0; i < park_slots_num; i++)
         {
           int width = 50;
-          //park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 120, floor_id, i, selectedParkingType, onParkSlotChooseButtonClickCB);
           park_slots[i] = new ParkSlot(frame, floor_canvas, offset_x, 10, width, 120, floor_id, i, selectedParkingType, onParkSlotChooseButtonClickCB);
           offset_x += width + 5;
         }
@@ -139,6 +132,3 @@ public:
         return -1;
      }
 };
-
-
-//#endif // FLOORFRAME_H
