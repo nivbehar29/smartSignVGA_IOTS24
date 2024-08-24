@@ -1,10 +1,9 @@
 how to launch the website:
 
-    1) open terminal in "parking_manager.html" directory.
+    1) open terminal in "manager_website" directory.
     2) run "python -m http.server <port>" ex. python -m http.server 800
     3) open browser and navigate to "http://localhost:<port>/"
 
-for parking_manager-new:
 you should have a folder "keys" which has a file called firebaseConfig.js
 the file should contain the firebase config data like this:
 

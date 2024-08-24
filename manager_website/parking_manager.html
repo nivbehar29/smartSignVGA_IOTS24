@@ -19,24 +19,43 @@
             background-color: #5b63fa;
         }
         .parking-lot {
-            display: flex;
-            flex-wrap: wrap;
-            margin-top: 20px;
+            position: relative; /* Ensure relative positioning for absolute children */
+            width: 570px;
+            height: 450px;
+            overflow: hidden; /* Ensure no overflow */
+            border: 11px solid #000;  /* Optional: to visualize the container boundaries */
         }
+
         .parking-spot {
-            width: 80px;
-            height: 180px;
-            margin: 5px;
+            width: 70px; /* Adjust the width as needed */
+            height: 90px; /* Adjust the height as needed */
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid #000;
-            border-radius: 5px;
+            border-radius: 2px;
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+        }
+        .parking-spot-label {
+            position: absolute;
+            top: 5px; /* Adjust position as needed */
+            left: 5px; /* Adjust position as needed */
+            background-color: rgba(0, 0, 255, 0.7); /* Blue background with some transparency */
+            color: white; /* White text color for better contrast */
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 8px; /* Adjust font size as needed */
+        }
+        .highlighted {
+            border: 3px solid rgb(0, 247, 255);
+            box-shadow: 0 0 50px 12px rgb(0, 0, 0); /* Glow effect with yellow color */
+            z-index: 100;
         }
         .free {
             background-color: rgb(0, 124, 10);
             color: white;
         }
+
         .occupied {
             background-color: rgb(255, 0, 0);
             color: white;
@@ -48,7 +67,58 @@
         .ads-section input {
             margin-bottom: 10px;
         }
+        .resize-handle {
+            width: 10px;
+            height: 10px;
+            background: #000;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            cursor: se-resize;
+        }
+        
+        .menu {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #f9f9f9;
+            border-left: 2px solid #ccc;
+            padding: 10px;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .menu h3 {
+            margin-top: 0;
+        }
+
+        .menu div {
+            margin-bottom: 10px;
+        }
+
+        .menu label {
+            display: block;
+        }
+
+        .menu button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .menu button:hover {
+            background-color: #0056b3;
+        }
     </style>
+    <!-- Include jQuery and jQuery UI -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 </head>
 <body>
     <h1>Parking Lot Manager</h1>
@@ -61,28 +131,61 @@
     <div id="adsSection" class="ads-section">
         <!-- Ads content will be dynamically generated here -->
     </div>
+
+    <div id="menu" class="menu">
+        <h3>Parking Slot Configuration</h3>
+        <div>
+            <label><input type="checkbox" id="disabled-checkbox"> Disabled</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="motorcycle-checkbox"> Motorcycle</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="electric-checkbox"> Electric</label>
+        </div>
+        <button id="apply-button">Apply</button>
     </div>
 
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBrpxjOIqWSrRhkyvUjbkU_nrmcnlTuo5A",
-            authDomain: "parking-lot-9a2a7.firebaseapp.com",
-            databaseURL: "https://parking-lot-9a2a7-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "parking-lot-9a2a7",
-            storageBucket: "parking-lot-9a2a7.appspot.com",
-            messagingSenderId: "590968155181",
-            appId: "1:590968155181:web:6145886052839f4a721ca4",
-            measurementId: "G-CEZQYBY255"
-        };
+        import { getDatabase, ref, onValue, set, update, get} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+        import { firebaseConfig } from "./keys/firebaseConfig.js";  // Import the config
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        // Sign in anonymously
+        signInAnonymously(auth)
+            .then(() => {
+                console.log('Signed in anonymously');
+                // Load initial data after signing in
+                loadParkingLot(0); // Load the first floor by default
+            })
+            .catch((error) => {
+                console.error('Error signing in anonymously:', error);
+            });
+
+        
+        // Set up the button click event handler
+        document.getElementById('clearSlotsButton').addEventListener('click', clearAllSlots);
+
+
+        // Attach the savePositions function to the button
+        document.getElementById('savePositionsButton').addEventListener('click', savePositions);
+
+        // Attach the addSlotButton function to the button
+        document.getElementById('addSlotButton').addEventListener('click', addNewSlot);
+
+        // Attach the deleteSlotButton function to the button
+        document.getElementById('deleteSlotButton').onclick = deleteLastSlot;
+
+        // Initialize the tabs
+        const floors = [0, 1, 2, 3, 4]; // Adjust this array to match the number of floors in your Firebase
+        generateTabs(floors);
 
         // Function to generate tabs based on floors
         function generateTabs(floors) {
@@ -102,32 +205,184 @@
             tabsContainer.appendChild(adsTab);
         }
 
-        // Function to generate parking spots
+        function isParkSlotData(spot)
+        {
+            return /^P\d/.test(spot);
+            
+        }
+
+        // Declare the currentFloor variable to track the current floor
+        let currentFloor = 0; // Default to floor 0
+        let currentSlot = -1; // Default to park -1 (not park)
+        let currentlyHighlightedSlot = null; // Keep track of the currently highlighted slot
+
+        function highlightSpot(spot) {
+            if (currentlyHighlightedSlot) {
+                currentlyHighlightedSlot.classList.remove('highlighted');
+            }
+            spot.classList.add('highlighted');
+            currentlyHighlightedSlot = spot;
+        }
+
+        function updateMenuBaseOnSpot(spot, data)
+        {
+            const disabledCheckbox = document.getElementById('disabled-checkbox');
+            const motorcycleCheckbox = document.getElementById('motorcycle-checkbox');
+            const electricCheckbox = document.getElementById('electric-checkbox');
+            currentSlot = spot; // Update the global currentSlot variable
+
+            // Reset checkboxes
+            disabledCheckbox.checked = false;
+            motorcycleCheckbox.checked = false;
+            electricCheckbox.checked = false;
+
+            // Get the type from Firebase data
+            const slotType = data[spot].K; // Assuming 'K' stores the type
+
+            // Update checkboxes based on slotType
+            switch (slotType) {
+                case 2:
+                    disabledCheckbox.checked = true;
+                    break;
+                case 3:
+                    electricCheckbox.checked = true;
+                    break;
+                case 4:
+                    motorcycleCheckbox.checked = true;
+                    break;
+                default:
+                    // Regular slot, no checkboxes checked
+                    break;
+            }
+        }
+
         function generateParkingSpots(floor, data) {
             const parkingLot = document.getElementById('parkingLot');
             parkingLot.innerHTML = '';
-            for (let spot in data) {
-                const parkingSpot = document.createElement('div');
-                parkingSpot.className = 'parking-spot ' + (data[spot] ? 'occupied' : 'free');
-                parkingSpot.innerText = '';
-                parkingLot.appendChild(parkingSpot);
+            const parkingLotRect = parkingLot.getBoundingClientRect(); // Get container dimensions
+            const borderWidth = parseInt(window.getComputedStyle(parkingLot).borderWidth, 10);
+
+            // Highlight the corresponding floor tab
+            const tabsContainer = document.getElementById('tabs');
+            const tabs = tabsContainer.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                if (tabs[i].innerText === `Floor ${floor}`) {
+                    tabs[i].classList.add('active');
+                } else {
+                    tabs[i].classList.remove('active');
+                }
             }
+
+            for (let spot in data) {
+                if (isParkSlotData(spot)) {  // Ensure we only handle parking slots
+                    const isTaken = data[spot].t;
+                    const parkingSpot = document.createElement('div');
+                    parkingSpot.className = 'parking-spot ' + (isTaken ? 'occupied' : 'free');
+                    parkingSpot.innerText = '';
+                    parkingSpot.floor_id = floor; // Set floor ID
+                    parkingSpot.id = spot; // Set the spot ID
+
+                    // Set initial position from Firebase data
+
+                    const x = Math.min(Math.max(data[spot].Pos.x, 0), parkingLotRect.width - parkingSpot.offsetWidth); // Ensure x is within bounds
+                    const y = Math.min(Math.max(data[spot].Pos.y, 0), parkingLotRect.height - parkingSpot.offsetHeight); // Ensure y is within bounds
+                    parkingSpot.style.position = 'absolute'; // Ensure absolute positioning
+                    parkingSpot.style.left = `${x - borderWidth}px`;
+                    parkingSpot.style.top = `${y - borderWidth}px`;
+
+                    // Set initial dimentions from Firebase data
+                    if (data[spot].Dim) {
+                        parkingSpot.style.width = `${data[spot].Dim.w}px`;
+                        parkingSpot.style.height = `${data[spot].Dim.h}px`;
+                    }
+
+                    // Create and append label
+                    const label = document.createElement('div');
+                    label.className = 'parking-spot-label';
+                    label.innerText = `${floor}${spot.replace('P', '')}`;
+                    // label.innerText = spot.split('_')[1]; // Extract the numeric ID from the spot string
+                    parkingSpot.appendChild(label);
+
+                    const resizeHandle = document.createElement('div');
+                    resizeHandle.className = 'resize-handle';
+                    parkingSpot.appendChild(resizeHandle);
+
+                    parkingLot.appendChild(parkingSpot);
+
+                    // Add click event listener to update currentSlot
+                    parkingSpot.addEventListener('click', function() {
+                        currentSlot = this.id;
+                        console.log(`current park id ${currentSlot}:`);
+                    });
+                    
+                    $(parkingSpot).resizable({
+                        handles: 'se',
+                        containment: ".parking-lot",
+                        start: function(event, ui) {
+                            currentSlot = this.id;  // Update currentSlot with the ID of the resized element
+                            console.log(`current park id ${currentSlot}:`);
+                            highlightSpot(parkingSpot);
+                        },
+                        resize: function(event, ui) {
+                            const snapToGrid = 2;
+                            // Snap the size to 5-pixel increments
+                            ui.size.width = Math.round(ui.size.width / snapToGrid) * snapToGrid;
+                            ui.size.height = Math.round(ui.size.height / snapToGrid) * snapToGrid;
+                        }
+                    });
+
+                    // Add click event listener to update the checkboxes based on the slot type
+                    parkingSpot.addEventListener('click', () => {
+                        updateMenuBaseOnSpot(spot, data);
+                        highlightSpot(parkingSpot);
+                    });
+                }
+            }
+
+            // Make parking spots draggable
+            $(".parking-spot").draggable({
+                containment: ".parking-lot",
+                drag: function(event, ui) {
+                    // console.log(`${ui}`);
+                    const snapToGrid = 2;
+                    // Snap the position to 5-pixel increments
+                    ui.position.left = Math.round(ui.position.left / snapToGrid) * snapToGrid;
+                    ui.position.top = Math.round(ui.position.top / snapToGrid) * snapToGrid;
+                    currentSlot = this.id;
+                    console.log(`current park id: ${currentSlot}`);
+
+                    updateMenuBaseOnSpot(currentSlot, data);
+                    highlightSpot(this);
+                    
+                }
+            });
+            
         }
+
+        let adText = 'None'
+        let runningAdText = 'None'
+
         // Function to generate ad section
-        function generateAds(adText) {
+        function generateAds() {
             const adsSection = document.getElementById('adsSection');
             adsSection.innerHTML = `
                 <label for="adInput">Edit Ad:</label>
                 <input type="text" id="adInput" value="${adText}" />
-                <button onclick="updateAd()">Update Ad</button>
+                <button onclick="updateAd()" style="margin-bottom: 20px;">Update Ad</button> <!-- Adjust the margin as needed -->
+                <label for="runningAdInput">Edit running Ad:</label>
+                <input type="text" id="runningAdInput" value="${runningAdText}" />
+                <button onclick="updateRunningAd()">Update Running Ad</button>
             `;
         }
 
-        // Function to load the parking lot data for a specific floor
+        // Update the current floor in the loadParkingLot function
         function loadParkingLot(floor) {
+            currentFloor = floor; // Update the current floor variable
+            currentSlot = -1;
             const floorRef = ref(database, `floor${floor}`);
             onValue(floorRef, (snapshot) => {
-                generateParkingSpots(floor, snapshot.val());
+                const data = snapshot.val();
+                generateParkingSpots(floor, data);
             });
             // Highlight the active tab
             const tabs = document.querySelectorAll('.tab');
@@ -135,21 +390,41 @@
             tabs[floor].classList.add('active');
             document.getElementById('adsSection').style.display = 'none'; // Hide Ads section
             document.getElementById('parkingLot').style.display = 'flex'; // Show Parking section
+            
+            // Show Parking section
+            document.getElementById('savePositionsButton').style.display = 'flex';
+            document.getElementById('clearSlotsButton').style.display = 'flex';
+            document.getElementById('addSlotButton').style.display = 'flex';
+            document.getElementById('deleteSlotButton').style.display = 'flex';
 
         }
-        
+
         // Function to load the ad text
         function loadAds() {
             const adRef = ref(database, 'ad');
             onValue(adRef, (snapshot) => {
-                generateAds(snapshot.val() || '');
+                adText = snapshot.val();
+                generateAds();
             });
+
+            const runningAdRef = ref(database, 'ad2');
+            onValue(runningAdRef, (snapshot) => {
+                runningAdText = snapshot.val();
+                generateAds();
+            });
+
             // Highlight the active tab
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => tab.classList.remove('active'));
             tabs[tabs.length - 1].classList.add('active');
             document.getElementById('parkingLot').style.display = 'none'; // Hide Parking section
             document.getElementById('adsSection').style.display = 'flex'; // Show Ads section
+
+            // Hide ParkingLot buttons
+            document.getElementById('savePositionsButton').style.display = 'none';
+            document.getElementById('clearSlotsButton').style.display = 'none';
+            document.getElementById('addSlotButton').style.display = 'none';
+            document.getElementById('deleteSlotButton').style.display = 'none';
         }
 
         // Function to update the ad text
@@ -163,10 +438,289 @@
             });
         };
 
-        // Initialize the tabs
-        const floors = [0, 1, 2, 3, 4]; // Adjust this array to match the number of floors in your Firebase
-        generateTabs(floors);
-        loadParkingLot(1); // Load the first floor by default
+        // Function to update the running ad text
+        window.updateRunningAd = function() {
+            const adInput = document.getElementById('runningAdInput').value;
+            const adRef = ref(database, 'ad2');
+            set(adRef, adInput).then(() => {
+                alert('Running ad updated successfully!');
+            }).catch((error) => {
+                console.error("Error updating Running ad:", error);
+            });
+        };
+
+        function clearAllSlots() {
+            const floor = getCurrentFloor();
+
+            const floorRef = ref(database, `floor${floor}`);
+
+            // Fetch the data once
+            get(floorRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    console.log(`Current data for floor ${floor}:`, data);
+
+                    const updates = {};
+                    for (let spot in data) {
+                        if (isParkSlotData(spot)) {
+                            updates[`${spot}/t`] = false;  // Set the slot to free
+                        }
+                    }
+                    console.log(`Updating floor ${floor} with:`, updates);
+
+                    // Apply the updates to the Firebase database
+                    update(floorRef, updates).then(() => {
+                        console.log(`All slots on floor ${floor} cleared.`);
+                    }).catch((error) => {
+                        console.error("Error clearing slots:", error);
+                    });
+                } else {
+                    console.log(`No data available for floor ${floor}`);
+                }
+            }).catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+        }
+
+        function getCurrentFloor() {
+            return currentFloor; // Return the currently selected floor
+        }
+
+        function savePositions() {
+            const floor = currentFloor; // Use the currentFloor variable
+            const floorRef = ref(database, `floor${floor}`);
+            const parkingSpots = document.querySelectorAll('.parking-spot');
+
+            const updates = {};
+            parkingSpots.forEach(spot => {
+                const id = spot.id; // Use the entire ID directly
+                const floor_id = spot.floor_id;
+
+                console.log(`Spot ${id}`);
+                console.log(`currentFloor ${currentFloor}`);
+                console.log(`floor_id ${floor_id}`);
+
+                if (floor_id === currentFloor) { // Ensure we only update slots for the current floor
+                    const rect = spot.getBoundingClientRect();
+                    const parkingLotRect = document.getElementById('parkingLot').getBoundingClientRect();
+                    const x = rect.left - parkingLotRect.left;
+                    const y = rect.top - parkingLotRect.top;
+
+                    const basewidth = parseInt(window.getComputedStyle(spot).width, 10);
+                    const baseHeight = parseInt(window.getComputedStyle(spot).height, 10);
+
+                    // Fetch updated dimensions
+                    const width = spot.offsetWidth;
+                    const height = spot.offsetHeight;
+
+                    // BUG - the minus one is to fix a bug which every time we save the slots position, they are offsets 1 pixel on x/y axis
+                    updates[`${id}/Pos`] = { x: Math.round(x) , y: Math.round(y)  }; // Use 'position' to store coordinates
+                    updates[`${id}/Dim`] = { w: width, h: height }; // Store dimensions
+                    console.log(`Updating floor ${floor_id}, P${id}`)
+                    console.log(`position x = ${x}, y = ${y}`);
+                    console.log(`width = ${width}, height = ${height}`);
+                }
+            });
+
+            update(floorRef, updates).then(() => {
+                alert('Positions saved successfully!');
+            }).catch((error) => {
+                console.error("Error saving positions:", error);
+            });
+        }
+
+        function addNewSlot() {
+            const floor = getCurrentFloor(); // Function to get the current floor
+            const floorRef = ref(database, `floor${floor}`);
+            
+            // Fetch the current slots data
+            get(floorRef).then(snapshot => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const slotKeys = Object.keys(data).filter(key => isParkSlotData(key));
+
+                    if (slotKeys.length > 0) {
+                        const firstSlotKey = slotKeys[0];
+                        const firstSlotData = data[firstSlotKey];
+                        
+                        // Generate the new slot ID based on the number of existing slots
+                        const newSlotId = `P${slotKeys.length}`;
+
+                        // Create new slot data by copying the first slot's data
+                        const newSlotData = { ...firstSlotData };
+                        newSlotData.t = false;  // Ensure the new slot is 'not taken'
+
+                        // Update Firebase with the new slot
+                        const updates = {};
+                        updates[newSlotId] = newSlotData;
+
+                        // Update the new slot position to some default or incremented position
+                        updates[newSlotId].Pos = {
+                            x: firstSlotData.Pos.x, // example offset
+                            y: firstSlotData.Pos.y  // example offset
+                        };
+
+                        update(floorRef, updates).then(() => {
+                            console.log(`New slot ${newSlotId} added successfully!`);
+
+                            // Fetch the current numSlots
+                            const numSlotsRef = ref(database, `floor${floor}/numSlots`);
+                            get(numSlotsRef).then((snapshot) => {
+                                let numSlots = snapshot.exists() ? snapshot.val() : 0;
+                                numSlots += 1;
+
+                                // Update the numSlots in Firebase
+                                set(numSlotsRef, numSlots).then(() => {
+                                    console.log(`numSlots updated to ${numSlots} for floor ${floor}`);
+                                }).catch((error) => {
+                                    console.error("Error updating numSlots:", error);
+                                });
+                            }).catch((error) => {
+                                console.error("Error fetching numSlots:", error);
+                            });
+
+                            // Optionally, update the UI with the new slot
+                            generateParkingSpots(floor, { ...data, [newSlotId]: newSlotData });
+                        }).catch(error => {
+                            console.error("Error adding new slot:", error);
+                        });
+                    } else {
+                        console.log(`No ParkSlot found on floor ${floor}`);
+                    }
+                } else {
+                    console.log(`No data available for floor ${floor}`);
+                }
+            }).catch(error => {
+                console.error("Error fetching data:", error);
+            });
+        }
+
+        function deleteLastSlot() {
+            const floor = getCurrentFloor(); // Function to get the current floor
+            const floorRef = ref(database, `floor${floor}`);
+
+            // Fetch the current slots data
+            get(floorRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const slotKeys = Object.keys(data).filter(key => isParkSlotData(key));
+
+                    if (slotKeys.length > 0) {
+                        // Determine the last slot based on the highest numeric ID
+                        const lastSlotKey = slotKeys.reduce((prev, curr) => {
+                            const prevId = parseInt(prev.replace('P', ''));
+                            const currId = parseInt(curr.replace('P', ''));
+                            return currId > prevId ? curr : prev;
+                        });
+
+                        // Delete the last slot from Firebase
+                        const updates = {};
+                        updates[lastSlotKey] = null; // Setting the value to null will delete the slot
+
+                        update(floorRef, updates).then(() => {
+                            console.log(`Slot ${lastSlotKey} deleted successfully!`);
+
+                            // Fetch the current numSlots
+                            const numSlotsRef = ref(database, `floor${floor}/numSlots`);
+                            get(numSlotsRef).then((snapshot) => {
+                                let numSlots = snapshot.exists() ? snapshot.val() : 0;
+                                if (numSlots > 0) {
+                                    numSlots -= 1;
+
+                                    // Update the numSlots in Firebase
+                                    set(numSlotsRef, numSlots).then(() => {
+                                        console.log(`numSlots updated to ${numSlots} for floor ${floor}`);
+                                    }).catch((error) => {
+                                        console.error("Error updating numSlots:", error);
+                                    });
+                                }
+                            }).catch((error) => {
+                                console.error("Error fetching numSlots:", error);
+                            });
+                        }).catch((error) => {
+                            console.error("Error deleting slot:", error);
+                        });
+                    } else {
+                        console.error("No slots to delete.");
+                    }
+                } else {
+                    console.error("No data available for the current floor.");
+                }
+            }).catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const disabledCheckbox = document.getElementById('disabled-checkbox');
+            const motorcycleCheckbox = document.getElementById('motorcycle-checkbox');
+            const electricCheckbox = document.getElementById('electric-checkbox');
+            const applyButton = document.getElementById('apply-button');
+
+            // Apply button event listener
+            applyButton.addEventListener('click', () => {
+                if (currentSlot != -1) {
+                    // Determine the property type based on the checkboxes
+                    let type = 1; // Default to regular
+                    let checkedCount = 0;
+
+                    if (disabledCheckbox.checked) {
+                        type = 2;
+                        checkedCount++;
+                    }
+                    if (motorcycleCheckbox.checked) {
+                        type = 4;
+                        checkedCount++;
+                    }
+                    if (electricCheckbox.checked) {
+                        type = 3;
+                        checkedCount++;
+                    }
+
+                    if (checkedCount > 1) {
+                        alert("Please select only one type.");
+                        return;
+                    }
+
+                    const properties = {
+                        kind: type
+                    };
+
+                    // Update the slot in the database
+                    const currentFloor = getCurrentFloor(); // Function to get the current floor
+                    const slotPath = `floor${currentFloor}/${currentSlot}/K`;
+
+                    const updates = {};
+                    updates[slotPath] = type;
+
+                    set(ref(database, slotPath), type).then(() => {
+                        console.log('Slot type updated successfully!');
+                    }).catch((error) => {
+                        console.error("Error updating slot type:", error);
+                    });
+
+                    console.log('Updating slot', currentSlot, 'with properties', properties);
+
+                    currentSlot = -1; // Reset the currentSlot after updating
+                    // Reset the checkboxes
+                    disabledCheckbox.checked = false;
+                    motorcycleCheckbox.checked = false;
+                    electricCheckbox.checked = false;
+                }
+                else
+                {
+                    alert('Please select a slot first');
+                }
+            });
+
+        });
+
     </script>
+
+    <button id="savePositionsButton" style="display:none;">Save Positions</button>
+    <button id="clearSlotsButton" style="display:none;">Clear All Slots</button>
+    <button id="addSlotButton" style="display:none;">Add Slot</button>
+    <button id="deleteSlotButton" style="display:none;">Delete Last Slot</button>
+
 </body>
 </html>
